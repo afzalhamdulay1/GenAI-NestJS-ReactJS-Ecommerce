@@ -97,7 +97,7 @@ export class OrdersService {
       throw new BadRequestException('You have already delivered this order');
     }
 
-    if (!updateData.status) {
+    if (!updateOrderStatusDto.status) {
       throw new BadRequestException('Status field is required');
     }
 
@@ -105,9 +105,9 @@ export class OrdersService {
       await this.updateStock(item.productId.toString(), item.quantity);
     }
 
-    order.orderStatus = updateData.status;
+    order.orderStatus = updateOrderStatusDto.status;
     
-    if (updateData.status === 'Delivered') {
+    if (updateOrderStatusDto.status === 'Delivered') {
       order.deliveredAt = new Date();
     }
 
