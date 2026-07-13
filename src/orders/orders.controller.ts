@@ -1,6 +1,16 @@
-import { Controller, Post, Body, Get, Put, Param, UseGuards, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Put,
+  Param,
+  UseGuards,
+  Delete,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -12,7 +22,10 @@ export class OrdersController {
 
   @Post('order/new')
   @UseGuards(JwtAuthGuard)
-  async createOrder(@Body() createOrderDto: CreateOrderDto, @CurrentUser() user: any) {
+  async createOrder(
+    @Body() createOrderDto: CreateOrderDto,
+    @CurrentUser() user: any,
+  ) {
     return this.ordersService.createOrder(createOrderDto, user);
   }
 
@@ -39,8 +52,11 @@ export class OrdersController {
   @Put('admin/order/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  async updateOrder(@Param('id') id: string, @Body() updateData: { status: string }) {
-    return this.ordersService.updateOrder(id, updateData);
+  async updateOrder(
+    @Param('id') id: string,
+    @Body() updateOrderStatusDto: UpdateOrderStatusDto,
+  ) {
+    return this.ordersService.updateOrder(id, updateOrderStatusDto);
   }
 
   @Delete('admin/order/:id')

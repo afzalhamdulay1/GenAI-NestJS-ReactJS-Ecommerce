@@ -13,7 +13,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import * as crypto from 'crypto';
-import { sendEmail } from '../common/utils/send-email.util';
+import { MailService } from '../mail/mail.service';
 import * as cloudinary from 'cloudinary';
 
 @Injectable()
@@ -22,6 +22,7 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private mailService: MailService,
     @Inject('Cloudinary') private cloudinaryProvider: any,
   ) {}
 
@@ -120,7 +121,7 @@ export class UsersService {
     const message = `Your password reset token is :- \n\n ${resetPasswordUrl} \n\nIf you have not requested this email then, please ignore it.`;
 
     try {
-      await sendEmail({
+      await this.mailService.sendEmail({
         email: user.email,
         subject: `Ecommerce Password Recovery`,
         message,

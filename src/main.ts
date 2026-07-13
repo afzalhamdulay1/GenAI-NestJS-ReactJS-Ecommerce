@@ -5,11 +5,14 @@ import cookieParser = require('cookie-parser');
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { json, urlencoded } from 'express';
 
+import { ConfigService } from '@nestjs/config';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
 
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: configService.get<string>('FRONTEND_URL') || 'http://localhost:3000',
     credentials: true,
   });
 
@@ -25,6 +28,6 @@ async function bootstrap() {
 
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  await app.listen(process.env.PORT ?? 4000);
+  await app.listen(configService.get<number>('PORT') ?? 4000);
 }
 bootstrap();

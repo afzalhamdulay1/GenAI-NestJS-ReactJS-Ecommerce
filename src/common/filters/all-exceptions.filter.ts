@@ -1,8 +1,10 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Response } from 'express';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+  private readonly logger = new Logger(AllExceptionsFilter.name);
+
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -10,12 +12,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = exception.message || 'Internal server error';
 
-    console.error('EXCEPTION CAUGHT BY FILTER:', exception);
+    this.logger.error(`EXCEPTION CAUGHT BY FILTER: ${exception.message}`, exception.stack);
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const responseData = exception.getResponse();
-      console.error('HTTP Exception:', responseData);
+      this.logger.error(`HTTP Exception: ${JSON.stringify(responseData)}`);
       
       const resMessage = typeof responseData === 'string' ? responseData : (responseData as any).message || message;
       // ValidationPipe returns an array of messages. Extract the first one so the frontend receives a string.

@@ -3,8 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { ProductsService } from '../products/products.service';
-import { sendEmail } from '../common/utils/send-email.util';
+import { MailService } from '../mail/mail.service';
 import { generateInvoice } from '../common/utils/generate-invoice.util';
 import { ProductDocument, Product } from '../products/schemas/product.schema';
 
@@ -13,6 +14,7 @@ export class OrdersService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>, // We should inject model directly for stock update
+    private mailService: MailService,
   ) {}
 
   async createOrder(createOrderDto: CreateOrderDto, user: any) {
@@ -25,7 +27,7 @@ export class OrdersService {
     const invoiceBuffer = await generateInvoice(order, user);
 
     try {
-      await sendEmail({
+      await this.mailService.sendEmail({
         email: user.email,
         subject: `Order Confirmation - #${order._id}`,
         message: `Hi ${user.name},\n\nThank you for placing an order with us! Your order #${order._id} has been successfully placed. Please find your invoice attached.\n\nHappy Shopping!`,
@@ -84,7 +86,7 @@ export class OrdersService {
     };
   }
 
-  async updateOrder(id: string, updateData: { status: string }) {
+  async updateOrder(id: string, updateOrderStatusDto: UpdateOrderStatusDto) {
     const order = await this.orderModel.findById(id);
 
     if (!order) {

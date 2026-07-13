@@ -9,6 +9,9 @@ import {
   Param,
   Delete,
   UseInterceptors,
+  Logger,
+  Req,
+  UploadedFiles,
 } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
@@ -83,7 +86,7 @@ export class UsersController {
     @Body() updateProfileDto: UpdateProfileDto,
     @CurrentUser() user: any,
   ) {
-    console.log('UPDATE PROFILE DTO:', updateProfileDto);
+    Logger.debug(`UPDATE PROFILE DTO: ${JSON.stringify(updateProfileDto)}`, 'UsersController');
     return this.usersService.updateProfile(updateProfileDto, user);
   }
 
