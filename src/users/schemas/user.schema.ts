@@ -26,10 +26,10 @@ export class User {
   role: string;
 
   @Prop()
-  resetPasswordToken: string;
+  resetPasswordToken?: string;
 
   @Prop()
-  resetPasswordExpire: Date;
+  resetPasswordExpire?: Date;
 
   // Methods
   async comparePassword(enteredPassword: string): Promise<boolean> {

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { UserDocument } from '../users/schemas/user.schema';
 import { Product, ProductDocument } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
@@ -14,7 +15,7 @@ export class ProductsService {
     @Inject('Cloudinary') private cloudinaryProvider: any,
   ) {}
 
-  async createProduct(createProductDto: CreateProductDto, user: any) {
+  async createProduct(createProductDto: CreateProductDto, user: UserDocument) {
     let images: any[] = [];
 
     if (typeof createProductDto.images === 'string') {
@@ -39,7 +40,7 @@ export class ProductsService {
     const productData = {
       ...createProductDto,
       images: imagesLinks,
-      user: user.id,
+      user: user._id as any,
     };
 
     const product = await this.productModel.create(productData);
@@ -164,7 +165,7 @@ export class ProductsService {
     };
   }
 
-  async createProductReview(createReviewDto: CreateReviewDto, user: any) {
+  async createProductReview(createReviewDto: CreateReviewDto, user: UserDocument) {
     const { rating, comment, productId } = createReviewDto;
 
     const review = {

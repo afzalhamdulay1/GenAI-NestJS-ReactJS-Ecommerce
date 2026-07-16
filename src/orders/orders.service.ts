@@ -5,6 +5,7 @@ import { Order, OrderDocument } from './schemas/order.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { ProductsService } from '../products/products.service';
+import { UserDocument } from '../users/schemas/user.schema';
 import { MailService } from '../mail/mail.service';
 import { generateInvoice } from '../common/utils/generate-invoice.util';
 import { ProductDocument, Product } from '../products/schemas/product.schema';
@@ -17,11 +18,11 @@ export class OrdersService {
     private mailService: MailService,
   ) {}
 
-  async createOrder(createOrderDto: CreateOrderDto, user: any) {
+  async createOrder(createOrderDto: CreateOrderDto, user: UserDocument) {
     const order = await this.orderModel.create({
       ...createOrderDto,
       paidAt: Date.now(),
-      user: user._id,
+      user: user._id as any,
     });
 
     const invoiceBuffer = await generateInvoice(order, user);
@@ -62,8 +63,8 @@ export class OrdersService {
     };
   }
 
-  async myOrders(user: any) {
-    const orders = await this.orderModel.find({ user: user._id });
+  async myOrders(user: UserDocument) {
+    const orders = await this.orderModel.find({ user: user._id as any });
     return {
       success: true,
       orders,

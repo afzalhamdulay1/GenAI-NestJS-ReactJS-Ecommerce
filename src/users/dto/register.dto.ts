@@ -17,5 +17,5 @@ export class RegisterDto {
   password: string;
 
   @IsOptional()
-  avatar?: any;
+  avatar?: string;
 }

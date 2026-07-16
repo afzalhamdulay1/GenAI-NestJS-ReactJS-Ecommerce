@@ -10,5 +10,5 @@ export class UpdateProfileDto {
   email?: string;
   
   @IsOptional()
-  avatar?: any;
+  avatar?: string;
 }

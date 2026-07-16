@@ -22,13 +22,12 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import type { UserDocument } from './schemas/user.schema';
 import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import type { UserDocument } from './schemas/user.schema';
-
 @Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -84,7 +83,7 @@ export class UsersController {
   @UseInterceptors(AnyFilesInterceptor({ limits: { fieldSize: 50 * 1024 * 1024 } }))
   async updateProfile(
     @Body() updateProfileDto: UpdateProfileDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: UserDocument,
   ) {
     Logger.debug(`UPDATE PROFILE DTO: ${JSON.stringify(updateProfileDto)}`, 'UsersController');
     return this.usersService.updateProfile(updateProfileDto, user);

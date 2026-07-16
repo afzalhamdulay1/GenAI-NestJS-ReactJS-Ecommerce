@@ -26,7 +26,7 @@ export class UsersService {
     @Inject('Cloudinary') private cloudinaryProvider: any,
   ) {}
 
-  private sendToken(user: any, statusCode: number, res: Response) {
+  private sendToken(user: UserDocument, statusCode: number, res: Response) {
     const token = this.jwtService.sign({ id: user._id });
 
     const cookieExpire = this.configService.get<number>('COOKIE_EXPIRE') || 5;
@@ -132,8 +132,8 @@ export class UsersService {
         message: `Email sent to ${user.email} successfully`,
       };
     } catch (error) {
-      user.resetPasswordToken = '' as any;
-      user.resetPasswordExpire = null as any;
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
       await user.save({ validateBeforeSave: false });
 
       throw new BadRequestException(error.message);
@@ -160,24 +160,24 @@ export class UsersService {
     }
 
     user.password = resetPasswordDto.password;
-    user.resetPasswordToken = '' as any;
-    user.resetPasswordExpire = null as any;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
 
     await user.save();
 
     this.sendToken(user, 200, res);
   }
 
-  async getUserDetails(user: any) {
-    const foundUser = await this.userModel.findById(user.id);
+  async getUserDetails(user: UserDocument) {
+    const foundUser = await this.userModel.findById(user._id);
     return {
       success: true,
       user: foundUser,
     };
   }
 
-  async updatePassword(updatePasswordDto: UpdatePasswordDto, user: any, res: Response) {
-    const foundUser = await this.userModel.findById(user.id).select('+password');
+  async updatePassword(updatePasswordDto: UpdatePasswordDto, user: UserDocument, res: Response) {
+    const foundUser = await this.userModel.findById(user._id).select('+password');
     
     if (!foundUser) {
       throw new BadRequestException('User not found');
@@ -199,14 +199,14 @@ export class UsersService {
     this.sendToken(foundUser, 200, res);
   }
 
-  async updateProfile(updateProfileDto: UpdateProfileDto, user: any) {
+  async updateProfile(updateProfileDto: UpdateProfileDto, user: UserDocument) {
     const newUserData: any = {
       name: updateProfileDto.name,
       email: updateProfileDto.email,
     };
 
     if (updateProfileDto.avatar) {
-      const foundUser = await this.userModel.findById(user.id);
+      const foundUser = await this.userModel.findById(user._id);
       
       if (!foundUser) {
         throw new BadRequestException('User not found');
@@ -229,7 +229,7 @@ export class UsersService {
       };
     }
 
-    const updatedUser = await this.userModel.findByIdAndUpdate(user.id, newUserData, {
+    const updatedUser = await this.userModel.findByIdAndUpdate(user._id, newUserData, {
       returnDocument: 'after',
       runValidators: true,
       useFindAndModify: false,

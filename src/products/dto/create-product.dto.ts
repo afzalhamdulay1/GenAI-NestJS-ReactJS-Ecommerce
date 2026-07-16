@@ -22,5 +22,5 @@ export class CreateProductDto {
   stock: number;
 
   @IsOptional()
-  images?: any;
+  images?: string | string[];
 }

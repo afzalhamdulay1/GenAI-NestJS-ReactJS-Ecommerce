@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { UserDocument } from '../users/schemas/user.schema';
 
 @Controller()
 export class OrdersController {
@@ -24,7 +25,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   async createOrder(
     @Body() createOrderDto: CreateOrderDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: UserDocument,
   ) {
     return this.ordersService.createOrder(createOrderDto, user);
   }
@@ -37,7 +38,7 @@ export class OrdersController {
 
   @Get('orders/me')
   @UseGuards(JwtAuthGuard)
-  async myOrders(@CurrentUser() user: any) {
+  async myOrders(@CurrentUser() user: UserDocument) {
     return this.ordersService.myOrders(user);
   }
 

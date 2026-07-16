@@ -8,6 +8,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { UserDocument } from '../users/schemas/user.schema';
 
 @Controller()
 export class ProductsController {
@@ -27,7 +28,7 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard)
   async createProductReview(
     @Body() createReviewDto: CreateReviewDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: UserDocument,
   ) {
     return this.productsService.createProductReview(createReviewDto, user);
   }
@@ -53,7 +54,7 @@ export class ProductsController {
   @UseInterceptors(AnyFilesInterceptor({ limits: { fieldSize: 50 * 1024 * 1024 } }))
   async createProduct(
     @Body() createProductDto: CreateProductDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: UserDocument,
   ) {
     return this.productsService.createProduct(createProductDto, user);
   }
