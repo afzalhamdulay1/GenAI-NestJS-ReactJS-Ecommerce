@@ -1,0 +1,239 @@
+.ProductsPage {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding: 4rem 5%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.totalProductsText {
+  font-family: "Outfit", sans-serif;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+  text-align: right;
+  width: 100%;
+}
+
+.productsLayout {
+  display: flex;
+  gap: 3rem;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 5rem;
+}
+
+/* Products Grid Container matches Home page design */
+.ProductsContainer {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 3rem;
+  width: 100%;
+}
+
+/* Filter Box Sidebar */
+.filterBox {
+  width: 280px;
+  background-color: white;
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.filterBox p, .filterBox .MuiTypography-root {
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.categoryBox {
+  padding: 0;
+  margin: 0 0 2rem 0;
+}
+
+.category-link {
+  list-style: none;
+  font-family: "Outfit", sans-serif;
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+}
+
+.category-link:hover {
+  color: rgb(248 113 113);
+  background-color: #fff1f0;
+}
+
+.category-link.active {
+  color: white;
+  background-color: rgb(248 113 113);
+  font-weight: 700;
+}
+
+.filterBox fieldset {
+  border: 1px solid #f1f5f9;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.filterBox fieldset legend {
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  color: #1a1a1a;
+  padding: 0 0.5rem;
+}
+
+.applyFiltersBtn {
+  width: 100%;
+  border-radius: 50px !important;
+  padding: 0.8rem !important;
+  text-transform: none !important;
+  font-weight: 700 !important;
+  font-family: "Outfit", sans-serif !important;
+  background-color: rgb(248 113 113) !important;
+  box-shadow: 0 10px 15px -3px rgba(235, 64, 52, 0.2) !important;
+}
+
+/* Pagination Modern Design */
+.paginationBox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5rem 0;
+  margin-top: auto;
+  width: 100%;
+}
+
+.pagination {
+  display: flex;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.page-item {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.page-item:hover {
+  border-color: rgb(248 113 113);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px -3px rgba(235, 64, 52, 0.2);
+}
+
+.page-item:hover .page-link {
+  color: rgb(248 113 113);
+}
+
+.page-link {
+  text-decoration: none;
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #475569;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pageItemActive {
+  background-color: rgb(248 113 113) !important;
+  border-color: rgb(248 113 113) !important;
+  box-shadow: 0 10px 15px -3px rgba(235, 64, 52, 0.3) !important;
+  transform: translateY(-3px);
+}
+
+.pageItemActive .page-link {
+  color: #ffffff !important;
+}
+
+@media screen and (max-width: 600px) {
+  .pagination {
+    gap: 6px;
+  }
+  .page-item {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+  .page-link {
+    font-size: 0.85rem;
+  }
+}
+
+/* Error / No Products Found */
+.noProductsInside {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 8rem 0;
+  background-color: white;
+  border-radius: 2rem;
+  border: 1px dashed #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.noProductsInside h2 {
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
+  color: #1e293b;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.noProductsInside p {
+  font-family: "Outfit", sans-serif;
+  color: #64748b;
+  font-size: 1rem;
+  margin: 0;
+}
+
+@media screen and (max-width: 900px) {
+  .productsLayout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filterBox {
+    width: 100%;
+    position: static;
+    margin-bottom: 2rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .ProductsPage {
+    padding: 2rem;
+  }
+  .ProductsContainer {
+    grid-template-columns: 1fr;
+  }
+}

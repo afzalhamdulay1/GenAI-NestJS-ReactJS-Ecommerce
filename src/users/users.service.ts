@@ -43,6 +43,53 @@ export class UsersService {
     });
   }
 
+  async findOrCreateGoogleUser(googleUser: {
+    googleId: string;
+    email: string;
+    name: string;
+    avatar?: { url: string; public_id: string };
+  }): Promise<UserDocument> {
+    const { googleId, email, name, avatar } = googleUser;
+
+    let user = await this.userModel.findOne({ googleId });
+
+    if (!user) {
+      user = await this.userModel.findOne({ email });
+
+      if (user) {
+        user.googleId = googleId;
+        await user.save();
+      } else {
+        user = await this.userModel.create({
+          name,
+          email,
+          googleId,
+          avatar: avatar || { url: '', public_id: '' },
+        });
+      }
+    }
+
+    return user;
+  }
+
+  googleLogin(user: UserDocument, res: Response) {
+    return this.sendToken(user, 200, res);
+  }
+
+  setCookieToken(user: UserDocument, res: Response) {
+    const token = this.jwtService.sign({ id: user._id });
+
+    const cookieExpire = this.configService.get<number>('COOKIE_EXPIRE') || 5;
+
+    const options = {
+      expires: new Date(Date.now() + cookieExpire * 24 * 60 * 60 * 1000),
+      httpOnly: true,
+    };
+
+    res.cookie('token', token, options);
+    return token;
+  }
+
   async register(registerDto: RegisterDto, res: Response) {
     // In production, you would upload avatar to cloudinary and get URL
     // For now we assume registerDto.avatar contains a base64 string or similar from frontend, or we handle it via Multer.

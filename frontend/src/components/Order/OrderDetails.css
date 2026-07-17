@@ -1,0 +1,237 @@
+.orderDetailsPage {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 4rem 10%;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.orderDetailsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.orderDetailsSection {
+  background-color: white;
+  padding: 3rem;
+  border-radius: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f1f5f9;
+}
+
+.orderDetailsSection > .MuiTypography-h1 {
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  color: #1a1a1a;
+  margin-bottom: 2rem;
+  border-left: 5px solid rgb(248 113 113);
+  padding-left: 1.25rem;
+}
+
+.orderStatusSubheader {
+  margin-top: -1.5rem;
+  margin-bottom: 3.5rem;
+  padding-left: 1.5rem;
+}
+
+.orderStatusSubheader p {
+  font-family: "Outfit", sans-serif;
+  color: #94a3b8;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.orderStatusSubheader span {
+  color: #1a1a1a;
+  font-weight: 700;
+  margin-left: 0.5rem;
+}
+
+.orderDetailsSection > .MuiTypography-h6 {
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: #1a1a1a;
+  margin-bottom: 2rem;
+  border-left: 5px solid rgb(248 113 113);
+  padding-left: 1.25rem;
+}
+
+.orderDetailsContainerBox {
+  margin-bottom: 3rem;
+}
+
+.orderDetailsContainerBox:last-child {
+  margin-bottom: 0;
+}
+
+.orderDetailsContainerBox > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin: 1.25rem 0;
+}
+
+.orderDetailsContainerBox > div > p {
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  color: #64748b;
+  min-width: 120px;
+  margin: 0;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.orderDetailsContainerBox > div > span {
+  font-family: "Outfit", sans-serif;
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 1.1rem;
+  flex: 1;
+}
+
+.totalPriceTag {
+  font-weight: 800 !important;
+  color: #1a1a1a !important;
+  font-size: 1.4rem !important;
+}
+
+.gatewayName {
+  color: #94a3b8 !important;
+  font-size: 0.9rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.greenColor {
+  color: #10b981 !important;
+  font-weight: 700;
+}
+
+.redColor {
+  color: #ef4444 !important;
+  font-weight: 700;
+}
+
+/* ── Sidebar: Items ──────────────────────────────────── */
+.orderSummarySidebar {
+  position: sticky;
+  top: 6rem;
+}
+
+.orderDetailsCartItemsContainer {
+  margin-top: 1.5rem;
+}
+
+.orderItemRow {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.orderItemRow:last-child {
+  border-bottom: none;
+}
+
+.orderItemRow img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  border: 1px solid #f1f5f9;
+}
+
+.orderItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.orderItemInfo a {
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1e293b;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.orderItemInfo a:hover {
+  color: rgb(248 113 113);
+}
+
+.orderItemInfo span {
+  font-family: "Outfit", sans-serif;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.orderItemInfo b {
+  color: #1a1a1a;
+  font-weight: 800;
+  margin-left: 0.3rem;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media screen and (max-width: 1200px) {
+  .orderDetailsPage {
+    padding: 3rem 5%;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 2rem;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .orderDetailsPage {
+    grid-template-columns: 1fr;
+  }
+  
+  .orderSummarySidebar {
+    position: static;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .orderDetailsPage {
+    padding: 2rem 1.25rem;
+  }
+  
+  .orderDetailsSection {
+    padding: 2rem 1.5rem;
+  }
+  
+  .orderDetailsSection > .MuiTypography-h1 {
+    font-size: 1.5rem;
+  }
+  
+  .orderDetailsSection > .MuiTypography-h6 {
+    font-size: 1.25rem;
+  }
+
+  .orderDetailsContainerBox > div {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .orderDetailsContainerBox > div > p {
+    font-size: 0.8rem;
+  }
+
+  .orderItemRow {
+    gap: 1rem;
+  }
+
+  .orderItemRow img {
+    width: 60px;
+    height: 60px;
+  }
+}

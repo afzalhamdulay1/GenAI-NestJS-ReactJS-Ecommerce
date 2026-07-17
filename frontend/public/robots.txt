@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /private/
+Allow: /
+Sitemap: https://mern-ecom-6pp1.onrender.com/sitemap.xml

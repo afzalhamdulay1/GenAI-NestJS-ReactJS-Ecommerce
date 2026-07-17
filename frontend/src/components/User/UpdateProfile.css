@@ -1,0 +1,183 @@
+.updateProfileContainer {
+  width: 100vw;
+  max-width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8fafc;
+  padding: 4rem 2rem;
+  box-sizing: border-box;
+}
+
+.updateProfileBox {
+  background-color: white;
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  padding: 3rem;
+  border-radius: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+}
+
+.updateProfileHeading {
+  text-align: center;
+  color: #1a1a1a;
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  margin-bottom: 3rem;
+  position: relative;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.updateProfileHeading::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 5px;
+  background-color: rgb(248 113 113);
+  border-radius: 5px;
+}
+
+.updateProfileForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+.updateProfileForm > div {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  position: relative;
+}
+
+.updateProfileForm > div > input {
+  padding: 1rem 1rem 1rem 3.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  font-family: "Outfit", sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  color: #1e293b;
+  outline: none;
+  background-color: #f8fafc;
+  transition: all 0.3s ease;
+}
+
+.updateProfileForm > div > input:focus {
+  border-color: rgb(248 113 113);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.1);
+}
+
+.updateProfileForm > div > svg {
+  position: absolute;
+  left: 1.25rem;
+  font-size: 1.5rem;
+  color: #94a3b8;
+  z-index: 10;
+  transition: color 0.3s ease;
+}
+
+.updateProfileForm > div:focus-within > svg {
+  color: rgb(248 113 113);
+}
+
+/* ── Avatar Upload Section ───────────────────────────── */
+#updateProfileImage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2rem 1.5rem;
+  border: 2px dashed #e2e8f0;
+  border-radius: 1.25rem;
+  background-color: #f8fafc;
+  cursor: pointer;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+#updateProfileImage:hover {
+  border-color: rgb(248 113 113);
+  background-color: #fff5f5;
+}
+
+#updateProfileImage > img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 6px 20px rgba(248, 113, 113, 0.2);
+}
+
+#updateProfileImage > label {
+  font-family: "Outfit", sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: rgb(248 113 113);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+#updateProfileImage > label:hover {
+  color: #f06060;
+}
+
+#updateProfileImage > p {
+  font-family: "Outfit", sans-serif;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+#updateProfileImage > input[type="file"] {
+  display: none;
+}
+
+.updateProfileBtn {
+  border: none;
+  background-color: rgb(248 113 113);
+  color: white;
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  width: 100%;
+  padding: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50px;
+  outline: none;
+  box-shadow: 0 10px 20px rgba(248, 113, 113, 0.2);
+  margin-top: 0.5rem;
+}
+
+.updateProfileBtn:hover {
+  background-color: #f06060;
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(248, 113, 113, 0.3);
+}
+
+@media screen and (max-width: 600px) {
+  .updateProfileContainer {
+    padding: 2rem 1.5rem;
+  }
+  .updateProfileBox {
+    padding: 2rem;
+    border-radius: 1.5rem;
+  }
+  .updateProfileHeading {
+    font-size: 1.5rem;
+  }
+}

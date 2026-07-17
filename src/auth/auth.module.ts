@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './jwt.strategy';
+import { GoogleStrategy } from './google.strategy';
 
 @Global()
 @Module({
@@ -23,7 +24,7 @@ import { JwtStrategy } from './jwt.strategy';
     }),
     forwardRef(() => UsersModule),
   ],
-  providers: [JwtStrategy],
+  providers: [JwtStrategy, GoogleStrategy],
   exports: [JwtModule, PassportModule],
 })
 export class AuthModule {}

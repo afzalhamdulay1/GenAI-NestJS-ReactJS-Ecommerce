@@ -1,0 +1,106 @@
+.productListContainer {
+  background-color: #f8fafc;
+  width: 100%;
+  padding: 2rem;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.headerSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.pageHeading {
+  font-weight: 800 !important;
+  color: #1e293b;
+  font-size: 1.15rem !important; /* Noticeably smaller title */
+  margin-bottom: 0.15rem !important;
+}
+
+.breadcrumbLink {
+  text-decoration: none;
+  color: #64748b;
+  font-size: 0.875rem;
+  transition: color 0.2s;
+}
+
+.breadcrumbLink:hover {
+  color: #6366f1;
+}
+
+.addNewBtn {
+  background-color: #6366f1 !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  border-radius: 0.75rem !important;
+  padding: 0.6rem 1.25rem !important;
+  box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4) !important;
+}
+
+.productListTableContainer {
+  background-color: white !important;
+  border-radius: 1rem !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+.productListTable {
+  border: none !important;
+}
+
+/* Custom styles for DataGrid Headers */
+.MuiDataGrid-columnHeaders {
+  background-color: #f8fafc !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  min-height: 56px !important;
+  max-height: 56px !important;
+  line-height: normal !important;
+}
+
+.MuiDataGrid-columnHeader {
+  padding: 0 1rem !important;
+}
+
+.productListTable.MuiDataGrid-root .MuiDataGrid-columnHeaderTitle,
+.productListTable.MuiDataGrid-root .MuiDataGrid-columnHeader div,
+.productListTable.MuiDataGrid-root .MuiDataGrid-columnHeaderTitleContainer {
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  text-transform: capitalize !important;
+  font-size: 1.125rem !important; /* EXACTLY 18px */
+  letter-spacing: normal !important;
+  line-height: 1.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.MuiDataGrid-cell {
+  border-bottom: 1px solid #f1f5f9 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.MuiDataGrid-columnHeaderTitleContainer {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.MuiDataGrid-row:hover {
+  background-color: #f8fafc !important;
+}
+
+@media screen and (max-width: 768px) {
+  .headerSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .productListContainer {
+    padding: 1rem;
+  }
+}

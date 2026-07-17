@@ -12,12 +12,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = exception.message || 'Internal server error';
 
-    this.logger.error(`EXCEPTION CAUGHT BY FILTER: ${exception.message}`, exception.stack);
-
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const responseData = exception.getResponse();
-      this.logger.error(`HTTP Exception: ${JSON.stringify(responseData)}`);
+      
+      if (status >= 500) {
+        this.logger.error(`HTTP Server Error: ${JSON.stringify(responseData)}`, exception.stack);
+      } else if (status !== 401) {
+        this.logger.warn(`HTTP Client Error (${status}): ${JSON.stringify(responseData)}`);
+      }
       
       const resMessage = typeof responseData === 'string' ? responseData : (responseData as any).message || message;
       // ValidationPipe returns an array of messages. Extract the first one so the frontend receives a string.
@@ -42,6 +45,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     else if (exception.name === 'TokenExpiredError') {
       status = HttpStatus.BAD_REQUEST;
       message = `Json Web Token is Expired, Try again`;
+    } 
+    else {
+      this.logger.error(`EXCEPTION CAUGHT BY FILTER: ${exception.message}`, exception.stack);
     }
 
     response.status(status).json({

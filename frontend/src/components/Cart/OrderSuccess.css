@@ -1,0 +1,120 @@
+@keyframes successPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeInMove {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.orderSuccessContainer {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8fafc;
+  padding: 2rem;
+}
+
+.orderSuccessBox {
+  background-color: white;
+  padding: 5rem;
+  border-radius: 3rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+  border: 1px solid #f1f5f9;
+}
+
+.orderSuccessBox > svg {
+  font-size: 8rem !important;
+  color: #10b981;
+  margin-bottom: 2rem;
+  animation: successPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.orderSuccessBox > p {
+  font-family: "Outfit", sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 1.5rem;
+  animation: fadeInMove 0.8s ease out forwards;
+}
+
+.orderSuccessBox > span {
+  font-family: "Outfit", sans-serif;
+  font-size: 1.1rem;
+  color: #64748b;
+  margin-bottom: 3rem;
+  display: block;
+}
+
+.successBtnGroup {
+  display: flex;
+  gap: 1.5rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.orderSuccessBox a {
+  padding: 1.2rem 2.5rem;
+  border-radius: 50px;
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
+  min-width: 180px;
+}
+
+.viewOrdersBtn {
+  background-color: rgb(248 113 113);
+  color: white;
+  box-shadow: 0 10px 20px rgba(235, 64, 52, 0.2);
+}
+
+.viewOrdersBtn:hover {
+  background-color: rgb(214, 84, 61);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(235, 64, 52, 0.3);
+}
+
+.continueShoppingBtn {
+  background-color: white;
+  color: #1a1a1a;
+  border: 1px solid #e2e8f0;
+}
+
+.continueShoppingBtn:hover {
+  background-color: #f8fafc;
+  border-color: #1a1a1a;
+  transform: translateY(-3px);
+}
+
+@media screen and (max-width: 600px) {
+  .orderSuccessBox {
+    padding: 3rem 2rem;
+    border-radius: 2rem;
+  }
+  .orderSuccessBox > svg {
+    font-size: 6rem !important;
+  }
+  .orderSuccessBox > p {
+    font-size: 1.5rem;
+  }
+  .successBtnGroup {
+    flex-direction: column;
+    align-items: center;
+  }
+  .orderSuccessBox a {
+    width: 100%;
+  }
+}

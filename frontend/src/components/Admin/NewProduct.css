@@ -1,0 +1,130 @@
+.newProductContainer {
+  width: 100%;
+  padding: 3rem 0;
+  background-color: #f8fafc;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.newProductCard {
+  width: 100%;
+  max-width: 650px;
+  background: white !important;
+  border-radius: 1.5rem !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+  padding: 2.5rem;
+  margin: 0 1rem;
+}
+
+.formTitle {
+  font-weight: 800 !important;
+  color: #1e293b;
+  margin-bottom: 2rem !important;
+  text-align: center;
+  position: relative;
+}
+
+.formTitle::after {
+  content: "";
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 4px;
+  background-color: #6366f1;
+  border-radius: 2px;
+}
+
+.createProductForm {
+  width: 100%;
+}
+
+.MuiInputAdornment-root svg {
+  color: #94a3b8;
+}
+
+.uploadButton {
+  border: 2px dashed #e2e8f0 !important;
+  text-transform: none !important;
+  padding: 1.5rem !important;
+  color: #64748b !important;
+  background-color: #f8fafc !important;
+  border-radius: 1rem !important;
+}
+
+.uploadButton:hover {
+  border-color: #6366f1 !important;
+  color: #6366f1 !important;
+  background-color: #f5f3ff !important;
+}
+
+.imagePreviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 1rem;
+}
+
+.previewItem {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.previewItem img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removeImgBtn {
+  position: absolute !important;
+  top: 4px;
+  right: 4px;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #ef4444 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#createProductBtn {
+  background-color: #6366f1 !important;
+  color: white !important;
+  border-radius: 1rem !important;
+  font-weight: 700 !important;
+  padding: 1rem !important;
+  text-transform: none !important;
+  font-size: 1.1rem !important;
+  transition: all 0.2s ease !important;
+}
+
+#createProductBtn:hover {
+  background-color: #4f46e5 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4) !important;
+}
+
+@media screen and (max-width: 600px) {
+  .newProductContainer {
+    padding: 1rem 0;
+  }
+  
+  .newProductCard {
+    padding: 1.5rem;
+    border-radius: 0 !important;
+    margin: 0;
+  }
+
+  .formTitle {
+    font-size: 1.5rem !important;
+  }
+}

@@ -1,0 +1,76 @@
+.CartItemCard {
+  display: flex;
+  padding: 1.5rem;
+  align-items: center;
+  box-sizing: border-box;
+  background-color: white;
+  border-radius: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.CartItemCard > img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-right: 1.5rem;
+  border-radius: 0.8rem;
+  background-color: #f8fafc;
+}
+
+.CartItemCard > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.CartItemCard > div > a {
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.CartItemCard > div > a:hover {
+  color: rgb(248 113 113);
+}
+
+.CartItemCard > div > span {
+  font-family: "Outfit", sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.CartItemCard > div > p {
+  color: rgb(248 113 113);
+  font-family: "Outfit", sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: opacity 0.3s ease;
+}
+
+.CartItemCard > div > p:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 600px) {
+  .CartItemCard {
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+  }
+  .CartItemCard > img {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  .CartItemCard > div {
+    align-items: center;
+  }
+}

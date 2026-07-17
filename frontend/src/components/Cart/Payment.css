@@ -1,0 +1,141 @@
+.paymentContainer {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 5rem 10%;
+  gap: 3rem;
+  box-sizing: border-box;
+}
+
+.paymentInfoBox {
+  flex: 1.5;
+  min-width: 350px;
+  max-width: 800px;
+  background-color: #fff1f2;
+  border: 1px solid #fecaca;
+  border-radius: 2rem;
+  padding: 2.5rem;
+  box-sizing: border-box;
+}
+
+.paymentInfoBox h2 {
+  font-family: "Outfit", sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.paymentInfoBox p {
+  font-family: "Outfit", sans-serif;
+  font-size: 1rem;
+  margin: 1rem 0;
+  font-weight: 500;
+}
+
+.paymentForm {
+  flex: 1;
+  min-width: 350px;
+  max-width: 450px;
+  background-color: white;
+  padding: 3rem;
+  border-radius: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-sizing: border-box;
+}
+
+.paymentForm > p, .paymentForm .MuiTypography-root {
+  text-align: center;
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
+  font-size: 1.8rem;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+  width: 100% !important;
+}
+
+.paymentForm > div {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.paymentInput {
+  padding: 1rem 1rem 1rem 3.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  outline: none;
+  background-color: #f8fafc;
+  transition: all 0.3s ease;
+}
+
+.paymentForm > div:focus-within .paymentInput {
+  border-color: rgb(248 113 113);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(235, 64, 52, 0.1);
+}
+
+.paymentForm > div > svg {
+  position: absolute;
+  left: 1.25rem;
+  font-size: 1.5rem;
+  color: #94a3b8;
+  z-index: 10;
+  transition: color 0.3s ease;
+}
+
+.paymentForm > div:focus-within > svg {
+  color: rgb(248 113 113);
+}
+
+.paymentFormBtn {
+  border: none;
+  background-color: rgb(248 113 113);
+  color: white;
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  width: 100%;
+  padding: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  border-radius: 50px;
+  margin-top: 1rem;
+  box-shadow: 0 10px 20px rgba(235, 64, 52, 0.2);
+}
+
+.paymentFormBtn:hover:not(:disabled) {
+  background-color: rgb(214, 84, 61);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(235, 64, 52, 0.3);
+}
+
+.paymentFormBtn:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media screen and (max-width: 900px) {
+  .paymentContainer {
+    padding: 2rem;
+  }
+  .paymentInfoBox, .paymentForm {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+  }
+}

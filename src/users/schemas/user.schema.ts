@@ -13,8 +13,8 @@ export class User {
   @Prop({ required: true, unique: true, lowercase: true })
   email: string;
 
-  @Prop({ required: true, minlength: 8, select: false })
-  password: string;
+  @Prop({ select: false })
+  password?: string;
 
   @Prop({ type: { public_id: String, url: String } })
   avatar: {
@@ -26,6 +26,9 @@ export class User {
   role: string;
 
   @Prop()
+  googleId?: string;
+
+  @Prop()
   resetPasswordToken?: string;
 
   @Prop()
@@ -33,6 +36,7 @@ export class User {
 
   // Methods
   async comparePassword(enteredPassword: string): Promise<boolean> {
+    if (!this.password) return false;
     return await bcrypt.compare(enteredPassword, this.password);
   }
 
@@ -49,9 +53,9 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.pre('save', async function (next: any) {
-  if (!this.isModified('password')) {
-    next();
+UserSchema.pre('save', async function () {
+  if (!this.password || !this.isModified('password')) {
+    return;
   }
   this.password = await bcrypt.hash(this.password, 10);
 });

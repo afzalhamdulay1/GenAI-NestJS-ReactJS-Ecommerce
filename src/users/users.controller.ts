@@ -28,9 +28,28 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { GoogleAuthGuard } from '../auth/guards/google-auth.guard';
+import { ConfigService } from '@nestjs/config';
+
 @Controller()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  @Get('auth/google')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuth(@Req() req: any) {
+    // This route initiates the Google OAuth flow
+  }
+
+  @Get('auth/google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuthCallback(@Req() req: any, @Res() res: Response) {
+    this.usersService.setCookieToken(req.user, res);
+    res.redirect('/');
+  }
 
   @Post('register')
   @UseInterceptors(AnyFilesInterceptor({ limits: { fieldSize: 50 * 1024 * 1024 } }))
