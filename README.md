@@ -8,6 +8,8 @@
 
 A highly scalable, production-ready Full-Stack E-Commerce platform. This application features a unified architecture where the robust **NestJS + TypeScript** backend directly serves the modern **React + Vite** frontend. It includes native Google OAuth, secure Stripe checkout, and role-based administration features.
 
+🔗 **Live Demo:** [https://nestjs-reactjs-ecommerce.onrender.com/](https://nestjs-reactjs-ecommerce.onrender.com/)
+
 ---
 
 ## ⚡ Unified Full-Stack Architecture
