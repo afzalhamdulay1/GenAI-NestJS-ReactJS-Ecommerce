@@ -1,106 +1,132 @@
-# 🛍️ NestJS E-Commerce REST API
+# 🛍️ Enterprise NestJS E-Commerce Stack
 
-A highly scalable, production-ready E-Commerce REST API built with NestJS and MongoDB, featuring Role-Based Access Control (RBAC), secure payment gateway integration, and comprehensive admin panel support. 
+[![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Stripe](https://img.shields.io/badge/Stripe-625DF5?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com/)
+[![Passport](https://img.shields.io/badge/Passport-34E27A?style=for-the-badge&logo=passport&logoColor=white)](http://www.passportjs.org/)
 
-This backend was built to power modern frontend frameworks (React, Next.js, Vue) and ensures enterprise-grade security, type safety, and strict data validation.
+A highly scalable, production-ready Full-Stack E-Commerce platform. This application features a unified architecture where the robust **NestJS + TypeScript** backend directly serves the modern **React + Vite** frontend. It includes native Google OAuth, secure Stripe checkout, and role-based administration features.
+
+---
+
+## ⚡ Unified Full-Stack Architecture
+
+Rather than maintaining separate hosting environments, this repository runs as a single unified service:
+* **Development:** Vite's dev server proxies API requests seamlessly to the NestJS backend.
+* **Production:** NestJS serves the compiled React production assets (`/frontend/dist`) statically. All client-side routing (React Router) falls back to `index.html` automatically, while API routes are protected under `/api/v1/*`.
 
 ---
 
 ## ✨ Key Features
 
-### 🛡️ Authentication & Authorization
-- **JWT Authentication:** Secure user login and registration using JSON Web Tokens stored securely in cookies.
-- **Role-Based Access Control (RBAC):** Custom Guard architecture to restrict access. Normal users can only access their data, while `admin` users gain access to comprehensive dashboard endpoints.
+### 🛡️ Authentication & Google OAuth 2.0
+* **Google Sign-In & Sign-Up:** Complete Google login using Passport OAuth 2.0 strategy.
+* **Auto Account Merging:** Google login automatically links with existing email/password accounts if emails match.
+* **Smart Route Guards:** Custom `GoogleAuthGuard` detects login cancellations or failures and redirects users back to `/login` rather than exposing raw JSON error pages.
+* **Secure JWT Sessions:** Encrypted JWT tokens stored in HTTP-Only cookies to protect against XSS/CSRF.
 
-### 📦 Product & Order Management
-- **Full CRUD for Products:** Create, read, update, and delete products with multiple images, pricing, stock, and categories.
-- **Reviews & Ratings:** Users can leave reviews and ratings, with automated recalculation of overall product ratings.
-- **Order Processing:** Complete order lifecycle management (processing, shipped, delivered) with stock deduction logic.
+### 📦 Product & Order Engine
+* **Dynamic Reviews:** Automated score recalculation whenever products are reviewed or rated.
+* **Inventory Control:** Real-time stock deduction upon order confirmation.
+* **Admin Dashboard:** Full CRUD endpoints to manage users, products, orders, and review reviews.
 
-### 💳 Payments
-- **Stripe Integration:** Secure server-side Stripe integration to generate payment intents and process credit card transactions.
-
-### ⚙️ Architecture & Security
-- **Strict Validation:** Every endpoint is protected by `ValidationPipe`, utilizing `class-validator` and `class-transformer` to strictly enforce DTO structures and prevent rogue data injections.
-- **Global Exception Filtering:** Custom filters dynamically catch unhandled exceptions (like Mongoose duplicate keys or JWT expirations) and format them into clean, human-readable JSON.
-- **Stateless Media Uploads:** Native integration with Cloudinary utilizing Multer to parse large Base64 image payloads seamlessly.
+### 💳 Payments & Media Storage
+* **Stripe Gateway:** Secure server-side Stripe integration to create payment intents and secure credits.
+* **Cloudinary Storage:** Media handling using Multer for base64 photo uploads.
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Tech Stack
 
-- **Framework:** [NestJS](https://nestjs.com/) (Node.js)
-- **Language:** TypeScript
-- **Database:** MongoDB & Mongoose
-- **Authentication:** bcryptjs, jsonwebtoken, cookie-parser
-- **Storage:** Cloudinary
-- **Payments:** Stripe
+* **Backend Framework:** NestJS (NodeJS) + TypeScript
+* **Frontend Library:** React (Vite) + Tailwind CSS + Redux Toolkit
+* **Database:** MongoDB & Mongoose
+* **Auth Core:** PassportJS (`passport-jwt`, `passport-google-oauth20`)
+* **Styling & Assets:** Vanilla CSS, Material UI (MUI Icons)
 
 ---
 
 ## 🚀 Getting Started
 
-Follow these instructions to run the project locally.
-
-### 1. Clone the repository
+### 1. Clone & Set Up
 ```bash
 git clone <your-repo-url>
 cd nestjs-ecom-backend
-```
-
-### 2. Install dependencies
-```bash
 npm install
 ```
 
-### 3. Environment Variables
-Create a `.env` file in the root directory and configure the following variables:
-
+### 2. Configure Environment (`.env`)
+Create a `.env` file in the root directory:
 ```env
 PORT=4000
-DB_URI=mongodb://localhost:27017/Ecommerce
+DB_URI=mongodb+srv://...
+JWT_SECRET=your_secret_key
+JWT_EXPIRE=7d
+COOKIE_EXPIRE=5
 FRONTEND_URL=http://localhost:3000
 
-# Authentication
-JWT_SECRET=your_super_secret_jwt_key
-JWT_EXPIRE=5d
-COOKIE_EXPIRE=5
-
 # Stripe Payments
-STRIPE_API_KEY=your_stripe_public_key
-STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_API_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
 
 # Cloudinary
-CLOUDINARY_NAME=your_cloudinary_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# Google OAuth Credentials
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:4000/api/v1/auth/google/callback
 ```
 
-### 4. Run the Application
+### 3. Run Locally
 
-**Development Mode:**
-```bash
-npm run start:dev
+* **Run Backend (Port 4000):**
+  ```bash
+  npm run start:dev
+  ```
+* **Run Frontend (Port 3000):**
+  ```bash
+  cd frontend
+  npm run dev
+  ```
+
+---
+
+## 📂 Project Directory Structure
+
 ```
-
-**Production Build:**
-```bash
-npm run build
-npm run start:prod
+nestjs-ecom-backend/
+├── frontend/                 # React Frontend Codebase
+│   ├── src/                  # React Source files
+│   ├── dist/                 # Vite production build output
+│   └── package.json
+├── src/                      # NestJS Backend Codebase
+│   ├── auth/                 # Passport strategies & JWT/Google guards
+│   ├── users/                # User Schemas, Services, & Controllers
+│   ├── products/             # Product Schemas & Reviews
+│   ├── orders/               # Order Schemas & Stock controllers
+│   ├── payments/             # Stripe checkout handlers
+│   └── main.ts               # Server entry point
+├── package.json              # Chained build scripts for unified deployment
+└── README.md
 ```
-
-The API will be available at `http://localhost:4000/api/v1`.
 
 ---
 
 ## 📝 API Endpoints Summary
 
-- **Auth:** `/api/v1/register`, `/api/v1/login`, `/api/v1/logout`, `/api/v1/password/forgot`
-- **User:** `/api/v1/me`, `/api/v1/me/update`
-- **Products:** `/api/v1/products`, `/api/v1/product/:id`, `/api/v1/review`
-- **Orders:** `/api/v1/order/new`, `/api/v1/order/:id`, `/api/v1/orders/me`
-- **Payments:** `/api/v1/payment/process`, `/api/v1/stripeapikey`
-- **Admin (RBAC Protected):**
-  - `/api/v1/admin/users`
-  - `/api/v1/admin/product/new`
-  - `/api/v1/admin/orders`
+| Method | Endpoint | Description | Access |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/v1/auth/google` | Initiates Google OAuth Login | Public |
+| **GET** | `/api/v1/auth/google/callback` | Google OAuth redirect receiver | Public |
+| **POST** | `/api/v1/register` | Register new user account | Public |
+| **POST** | `/api/v1/login` | Login with email & password | Public |
+| **GET** | `/api/v1/me` | Fetch authenticated profile details | User |
+| **PUT** | `/api/v1/me/update` | Update user profile and avatar | User |
+| **POST** | `/api/v1/payment/process` | Create Stripe Payment intent | User |
+| **GET** | `/api/v1/admin/users` | Fetch list of all registered users | **Admin Only** |
+| **POST** | `/api/v1/admin/product/new` | Create new shop product listing | **Admin Only** |
+| **DELETE** | `/api/v1/admin/user/:id` | Remove user registration | **Admin Only** |
