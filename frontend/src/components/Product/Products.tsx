@@ -5,7 +5,7 @@ import MetaData from "../Layout/MetaData";
 import Loader from "../Layout/Loader/Loader";
 import Pagination from "react-js-pagination";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { getProducts, clearErrors } from "../../features/products/productsSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Slider, Typography, Button } from "@mui/material";
@@ -27,14 +27,18 @@ const Products: React.FC = () => {
   const { keyword } = useParams<{ keyword?: string }>();
   const mykeyword = keyword || "";
 
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const initialCategory = searchParams.get("category") || "";
+
   const [currentPage, setCurrentPage] = useState(1);
   const [price, setPrice] = useState<number[]>([0, 250000]);
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(initialCategory);
   const [ratings, setRatings] = useState<number>(0);
 
   const [filters, setFilters] = useState({
     price: [0, 250000],
-    category: "",
+    category: initialCategory,
     ratings: 0,
   });
 
