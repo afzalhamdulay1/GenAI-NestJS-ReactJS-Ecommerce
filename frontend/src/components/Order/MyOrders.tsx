@@ -1,0 +1,106 @@
+import React, { Fragment, useEffect } from "react";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import "./MyOrders.css";
+import { clearErrors, getMyOrders } from "../../features/order/orderSlice";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import Loader from "../Layout/Loader/Loader";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import Typography from "@mui/material/Typography";
+import MetaData from "../Layout/MetaData";
+import LaunchIcon from "@mui/icons-material/Launch";
+
+const MyOrders: React.FC = () => {
+  const dispatch = useAppDispatch();
+
+  const { loading, error, myOrders } = useAppSelector((state) => state.order);
+  const { user } = useAppSelector((state) => state.user);
+
+  const columns: GridColDef[] = [
+    { field: "id", headerName: "Order ID", minWidth: 300, flex: 1 },
+    {
+      field: "status",
+      headerName: "Status",
+      minWidth: 150,
+      flex: 0.5,
+      cellClassName: (params) => {
+        return params.row.status === "Delivered" ? "greenColor" : "redColor";
+      },
+    },
+    {
+      field: "itemsQty",
+      headerName: "Items Qty",
+      type: "number",
+      minWidth: 150,
+      flex: 0.3,
+    },
+    {
+      field: "amount",
+      headerName: "Amount",
+      type: "number",
+      minWidth: 270,
+      flex: 0.5,
+    },
+    {
+      field: "actions",
+      flex: 0.3,
+      headerName: "Actions",
+      minWidth: 150,
+      type: "number",
+      sortable: false,
+      renderCell: (params) => (
+        <Link to={`/order/${params.row.id}`}>
+          <LaunchIcon />
+        </Link>
+      ),
+    },
+  ];
+
+  const rows: any[] = [];
+
+  myOrders &&
+    myOrders.forEach((order) => {
+      rows.push({
+        id: order._id,
+        status: order.orderStatus,
+        itemsQty: order.orderItems?.length || 0,
+        amount: order.totalPrice,
+      });
+    });
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearErrors());
+    }
+
+    dispatch(getMyOrders());
+  }, [dispatch, error]);
+
+  return (
+    <Fragment>
+      <MetaData title={`${user?.name || "User"} - Orders`} />
+
+      {loading ? (
+        <Loader />
+      ) : (
+        <div className="myOrdersPage">
+          <Typography id="myOrdersHeading">{user?.name}'s Orders</Typography>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            pageSizeOptions={[10]}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 10 } },
+            }}
+            disableRowSelectionOnClick
+            className="myOrdersTable"
+            autoHeight
+          />
+        </div>
+      )}
+    </Fragment>
+  );
+};
+
+export default MyOrders;

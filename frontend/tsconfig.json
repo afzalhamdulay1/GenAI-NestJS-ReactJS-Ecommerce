@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ScriptHost",
+      "ES2020"
+    ],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "types": ["vite/client"],
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    /* Gradual Migration Settings */
+    "allowJs": true, // Allows you to keep using .js/.jsx files
+    "checkJs": false, // Skips type checking JavaScript files
+    /* Linting */
+    "strict": false, // You can turn this to true later once all files are migrated
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": false
+  },
+  "include": [
+    "src"
+  ]
+}

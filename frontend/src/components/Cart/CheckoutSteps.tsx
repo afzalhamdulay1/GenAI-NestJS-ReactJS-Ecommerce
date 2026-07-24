@@ -1,0 +1,58 @@
+import React, { Fragment } from "react";
+import { Typography, Stepper, StepLabel, Step } from "@mui/material";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import LibraryAddCheckIcon from "@mui/icons-material/LibraryAddCheck";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import "./CheckoutSteps.css";
+
+interface CheckoutStepsProps {
+  activeStep: number;
+}
+
+const CheckoutSteps: React.FC<CheckoutStepsProps> = ({ activeStep }) => {
+  const steps = [
+    {
+      label: <Typography>Shipping Details</Typography>,
+      icon: <LocalShippingIcon />,
+    },
+    {
+      label: <Typography>Confirm Order</Typography>,
+      icon: <LibraryAddCheckIcon />,
+    },
+    {
+      label: <Typography>Payment</Typography>,
+      icon: <AccountBalanceIcon />,
+    },
+  ];
+
+  const stepStyles: React.CSSProperties = {
+    boxSizing: "border-box",
+    marginTop: "5rem",
+    marginBottom: "2rem",
+  };
+
+  return (
+    <Fragment>
+      <Stepper alternativeLabel activeStep={activeStep} style={stepStyles}>
+        {steps.map((item, index) => (
+          <Step
+            key={index}
+            active={activeStep === index}
+            completed={activeStep >= index}
+          >
+            <StepLabel
+              style={{
+                color: activeStep >= index ? "rgb(248 113 113)" : "rgba(0, 0, 0, 0.649)",
+              }}
+              icon={item.icon}
+            >
+              {item.label}
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Fragment>
+  );
+};
+
+export default CheckoutSteps;
