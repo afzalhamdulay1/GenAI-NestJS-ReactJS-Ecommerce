@@ -36,9 +36,12 @@ export class UsersService {
       httpOnly: true,
     };
 
+    const userObj = user.toObject ? user.toObject() : { ...user };
+    delete userObj.password;
+
     res.status(statusCode).cookie('token', token, options).json({
       success: true,
-      user,
+      user: userObj,
       token,
     });
   }

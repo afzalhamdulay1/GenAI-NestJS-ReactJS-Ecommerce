@@ -1,4 +1,5 @@
 import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateProductDto {
   @IsString()
@@ -9,6 +10,7 @@ export class CreateProductDto {
   @IsNotEmpty({ message: 'Please enter product description' })
   description: string;
 
+  @Type(() => Number)
   @IsNumber()
   @IsNotEmpty({ message: 'Please enter product price' })
   price: number;
@@ -17,6 +19,7 @@ export class CreateProductDto {
   @IsNotEmpty({ message: 'Please enter product category' })
   category: string;
 
+  @Type(() => Number)
   @IsNumber()
   @IsNotEmpty({ message: 'Please enter product stock' })
   stock: number;
