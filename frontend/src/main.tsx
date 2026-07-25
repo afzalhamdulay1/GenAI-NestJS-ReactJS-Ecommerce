@@ -242,6 +242,11 @@ const router = createBrowserRouter([
   },
 ]);
 
+import { setupInterceptors } from './services/api';
+
+// Initialize Axios interceptors with the Redux store
+setupInterceptors(store);
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <RouterProvider router={router} />

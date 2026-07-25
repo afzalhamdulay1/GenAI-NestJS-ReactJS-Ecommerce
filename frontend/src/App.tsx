@@ -13,9 +13,11 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import Loader from './components/Layout/Loader/Loader';
 import ScrollToTop from './utils/ScrollToTop';
+import Maintenance from './components/Layout/Maintenance/Maintenance';
 
 function App(): React.ReactElement {
   const { isAuthenticated, user, isUserLoading } = useAppSelector((state) => state.user);
+  const { isOffline } = useAppSelector((state) => state.system);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
 
   async function getStripeApiKey() {
@@ -39,6 +41,10 @@ function App(): React.ReactElement {
     store.dispatch(loadUser());
     getStripeApiKey();
   }, []);
+
+  if (isOffline) {
+    return <Maintenance />;
+  }
 
   if (isUserLoading) {
     return <Loader />;

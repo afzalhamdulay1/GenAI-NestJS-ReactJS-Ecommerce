@@ -60,7 +60,9 @@ const Products: React.FC = () => {
       toast.error(error);
       dispatch(clearErrors());
     }
+  }, [dispatch, error]);
 
+  useEffect(() => {
     const params: Record<string, any> = {
       keyword: mykeyword,
       "price[lte]": filters.price[1],
@@ -74,7 +76,7 @@ const Products: React.FC = () => {
     }
 
     dispatch(getProducts(params));
-  }, [dispatch, error, mykeyword, currentPage, filters]);
+  }, [dispatch, mykeyword, currentPage, filters]);
 
   const count = filteredProductsCount || 0;
   const perPage = resultPerPage || 0;

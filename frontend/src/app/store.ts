@@ -5,6 +5,7 @@ import cartReducer from '../features/cart/cartSlice';
 import orderReducer from '../features/order/orderSlice';
 import productReducer from '../features/products/productSlice';
 import newReviewReducer from '../features/review/reviewSlice';
+import systemReducer from '../features/system/systemSlice';
 
 const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ const store = configureStore({
     products: productsReducer,
     user: userReducer,
     reviews: newReviewReducer,
+    system: systemReducer,
   },
   preloadedState: {
     cart: {

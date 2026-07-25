@@ -19,9 +19,11 @@ const Home: React.FC = () => {
       toast.error(error);
       dispatch(clearErrors());
     }
-
-    dispatch(getProducts({ keyword: "" }));
   }, [dispatch, error]);
+
+  useEffect(() => {
+    dispatch(getProducts({ keyword: "" }));
+  }, [dispatch]);
 
   const categories = [
     "Laptop",
