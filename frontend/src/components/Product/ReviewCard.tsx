@@ -1,7 +1,7 @@
 import { Rating } from "@mui/material";
 import React from "react";
-import profilePng from "../../images/Profile.png";
-import { Review } from "../../features/products/productsSlice";
+import profilePng from "@/images/Profile.png";
+import { Review } from "@/types";
 
 interface ReviewCardProps {
   review: Review;

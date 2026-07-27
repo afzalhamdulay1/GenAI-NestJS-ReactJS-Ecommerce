@@ -1,14 +1,14 @@
 import React, { Fragment, useState, useEffect } from "react";
-import "./UpdateProfile.css";
-import Loader from "../Layout/Loader/Loader";
+import "@/components/User/UpdateProfile.css";
+import Loader from "@/components/Layout/Loader/Loader";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import FaceIcon from "@mui/icons-material/Face";
-import { clearErrors, updateProfile } from "../../features/user/userSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import MetaData from "../Layout/MetaData";
+import { clearErrors, updateProfile } from "@/features/user/userSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import MetaData from "@/components/Layout/MetaData";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import dummyProfile from '../../images/Profile.png';
+import dummyProfile from '@/images/Profile.png';
 
 const UpdateProfile: React.FC = () => {
   const dispatch = useAppDispatch();

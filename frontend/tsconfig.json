@@ -25,7 +25,10 @@
     "strict": false, // You can turn this to true later once all files are migrated
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noImplicitReturns": false
+    "noImplicitReturns": false,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": [
     "src"

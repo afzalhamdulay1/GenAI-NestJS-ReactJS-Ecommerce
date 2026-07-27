@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { clearErrors, updateProduct, resetProductState, fetchProductDetails } from "../../features/products/productSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { clearErrors, updateProduct, resetProductState, fetchProductDetails } from "@/features/products/productSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { ProductImage } from "@/types";
 import { 
   Button, 
   Typography, 
@@ -17,13 +18,13 @@ import {
   Divider
 } from "@mui/material";
 import { toast } from "react-toastify";
-import MetaData from "../Layout/MetaData";
+import MetaData from "@/components/Layout/MetaData";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import DescriptionIcon from "@mui/icons-material/Description";
 import StorageIcon from "@mui/icons-material/Storage";
 import SpellcheckIcon from "@mui/icons-material/Spellcheck";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import SideBar from "./Sidebar";
+import SideBar from "@/components/Admin/Sidebar";
 import { useNavigate, useParams } from "react-router-dom";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
@@ -41,7 +42,7 @@ const UpdateProduct: React.FC = () => {
   const [category, setCategory] = useState("");
   const [stock, setStock] = useState<number | string>(0);
   const [images, setImages] = useState<string[]>([]);
-  const [oldImages, setOldImages] = useState<any[]>([]);
+  const [oldImages, setOldImages] = useState<ProductImage[]>([]);
   const [imagesPreview, setImagesPreview] = useState<string[]>([]);
 
   const categories = [
@@ -62,7 +63,7 @@ const UpdateProduct: React.FC = () => {
       setDescription(product.description || "");
       setPrice(product.price || 0);
       setCategory(product.category || "");
-      setStock(product.Stock ?? (product as any).stock ?? 0);
+      setStock(product.stock || 0);
       setOldImages(product.images || []);
     }
 

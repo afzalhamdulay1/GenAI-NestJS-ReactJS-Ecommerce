@@ -1,11 +1,11 @@
 import React, { Fragment, useEffect } from "react";
-import MetaData from "../Layout/MetaData";
-import Loader from "../Layout/Loader/Loader";
+import MetaData from "@/components/Layout/MetaData";
+import Loader from "@/components/Layout/Loader/Loader";
 import { Link, useNavigate } from "react-router-dom";
-import "./Profile.css";
-import { loadUser, resetUpdateProfile } from "../../features/user/userSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import dummyProfile from "../../images/Profile.png";
+import "@/components/User/Profile.css";
+import { loadUser, resetUpdateProfile } from "@/features/user/userSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import dummyProfile from "@/images/Profile.png";
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();

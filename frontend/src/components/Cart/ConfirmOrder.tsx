@@ -1,9 +1,9 @@
 import React, { Fragment } from "react";
-import CheckoutSteps from "./CheckoutSteps";
-import MetaData from "../Layout/MetaData";
-import "./ConfirmOrder.css";
+import CheckoutSteps from "@/components/Cart/CheckoutSteps";
+import MetaData from "@/components/Layout/MetaData";
+import "@/components/Cart/ConfirmOrder.css";
 import { Link, useNavigate } from "react-router-dom";
-import { useAppSelector } from "../../app/hooks";
+import { useAppSelector } from "@/app/hooks";
 
 const ConfirmOrder: React.FC = () => {
   const navigate = useNavigate();

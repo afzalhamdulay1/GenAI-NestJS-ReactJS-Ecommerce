@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import './ProductsList.css';
+import '@/components/Admin/ProductsList.css';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Typography,
@@ -12,18 +12,18 @@ import {
   Paper,
   Breadcrumbs,
 } from '@mui/material';
-import MetaData from '../Layout/MetaData';
+import MetaData from '@/components/Layout/MetaData';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import SideBar from './Sidebar';
+import SideBar from '@/components/Admin/Sidebar';
 import {
   getAllUsers,
   clearErrors,
   deleteUser,
   resetUserState,
-} from '../../features/user/userSlice';
-import { useAppDispatch, useAppSelector } from '../../app/hooks';
+} from '@/features/user/userSlice';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { toast } from 'react-toastify';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
@@ -177,7 +177,15 @@ const UsersList: React.FC = () => {
     },
   ];
 
-  const rows: any[] = [];
+  interface UserRow {
+    id: string;
+    role: string;
+    email: string;
+    name: string;
+    avatar?: string;
+  }
+
+  const rows: UserRow[] = [];
   users &&
     users.forEach((item) => {
       rows.push({

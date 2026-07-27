@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { useAppSelector } from "../../../app/hooks";
-import Container from "../../Container/Container";
+import { useAppSelector } from "@/app/hooks";
+import Container from "@/components/Container/Container";
 
 interface NavItem {
   name: string;
@@ -10,7 +10,7 @@ interface NavItem {
 }
 
 function Header(): React.ReactElement {
-  const { isAuthenticated } = useAppSelector((state) => state.user);
+  const { isAuthenticated, user } = useAppSelector((state) => state.user);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems: NavItem[] = [
@@ -18,6 +18,7 @@ function Header(): React.ReactElement {
     { name: "Products", slug: "/products", active: true },
     { name: "Search", slug: "/search", active: true },
     { name: "Cart", slug: "/cart", active: true },
+    { name: "Dashboard", slug: "/admin/dashboard", active: isAuthenticated && user?.role === "admin" },
     { name: "Account", slug: "/account", active: isAuthenticated },
     { name: "Login", slug: "/login", active: !isAuthenticated },
   ];

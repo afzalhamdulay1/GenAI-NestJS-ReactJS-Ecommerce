@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
-import Header from './components/Layout/Header/Header';
+import React, { useEffect, useState, Suspense } from 'react';
+import '@/App.css';
+import Header from '@/components/Layout/Header/Header';
 import { Outlet } from 'react-router-dom';
 import WebFont from 'webfontloader';
-import Footer from './components/Layout/Footer/Footer';
-import store from './app/store';
-import { loadUser } from './features/user/userSlice';
-import UserOptions from './components/Layout/Header/UserOptions';
-import { useAppSelector } from './app/hooks';
-import { api } from './services/api';
+import Footer from '@/components/Layout/Footer/Footer';
+import store from '@/app/store';
+import { loadUser } from '@/features/user/userSlice';
+import UserOptions from '@/components/Layout/Header/UserOptions';
+import { useAppSelector } from '@/app/hooks';
+import { api } from '@/services/api';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
-import Loader from './components/Layout/Loader/Loader';
-import ScrollToTop from './utils/ScrollToTop';
-import Maintenance from './components/Layout/Maintenance/Maintenance';
+import Loader from '@/components/Layout/Loader/Loader';
+import ScrollToTop from '@/utils/ScrollToTop';
+import Maintenance from '@/components/Layout/Maintenance/Maintenance';
 
 function App(): React.ReactElement {
   const { isAuthenticated, user, isUserLoading } = useAppSelector((state) => state.user);
@@ -58,7 +58,9 @@ function App(): React.ReactElement {
         {isAuthenticated && <UserOptions user={user} />}
         <main>
           <Elements stripe={stripePromise}>
-            <Outlet />
+            <Suspense fallback={<Loader />}>
+              <Outlet />
+            </Suspense>
           </Elements>
         </main>
         <Footer />

@@ -1,33 +1,8 @@
-import { createSlice, createAsyncThunk, ActionReducerMapBuilder } from '@reduxjs/toolkit';
-import { api } from '../../services/api';
+import { createSlice, createAsyncThunk, ActionReducerMapBuilder, PayloadAction, AsyncThunk } from '@reduxjs/toolkit';
+import { api } from '@/services/api';
+import axios from 'axios';
 
-export interface ProductImage {
-  public_id: string;
-  url: string;
-}
-
-export interface Review {
-  _id: string;
-  user: string;
-  name: string;
-  rating: number;
-  comment: string;
-}
-
-export interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  ratings: number;
-  images: ProductImage[];
-  category: string;
-  Stock: number;
-  numOfReviews: number;
-  reviews?: Review[];
-  user?: string;
-  createdAt?: string;
-}
+import { ProductImage, Review, Product } from '@/types';
 
 export interface ProductsState {
   products: Product[];
@@ -36,6 +11,15 @@ export interface ProductsState {
   filteredProductsCount: number | null;
   loading: boolean;
   error: string | null;
+}
+
+export interface ProductQueryParams {
+  keyword?: string;
+  page?: number;
+  category?: string;
+  'price[gte]'?: number;
+  'price[lte]'?: number;
+  'ratings[gte]'?: number;
 }
 
 const initialState: ProductsState = {
@@ -49,45 +33,54 @@ const initialState: ProductsState = {
 
 export const getProducts = createAsyncThunk<
   { products: Product[]; productsCount: number; resultPerPage: number; filteredProductsCount: number },
-  any,
+  ProductQueryParams | void,
   { rejectValue: string }
 >('products/getProducts', async (params, { rejectWithValue }) => {
   try {
     const response = await api.get('/products', { params });
     return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || 'Failed to fetch products');
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data.message || 'Failed to fetch products');
+    }
+    return rejectWithValue('Failed to fetch products');
   }
 });
 
 export const getAdminProducts = createAsyncThunk<
   { products: Product[]; productsCount: number; resultPerPage: number; filteredProductsCount: number },
-  any,
+  void,
   { rejectValue: string }
->('products/getAdminProducts', async (params, { rejectWithValue }) => {
+>('products/getAdminProducts', async (_, { rejectWithValue }) => {
   try {
-    const response = await api.get('/admin/products', { params });
+    const response = await api.get('/admin/products');
     return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || 'Failed to fetch admin products');
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data.message || 'Failed to fetch admin products');
+    }
+    return rejectWithValue('Failed to fetch admin products');
   }
 });
 
-const handleAsyncThunk = (builder: ActionReducerMapBuilder<ProductsState>, thunk: any) => {
+// Use GenericAsyncThunk to properly type the dynamic builder
+type GenericAsyncThunk = AsyncThunk<any, any, any>;
+
+const handleAsyncThunk = (builder: ActionReducerMapBuilder<ProductsState>, thunk: GenericAsyncThunk) => {
   builder
     .addCase(thunk.pending, (state) => {
       state.loading = true;
     })
-    .addCase(thunk.fulfilled, (state, action: any) => {
+    .addCase(thunk.fulfilled, (state, action: PayloadAction<{ products: Product[]; productsCount?: number; resultPerPage?: number; filteredProductsCount?: number }>) => {
       state.loading = false;
       state.products = action.payload.products;
-      state.productsCount = action.payload.productsCount;
-      state.resultPerPage = action.payload.resultPerPage;
-      state.filteredProductsCount = action.payload.filteredProductsCount;
+      if (action.payload.productsCount !== undefined) state.productsCount = action.payload.productsCount;
+      if (action.payload.resultPerPage !== undefined) state.resultPerPage = action.payload.resultPerPage;
+      if (action.payload.filteredProductsCount !== undefined) state.filteredProductsCount = action.payload.filteredProductsCount;
     })
-    .addCase(thunk.rejected, (state, action: any) => {
+    .addCase(thunk.rejected, (state, action: PayloadAction<unknown>) => {
       state.loading = false;
-      state.error = action.payload || 'An error occurred';
+      state.error = (action.payload as string) || 'An error occurred';
     });
 };
 

@@ -1,11 +1,11 @@
 import React, { Fragment, useEffect } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import "./ProductsList.css";
+import "@/components/Admin/ProductsList.css";
 import {
   clearErrors,
   getAdminProducts,
-} from "../../features/products/productsSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+} from "@/features/products/productsSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   Button, 
@@ -18,14 +18,14 @@ import {
   Paper,
   Breadcrumbs
 } from "@mui/material";
-import MetaData from "../Layout/MetaData";
+import MetaData from "@/components/Layout/MetaData";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import SideBar from "./Sidebar";
+import SideBar from "@/components/Admin/Sidebar";
 import { toast } from "react-toastify";
-import { deleteProduct, resetProductState } from "../../features/products/productSlice";
-import Loader from "../Layout/Loader/Loader";
+import { deleteProduct, resetProductState } from "@/features/products/productSlice";
+import Loader from "@/components/Layout/Loader/Loader";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 const ProductsList: React.FC = () => {
@@ -56,7 +56,7 @@ const ProductsList: React.FC = () => {
       dispatch(resetProductState());
     }
 
-    dispatch(getAdminProducts({}));
+    dispatch(getAdminProducts());
   }, [dispatch, deleteError, error, navigate, success, message]);
 
   const columns: GridColDef[] = [
@@ -157,12 +157,21 @@ const ProductsList: React.FC = () => {
     },
   ];
 
-  const rows: any[] = [];
+  interface ProductRow {
+    id: string;
+    stock: number;
+    price: number;
+    name: string;
+    image: string;
+    category: string;
+  }
+
+  const rows: ProductRow[] = [];
   products &&
     products.forEach((item) => {
       rows.push({
         id: item._id,
-        stock: item.Stock ?? (item as any).stock ?? 0,
+        stock: item.stock || 0,
         price: item.price,
         name: item.name,
         image: item.images && item.images[0] ? item.images[0].url : '',

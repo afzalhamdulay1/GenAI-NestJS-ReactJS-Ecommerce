@@ -14,14 +14,14 @@ import {
   Avatar,
   Divider
 } from "@mui/material";
-import MetaData from "../Layout/MetaData";
+import MetaData from "@/components/Layout/MetaData";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import PersonIcon from "@mui/icons-material/Person";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import SideBar from "./Sidebar";
-import { getUserDetails, clearErrors, updateUser, resetUserState } from "../../features/user/userSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import Loader from "../Layout/Loader/Loader";
+import SideBar from "@/components/Admin/Sidebar";
+import { getUserDetails, clearErrors, updateUser, resetUserState } from "@/features/user/userSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import Loader from "@/components/Layout/Loader/Loader";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -61,12 +61,7 @@ const UpdateUser: React.FC = () => {
 
   const updateUserSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!id) return;
-    const formData = new FormData();
-    formData.set("name", name);
-    formData.set("email", email);
-    formData.set("role", role);
-    dispatch(updateUser({ id, userData: formData }));
+    dispatch(updateUser({ id, userData: { name, email, role } }));
   };
 
   return (

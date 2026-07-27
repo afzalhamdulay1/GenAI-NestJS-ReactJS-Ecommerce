@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Rating } from "@mui/material";
-import { Product } from '../../features/products/productsSlice';
+import { Product } from '@/types';
 
 interface ProductCardProps {
   product: Product;

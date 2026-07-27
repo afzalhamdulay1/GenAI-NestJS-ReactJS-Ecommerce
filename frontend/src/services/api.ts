@@ -8,7 +8,11 @@ const api = axios.create({
   },
 });
 
-export const setupInterceptors = (store: any) => {
+import type { EnhancedStore } from '@reduxjs/toolkit';
+
+import type { RootState } from '@/app/store';
+
+export const setupInterceptors = (store: EnhancedStore<RootState>) => {
   api.interceptors.response.use(
     (response) => {
       // If a request succeeds, ensure we are back online

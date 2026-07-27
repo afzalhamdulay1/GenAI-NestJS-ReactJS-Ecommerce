@@ -1,13 +1,13 @@
 import React, { Fragment, useEffect, useState } from "react";
-import "./Products.css";
-import ProductCard from "../Home/ProductCard";
-import MetaData from "../Layout/MetaData";
-import Loader from "../Layout/Loader/Loader";
+import "@/components/Product/Products.css";
+import ProductCard from "@/components/Home/ProductCard";
+import MetaData from "@/components/Layout/MetaData";
+import Loader from "@/components/Layout/Loader/Loader";
 import Pagination from "react-js-pagination";
 import { toast } from "react-toastify";
 import { useParams, useLocation } from "react-router-dom";
-import { getProducts, clearErrors } from "../../features/products/productsSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { getProducts, clearErrors } from "@/features/products/productsSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Slider, Typography, Button } from "@mui/material";
 
 const categories = [
@@ -63,7 +63,7 @@ const Products: React.FC = () => {
   }, [dispatch, error]);
 
   useEffect(() => {
-    const params: Record<string, any> = {
+    const params: Record<string, string | number> = {
       keyword: mykeyword,
       "price[lte]": filters.price[1],
       "price[gte]": filters.price[0],

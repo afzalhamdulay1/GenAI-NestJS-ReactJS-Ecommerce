@@ -1,8 +1,10 @@
-export class ApiFeatures {
-  query: any;
-  queryStr: any;
+import { Query } from 'mongoose';
 
-  constructor(query: any, queryStr: any) {
+export class ApiFeatures<T> {
+  query: Query<T[], T>;
+  queryStr: Record<string, any>;
+
+  constructor(query: Query<T[], T>, queryStr: Record<string, any>) {
     this.query = query;
     this.queryStr = queryStr;
   }
@@ -30,6 +32,8 @@ export class ApiFeatures {
 
     const nestedQuery: any = {};
     Object.keys(queryCopy).forEach((key) => {
+      if (queryCopy[key] === undefined) return;
+      
       const match = key.match(/^([^\[]+)\[([^\]]+)\]$/);
       if (match) {
         const field = match[1];

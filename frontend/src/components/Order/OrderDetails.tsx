@@ -1,11 +1,11 @@
 import React, { Fragment, useEffect } from "react";
-import "./OrderDetails.css";
-import MetaData from "../Layout/MetaData";
+import "@/components/Order/OrderDetails.css";
+import MetaData from "@/components/Layout/MetaData";
 import { Link, useParams } from "react-router-dom";
 import { Typography } from "@mui/material";
-import { getOrderDetails, clearErrors } from "../../features/order/orderSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import Loader from "../Layout/Loader/Loader";
+import { getOrderDetails, clearErrors, isUserObject } from "@/features/order/orderSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import Loader from "@/components/Layout/Loader/Loader";
 import { toast } from "react-toastify";
 
 const OrderDetails: React.FC = () => {
@@ -51,7 +51,7 @@ const OrderDetails: React.FC = () => {
                 <div className="orderDetailsContainerBox">
                   <div>
                     <p>Name:</p>
-                    <span>{orderDetails.user && typeof orderDetails.user === 'object' ? orderDetails.user.name : orderDetails.user}</span>
+                    <span>{isUserObject(orderDetails.user) ? orderDetails.user.name : String(orderDetails.user)}</span>
                   </div>
                   <div>
                     <p>Phone:</p>

@@ -6,6 +6,8 @@ import { Product, ProductDocument } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { ApiFeatures } from '../common/utils/api-features.util';
+import { ProductQueryDto } from './dto/product-query.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 import * as cloudinary from 'cloudinary';
 
 @Injectable()
@@ -16,7 +18,7 @@ export class ProductsService {
   ) {}
 
   async createProduct(createProductDto: CreateProductDto, user: UserDocument) {
-    let images: any[] = [];
+    let images: string[] = [];
 
     if (typeof createProductDto.images === 'string') {
       images.push(createProductDto.images);
@@ -24,7 +26,7 @@ export class ProductsService {
       images = createProductDto.images;
     }
 
-    const imagesLinks: any[] = [];
+    const imagesLinks: { public_id: string; url: string }[] = [];
 
     for (let i = 0; i < images.length; i++) {
       const result = await cloudinary.v2.uploader.upload(images[i], {
@@ -40,10 +42,10 @@ export class ProductsService {
     const productData = {
       ...createProductDto,
       images: imagesLinks,
-      user: user._id as any,
+      user: user._id,
     };
 
-    const product = await this.productModel.create(productData);
+    const product = await this.productModel.create(productData as any);
 
     return {
       success: true,
@@ -51,7 +53,7 @@ export class ProductsService {
     };
   }
 
-  async getAllProducts(query: any) {
+  async getAllProducts(query: ProductQueryDto) {
     const resultPerPage = 8;
     const productsCount = await this.productModel.countDocuments();
 
@@ -94,15 +96,16 @@ export class ProductsService {
     };
   }
 
-  async updateProduct(id: string, updateProductDto: any) {
+  async updateProduct(id: string, updateProductDto: UpdateProductDto) {
     let product = await this.productModel.findById(id);
 
     if (!product) {
       throw new NotFoundException('Product not found');
     }
 
-    // Handle Images update here if needed
-    let images: any[] = [];
+    // Images Start Here
+    let images: string[] = [];
+
     if (typeof updateProductDto.images === 'string') {
       images.push(updateProductDto.images);
     } else if (Array.isArray(updateProductDto.images)) {
@@ -115,7 +118,7 @@ export class ProductsService {
         await cloudinary.v2.uploader.destroy(product.images[i].public_id);
       }
 
-      const imagesLinks: any[] = [];
+      const imagesLinks: { public_id: string; url: string }[] = [];
 
       for (let i = 0; i < images.length; i++) {
         const result = await cloudinary.v2.uploader.upload(images[i], {
@@ -128,15 +131,12 @@ export class ProductsService {
         });
       }
 
-      updateProductDto.images = imagesLinks;
-    } else {
-        delete updateProductDto.images;
+      updateProductDto.images = imagesLinks as any;
     }
 
     product = await this.productModel.findByIdAndUpdate(id, updateProductDto, {
-      returnDocument: 'after',
+      new: true,
       runValidators: true,
-      useFindAndModify: false,
     });
 
     return {

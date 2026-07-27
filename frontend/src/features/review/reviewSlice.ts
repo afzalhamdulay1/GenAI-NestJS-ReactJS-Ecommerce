@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { api } from '../../services/api';
-import { Review } from '../products/productsSlice';
+import { api } from '@/services/api';
+import { Review } from '@/types';
+import axios from 'axios';
 
 export interface ReviewState {
   loading: boolean;
@@ -22,7 +23,7 @@ const initialState: ReviewState = {
 
 export const createNewReview = createAsyncThunk<
   boolean,
-  any,
+  { rating: number; comment: string; productId: string },
   { rejectValue: string }
 >(
   'reviews/createNewReview',
@@ -31,8 +32,11 @@ export const createNewReview = createAsyncThunk<
       const config = { headers: { 'Content-Type': 'application/json' } };
       const { data } = await api.put('/review', reviewData, config);
       return data.success;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create review');
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to create review');
+      }
+      return rejectWithValue('Failed to create review');
     }
   }
 );
@@ -47,8 +51,11 @@ export const getAllReviews = createAsyncThunk<
     try {
       const { data } = await api.get(`/reviews?id=${productId}`);
       return data.reviews;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch reviews');
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to fetch reviews');
+      }
+      return rejectWithValue('Failed to fetch reviews');
     }
   }
 );
@@ -68,15 +75,18 @@ export const deleteReview = createAsyncThunk<
         },
       });
       return data.success;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete review');
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to delete review');
+      }
+      return rejectWithValue('Failed to delete review');
     }
   }
 );
 
 export const updateReview = createAsyncThunk<
   boolean,
-  { reviewId: string; reviewData: any },
+  { reviewId: string; reviewData: { rating?: number; comment?: string } },
   { rejectValue: string }
 >(
   'reviews/updateReview',
@@ -85,8 +95,11 @@ export const updateReview = createAsyncThunk<
       const config = { headers: { 'Content-Type': 'application/json' } };
       const { data } = await api.put(`/review/${reviewId}`, reviewData, config);
       return data.success;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update review');
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to update review');
+      }
+      return rejectWithValue('Failed to update review');
     }
   }
 );

@@ -1,14 +1,15 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import "./ProductReviews.css";
+import "@/components/Admin/ProductReviews.css";
 import {
   clearErrors,
   getAllReviews,
   deleteReview,
   resetReviewState,
-} from "../../features/review/reviewSlice";
-import { getAdminProducts } from "../../features/products/productsSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+} from "@/features/review/reviewSlice";
+import { getAdminProducts } from "@/features/products/productsSlice";
+import { Product } from "@/types";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { 
   Button, 
   Typography, 
@@ -24,11 +25,11 @@ import {
   Rating,
   InputAdornment
 } from "@mui/material";
-import MetaData from "../Layout/MetaData";
+import MetaData from "@/components/Layout/MetaData";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InventoryIcon from '@mui/icons-material/Inventory';
 import SearchIcon from '@mui/icons-material/Search';
-import SideBar from "./Sidebar";
+import SideBar from "@/components/Admin/Sidebar";
 import { toast } from "react-toastify";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { Link } from "react-router-dom";
@@ -40,7 +41,7 @@ const ProductReviews: React.FC = () => {
   const { products } = useAppSelector((state) => state.products);
 
   const [productId, setProductId] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Partial<Product> | null>(null);
 
   const deleteReviewHandler = (reviewId: string) => {
     dispatch(deleteReview({ reviewId, productId: selectedProduct?._id || productId }));
@@ -57,7 +58,7 @@ const ProductReviews: React.FC = () => {
     }
   };
 
-  const handleSelectProduct = (prod: any) => {
+  const handleSelectProduct = (prod: Product) => {
     setSelectedProduct(prod);
     setProductId(prod._id);
     dispatch(getAllReviews(prod._id));
@@ -65,7 +66,7 @@ const ProductReviews: React.FC = () => {
   };
 
   useEffect(() => {
-    dispatch(getAdminProducts({}));
+    dispatch(getAdminProducts());
     if (error) {
       toast.error(error);
       dispatch(clearErrors());
@@ -143,7 +144,14 @@ const ProductReviews: React.FC = () => {
     },
   ];
 
-  const rows: any[] = [];
+  interface ReviewRow {
+    id: string;
+    rating: number;
+    comment: string;
+    user: string;
+  }
+
+  const rows: ReviewRow[] = [];
   reviews &&
     reviews.forEach((item) => {
       rows.push({

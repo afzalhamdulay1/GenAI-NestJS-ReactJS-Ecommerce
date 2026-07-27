@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import "./ProductsList.css";
+import "@/components/Admin/ProductsList.css";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   Typography, 
@@ -11,17 +11,17 @@ import {
   Paper,
   Breadcrumbs
 } from "@mui/material";
-import MetaData from "../Layout/MetaData";
+import MetaData from "@/components/Layout/MetaData";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import SideBar from "./Sidebar";
+import SideBar from "@/components/Admin/Sidebar";
 import {
   deleteOrder,
   getAllOrders,
   clearErrors,
   resetDeleteState
-} from "../../features/order/orderSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+} from "@/features/order/orderSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { toast } from "react-toastify";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
@@ -150,7 +150,15 @@ const OrdersList: React.FC = () => {
     },
   ];
 
-  const rows: any[] = [];
+  interface OrderRow {
+    id: string;
+    itemsQty: number;
+    amount: number;
+    status: string;
+    date: string;
+  }
+
+  const rows: OrderRow[] = [];
   orders &&
     orders.forEach((item) => {
       rows.push({

@@ -1,35 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { api } from '../../services/api';
-import { ShippingInfo } from '../cart/cartSlice';
+import { api } from '@/services/api';
 
-export interface PaymentInfo {
-  id: string;
-  status: string;
-}
+import axios from 'axios';
 
-export interface OrderItem {
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-  product: string;
-  productId?: string;
-}
+import { PaymentInfo, OrderItem, UserObject, Order, ShippingInfo } from '@/types';
 
-export interface Order {
-  _id: string;
-  shippingInfo: ShippingInfo;
-  orderItems: OrderItem[];
-  paymentInfo: PaymentInfo;
-  itemsPrice: number;
-  taxPrice: number;
-  shippingPrice: number;
-  totalPrice: number;
-  orderStatus: string;
-  deliveredAt?: string;
-  createdAt: string;
-  user: any;
-}
+export const isUserObject = (user: string | UserObject | undefined): user is UserObject => {
+  return typeof user === 'object' && user !== null && '_id' in user;
+};
 
 export interface OrderState {
   order: Order | null;
@@ -57,14 +35,17 @@ const initialState: OrderState = {
 
 export const createOrder = createAsyncThunk<
   { order: Order },
-  any,
+  Omit<Order, '_id' | 'createdAt' | 'user' | 'orderStatus' | 'deliveredAt'>,
   { rejectValue: string }
 >('order/createOrder', async (orderData, { rejectWithValue }) => {
   try {
     const response = await api.post('/order/new', orderData);
     return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || error.message);
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data.message || 'Failed to create order');
+    }
+    return rejectWithValue('Failed to create order');
   }
 });
 
@@ -76,8 +57,11 @@ export const getMyOrders = createAsyncThunk<
   try {
     const response = await api.get('/orders/me');
     return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || error.message);
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data.message || 'Failed to fetch my orders');
+    }
+    return rejectWithValue('Failed to fetch my orders');
   }
 });
 
@@ -89,8 +73,11 @@ export const getOrderDetails = createAsyncThunk<
   try {
     const response = await api.get(`/order/${orderId}`);
     return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || error.message);
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data.message || 'Failed to fetch order details');
+    }
+    return rejectWithValue('Failed to fetch order details');
   }
 });
 
@@ -102,21 +89,27 @@ export const getAllOrders = createAsyncThunk<
   try {
     const response = await api.get('/admin/orders');
     return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || error.message);
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data.message || 'Failed to fetch all orders');
+    }
+    return rejectWithValue('Failed to fetch all orders');
   }
 });
 
 export const updateOrder = createAsyncThunk<
   { success: boolean },
-  { id: string; orderData: any },
+  { id: string; orderData: { status: string } },
   { rejectValue: string }
 >('order/updateOrder', async ({ id, orderData }, { rejectWithValue }) => {
   try {
     const response = await api.put(`/admin/order/${id}`, orderData);
     return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || error.message);
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data.message || 'Failed to update order');
+    }
+    return rejectWithValue('Failed to update order');
   }
 });
 
@@ -128,8 +121,11 @@ export const deleteOrder = createAsyncThunk<
   try {
     const response = await api.delete(`/admin/order/${id}`);
     return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || error.message);
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data.message || 'Failed to delete order');
+    }
+    return rejectWithValue('Failed to delete order');
   }
 });
 

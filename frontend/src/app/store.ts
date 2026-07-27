@@ -1,11 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
-import productsReducer from '../features/products/productsSlice';
-import userReducer from '../features/user/userSlice';
-import cartReducer from '../features/cart/cartSlice';
-import orderReducer from '../features/order/orderSlice';
-import productReducer from '../features/products/productSlice';
-import newReviewReducer from '../features/review/reviewSlice';
-import systemReducer from '../features/system/systemSlice';
+import productsReducer from '@/features/products/productsSlice';
+import userReducer from '@/features/user/userSlice';
+import cartReducer from '@/features/cart/cartSlice';
+import orderReducer from '@/features/order/orderSlice';
+import productReducer from '@/features/products/productSlice';
+import newReviewReducer from '@/features/review/reviewSlice';
+import systemReducer from '@/features/system/systemSlice';
 
 const store = configureStore({
   reducer: {

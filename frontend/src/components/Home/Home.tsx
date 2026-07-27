@@ -1,18 +1,28 @@
-import React, { Fragment, useEffect } from "react";
-import { CgMouse } from "react-icons/cg";
-import { FaShippingFast, FaShieldAlt, FaHeadset, FaUndoAlt } from "react-icons/fa";
-import { Link } from "react-router-dom";
-import "./Home.css";
-import ProductCard from "./ProductCard";
-import MetaData from "../Layout/MetaData";
-import Loader from "../Layout/Loader/Loader";
-import { toast } from "react-toastify";
-import { getProducts, clearErrors } from "../../features/products/productsSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import React, { Fragment, useEffect } from 'react';
+import { CgMouse } from 'react-icons/cg';
+import {
+  FaShippingFast,
+  FaShieldAlt,
+  FaHeadset,
+  FaUndoAlt,
+} from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import '@/components/Home/Home.css';
+import ProductCard from '@/components/Home/ProductCard';
+import MetaData from '@/components/Layout/MetaData';
+import Loader from '@/components/Layout/Loader/Loader';
+import { toast } from 'react-toastify';
+import {
+  getProducts,
+  clearErrors,
+} from '@/features/products/productsSlice';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
 
 const Home: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { products, loading, error } = useAppSelector((state) => state.products);
+  const { products, loading, error } = useAppSelector(
+    (state) => state.products,
+  );
 
   useEffect(() => {
     if (error) {
@@ -22,17 +32,17 @@ const Home: React.FC = () => {
   }, [dispatch, error]);
 
   useEffect(() => {
-    dispatch(getProducts({ keyword: "" }));
+    dispatch(getProducts({ keyword: '' }));
   }, [dispatch]);
 
   const categories = [
-    "Laptop",
-    "Footwear",
-    "Bottom",
-    "Tops",
-    "Attire",
-    "Camera",
-    "SmartPhones",
+    'Laptop',
+    'Footwear',
+    'Bottom',
+    'Tops',
+    'Attire',
+    'Camera',
+    'SmartPhones',
   ];
 
   return (
@@ -48,8 +58,10 @@ const Home: React.FC = () => {
             <div className="bannerContent">
               <p>Welcome to our store</p>
               <h1>Curated Collections</h1>
-              <p className="subtitle">Handpicked essentials for your everyday lifestyle.</p>
-              
+              <p className="subtitle">
+                Handpicked essentials for your everyday lifestyle.
+              </p>
+
               <a href="#container" className="scrollButton">
                 Shop Now <CgMouse />
               </a>
@@ -85,7 +97,11 @@ const Home: React.FC = () => {
             <h2 className="sectionHeading">Shop By Category</h2>
             <div className="categoriesGrid">
               {categories.map((cat) => (
-                <Link to={`/products?category=${cat}`} className="categoryItem" key={cat}>
+                <Link
+                  to={`/products?category=${cat}`}
+                  className="categoryItem"
+                  key={cat}
+                >
                   <div className="categoryImagePlaceholder">
                     <span>{cat}</span>
                   </div>

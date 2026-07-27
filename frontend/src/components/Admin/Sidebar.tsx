@@ -1,6 +1,6 @@
 import React from "react";
-import "./Sidebar.css";
-import logo from "../../images/logo.png";
+import "@/components/Admin/Sidebar.css";
+import logo from "@/images/logo.png";
 import { Link, NavLink } from "react-router-dom";
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';

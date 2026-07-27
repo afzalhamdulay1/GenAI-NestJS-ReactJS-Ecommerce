@@ -1,7 +1,7 @@
 import React from "react";
-import "./CartItemCard.css";
+import "@/components/Cart/CartItemCard.css";
 import { Link } from "react-router-dom";
-import { CartItem } from "../../features/cart/cartSlice";
+import { CartItem } from "@/types";
 
 interface CartItemCardProps {
   item: CartItem;

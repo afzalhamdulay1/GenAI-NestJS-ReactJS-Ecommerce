@@ -1,11 +1,11 @@
 import React, { Fragment, useState, useEffect } from "react";
-import "./ForgotPassword.css";
-import Loader from "../Layout/Loader/Loader";
+import "@/components/User/ForgotPassword.css";
+import Loader from "@/components/Layout/Loader/Loader";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import { forgotPassword, clearErrors, clearMessage } from "../../features/user/userSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { forgotPassword, clearErrors, clearMessage } from "@/features/user/userSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { toast } from "react-toastify";
-import MetaData from "../Layout/MetaData";
+import MetaData from "@/components/Layout/MetaData";
 
 const ForgotPassword: React.FC = () => {
   const dispatch = useAppDispatch();

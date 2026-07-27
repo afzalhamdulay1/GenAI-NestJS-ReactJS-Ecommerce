@@ -1,0 +1,47 @@
+.ErrorBoundary {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+  background-color: #f9f9f9;
+  padding: 2vmax;
+}
+
+.ErrorBoundary .MuiSvgIcon-root {
+  font-size: 10vmax;
+  color: #ff4d4f;
+}
+
+.ErrorBoundary h1 {
+  font-size: 3vmax;
+  font-weight: 600;
+  margin-top: 2vmax;
+  color: #333;
+}
+
+.ErrorBoundary p {
+  font-size: 1.2vmax;
+  color: #666;
+  max-width: 600px;
+  margin-top: 1vmax;
+  margin-bottom: 3vmax;
+}
+
+.ErrorBoundary a, .ErrorBoundary button {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 1vmax 3vmax;
+  cursor: pointer;
+  font-family: "Roboto";
+  border-radius: 4px;
+  font-size: 1.1vmax;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.ErrorBoundary a:hover, .ErrorBoundary button:hover {
+  background-color: #d9363e;
+}

@@ -1,21 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { api } from '../../services/api';
+import { api } from '@/services/api';
+import axios from 'axios';
 
-export interface UserAvatar {
-  public_id: string;
-  url: string;
-}
-
-export interface User {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-  avatar?: UserAvatar;
-  createdAt?: string;
-  updatedAt?: string;
-  googleId?: string;
-}
+import { User, UserAvatar } from '@/types';
 
 export interface UserState {
   success: boolean | null;
@@ -51,7 +38,7 @@ const initialState: UserState = {
 
 export const loginUser = createAsyncThunk<
   { user: User; token: string },
-  any,
+  { email: string; password?: string },
   { rejectValue: string }
 >(
   'user/login',
@@ -59,16 +46,18 @@ export const loginUser = createAsyncThunk<
     try {
       const response = await api.post('/login', credentials);
       return response.data;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Login failed';
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Login failed');
+      }
+      return rejectWithValue('Login failed');
     }
   }
 );
 
 export const registerUser = createAsyncThunk<
   { user: User; token: string },
-  any,
+  FormData,
   { rejectValue: string }
 >(
   'user/register',
@@ -80,9 +69,11 @@ export const registerUser = createAsyncThunk<
         },
       });
       return response.data;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Registration failed';
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Registration failed');
+      }
+      return rejectWithValue('Registration failed');
     }
   }
 );
@@ -97,9 +88,11 @@ export const loadUser = createAsyncThunk<
     try {
       const response = await api.get('/me');
       return response.data;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Failed to load user';
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to load user');
+      }
+      return rejectWithValue('Failed to load user');
     }
   }
 );
@@ -114,16 +107,18 @@ export const logout = createAsyncThunk<
     try {
       await api.get('/logout');
       return;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Logout failed';
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Logout failed');
+      }
+      return rejectWithValue('Logout failed');
     }
   }
 );
 
 export const updateProfile = createAsyncThunk<
   boolean,
-  any,
+  FormData,
   { rejectValue: string }
 >(
   'user/updateProfile',
@@ -136,16 +131,18 @@ export const updateProfile = createAsyncThunk<
       };
       const { data } = await api.put('/me/update', userData, config);
       return data.success;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Failed to update profile';
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to update profile');
+      }
+      return rejectWithValue('Failed to update profile');
     }
   }
 );
 
 export const updatePassword = createAsyncThunk<
   boolean,
-  any,
+  { oldPassword?: string; newPassword?: string; confirmPassword?: string },
   { rejectValue: string }
 >(
   'user/updatePassword',
@@ -154,9 +151,11 @@ export const updatePassword = createAsyncThunk<
       const config = { headers: { 'Content-Type': 'application/json' } };
       const { data } = await api.put('/password/update', passwords, config);
       return data.success;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Update password failed';
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Update password failed');
+      }
+      return rejectWithValue('Update password failed');
     }
   }
 );
@@ -172,15 +171,18 @@ export const forgotPassword = createAsyncThunk<
       const config = { headers: { 'Content-Type': 'application/json' } };
       const { data } = await api.post('/password/forgot', { email }, config);
       return data.message;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Forgot password failed');
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Forgot password failed');
+      }
+      return rejectWithValue('Forgot password failed');
     }
   }
 );
 
 export const resetPassword = createAsyncThunk<
   boolean,
-  { token: string; resetData: any },
+  { token: string; resetData: { password?: string; confirmPassword?: string } },
   { rejectValue: string }
 >(
   'user/resetPassword',
@@ -189,8 +191,11 @@ export const resetPassword = createAsyncThunk<
       const config = { headers: { 'Content-Type': 'application/json' } };
       const { data } = await api.put(`/password/reset/${token}`, resetData, config);
       return data.success;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Reset password failed');
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Reset password failed');
+      }
+      return rejectWithValue('Reset password failed');
     }
   }
 );
@@ -205,9 +210,11 @@ export const getAllUsers = createAsyncThunk<
     try {
       const { data } = await api.get('/admin/users');
       return data.users;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Failed to fetch users';
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to fetch users');
+      }
+      return rejectWithValue('Failed to fetch users');
     }
   }
 );
@@ -222,16 +229,18 @@ export const getUserDetails = createAsyncThunk<
     try {
       const { data } = await api.get(`/admin/user/${id}`);
       return data.user;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Failed to fetch user details';
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to fetch user details');
+      }
+      return rejectWithValue('Failed to fetch user details');
     }
   }
 );
 
 export const updateUser = createAsyncThunk<
   boolean,
-  { id: string; userData: any },
+  { id: string; userData: { name?: string; email?: string; role?: string } },
   { rejectValue: string }
 >(
   'user/updateUser',
@@ -240,9 +249,11 @@ export const updateUser = createAsyncThunk<
       const config = { headers: { 'Content-Type': 'application/json' } };
       const { data } = await api.put(`/admin/user/${id}`, userData, config);
       return data.success;
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Failed to update user';
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to update user');
+      }
+      return rejectWithValue('Failed to update user');
     }
   }
 );
@@ -257,9 +268,11 @@ export const deleteUser = createAsyncThunk<
     try {
       const { data } = await api.delete(`/admin/user/${id}`);
       return { success: data.success, userId: id };
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.message || 'Failed to delete user';
-      return rejectWithValue(errorMsg);
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to delete user');
+      }
+      return rejectWithValue('Failed to delete user');
     }
   }
 );

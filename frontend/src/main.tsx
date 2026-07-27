@@ -3,47 +3,49 @@ import React from 'react';
 // import { createRoot } from 'react-dom/client'
 import ReactDOM from 'react-dom/client';
 import { Provider, useSelector } from 'react-redux';
-import store from './app/store';
+import store from '@/app/store';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
-import './index.css';
-import App from './App';
-import Home from './components/Home/Home';
-import ProductDetails from './components/Product/ProductDetails';
-import Products from './components/Product/Products';
-import Search from './components/Product/Search';
-import LoginSignup from './components/User/LoginSignup';
-import UserOptions from './components/Layout/Header/UserOptions';
-import ProtectedRoute from './components/Route/ProtectedRoute';
-import Account from './components/User/Profile';
-import Profile from './components/User/Profile';
-import UpdateProfile from './components/User/UpdateProfile';
-import UpdatePassword from './components/User/UpdatePassword';
-import ForgotPassword from './components/User/ForgotPassword';
-import ResetPassword from './components/User/ResetPassword';
-import Cart from './components/Cart/Cart';
-import Shipping from './components/Cart/Shipping';
-import ConfirmOrder from './components/Cart/ConfirmOrder';
-import Payment from './components/Cart/Payment';
-import OrderSuccess from './components/Cart/OrderSuccess';
-import MyOrders from './components/Order/MyOrders';
-import OrderDetails from './components/Order/OrderDetails';
-import Dashboard from './components/Admin/Dashboard';
-import ProductsList from './components/Admin/ProductsList';
-import NewProduct from './components/Admin/NewProduct';
-import UpdateProduct from './components/Admin/UpdateProduct';
-import OrdersList from './components/Admin/OrdersList';
-import ProcessOrder from './components/Admin/ProcessOrder';
-import UsersList from './components/Admin/UsersList';
-import UpdateUser from './components/Admin/UpdateUser';
-import ProductReviews from './components/Admin/ProductReviews';
-import NotFound from './components/Layout/NotFound/NotFound';
+import '@/index.css';
+import App from '@/App';
+const Home = React.lazy(() => import('@/components/Home/Home'));
+const ProductDetails = React.lazy(() => import('@/components/Product/ProductDetails'));
+const Products = React.lazy(() => import('@/components/Product/Products'));
+const Search = React.lazy(() => import('@/components/Product/Search'));
+const LoginSignup = React.lazy(() => import('@/components/User/LoginSignup'));
+import UserOptions from '@/components/Layout/Header/UserOptions';
+import ProtectedRoute from '@/components/Route/ProtectedRoute';
+const Account = React.lazy(() => import('@/components/User/Profile'));
+const Profile = React.lazy(() => import('@/components/User/Profile'));
+const UpdateProfile = React.lazy(() => import('@/components/User/UpdateProfile'));
+const UpdatePassword = React.lazy(() => import('@/components/User/UpdatePassword'));
+const ForgotPassword = React.lazy(() => import('@/components/User/ForgotPassword'));
+const ResetPassword = React.lazy(() => import('@/components/User/ResetPassword'));
+const Cart = React.lazy(() => import('@/components/Cart/Cart'));
+const Shipping = React.lazy(() => import('@/components/Cart/Shipping'));
+const ConfirmOrder = React.lazy(() => import('@/components/Cart/ConfirmOrder'));
+const Payment = React.lazy(() => import('@/components/Cart/Payment'));
+const OrderSuccess = React.lazy(() => import('@/components/Cart/OrderSuccess'));
+const MyOrders = React.lazy(() => import('@/components/Order/MyOrders'));
+const OrderDetails = React.lazy(() => import('@/components/Order/OrderDetails'));
+const Dashboard = React.lazy(() => import('@/components/Admin/Dashboard'));
+const ProductsList = React.lazy(() => import('@/components/Admin/ProductsList'));
+const NewProduct = React.lazy(() => import('@/components/Admin/NewProduct'));
+const UpdateProduct = React.lazy(() => import('@/components/Admin/UpdateProduct'));
+const OrdersList = React.lazy(() => import('@/components/Admin/OrdersList'));
+const ProcessOrder = React.lazy(() => import('@/components/Admin/ProcessOrder'));
+const UsersList = React.lazy(() => import('@/components/Admin/UsersList'));
+const UpdateUser = React.lazy(() => import('@/components/Admin/UpdateUser'));
+const ProductReviews = React.lazy(() => import('@/components/Admin/ProductReviews'));
+const NotFound = React.lazy(() => import('@/components/Layout/NotFound/NotFound'));
+import ErrorBoundary from '@/components/Layout/ErrorBoundary/ErrorBoundary';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+    errorElement: <ErrorBoundary />,
     children: [
       {
         path: '/',
@@ -242,7 +244,7 @@ const router = createBrowserRouter([
   },
 ]);
 
-import { setupInterceptors } from './services/api';
+import { setupInterceptors } from '@/services/api';
 
 // Initialize Axios interceptors with the Redux store
 setupInterceptors(store);

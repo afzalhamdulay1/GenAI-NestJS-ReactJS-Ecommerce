@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import "./UserOptions.css";
+import "@/components/Layout/Header/UserOptions.css";
 import { SpeedDial, SpeedDialAction } from "@mui/material";
 import { Backdrop } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -9,9 +9,10 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { logout, User } from "../../../features/user/userSlice";
-import { useAppDispatch, useAppSelector } from "../../../app/hooks";
-import dummyProfile from "../../../images/Profile.png";
+import { logout } from "@/features/user/userSlice";
+import { User } from "@/types";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import dummyProfile from "@/images/Profile.png";
 
 interface UserOptionsProps {
   user: User | null;

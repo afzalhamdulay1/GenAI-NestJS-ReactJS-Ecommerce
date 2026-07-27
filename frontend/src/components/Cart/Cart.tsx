@@ -1,8 +1,8 @@
 import React, { Fragment } from "react";
-import "./Cart.css";
-import CartItemCard from "./CartItemCard";
-import { removeItem, changeItemQuantityInCart } from "../../features/cart/cartSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import "@/components/Cart/Cart.css";
+import CartItemCard from "@/components/Cart/CartItemCard";
+import { removeItem, changeItemQuantityInCart } from "@/features/cart/cartSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Typography } from "@mui/material";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import { Link, useNavigate } from "react-router-dom";

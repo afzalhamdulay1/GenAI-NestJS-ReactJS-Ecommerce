@@ -1,10 +1,10 @@
 import React, { Fragment, useState, useEffect } from "react";
-import "./UpdatePassword.css";
-import Loader from "../Layout/Loader/Loader";
+import "@/components/User/UpdatePassword.css";
+import Loader from "@/components/Layout/Loader/Loader";
 import { toast } from "react-toastify";
-import { updatePassword, clearErrors, resetUpdateProfile } from "../../features/user/userSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import MetaData from "../Layout/MetaData";
+import { updatePassword, clearErrors, resetUpdateProfile } from "@/features/user/userSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import MetaData from "@/components/Layout/MetaData";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockIcon from "@mui/icons-material/Lock";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";

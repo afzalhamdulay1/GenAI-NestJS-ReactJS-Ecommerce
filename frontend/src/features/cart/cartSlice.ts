@@ -1,26 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { api } from '../../services/api';
+import { api } from '@/services/api';
 import { toast } from "react-toastify";
-import { RootState } from '../../app/store';
+import { RootState } from '@/app/store';
 
-export interface CartItem {
-  productId: string;
-  product?: string;
-  name: string;
-  price: number;
-  image: string;
-  stock: number;
-  quantity: number;
-}
-
-export interface ShippingInfo {
-  address?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  pinCode?: string | number;
-  phoneNo?: string | number;
-}
+import { CartItem, ShippingInfo } from '@/types';
 
 export interface CartState {
   cartItems: CartItem[];
@@ -90,9 +73,13 @@ const cartSlice = createSlice({
       state.shippingInfo = action.payload;
       localStorage.setItem("shippingInfo", JSON.stringify(state.shippingInfo));
     },
+    emptyCart(state) {
+      state.cartItems = [];
+      localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
+    },
   },
 });
 
-export const { removeItem, saveShippingInfo, addItem, changeItemQuantityInCart } = cartSlice.actions;
+export const { removeItem, saveShippingInfo, addItem, changeItemQuantityInCart, emptyCart } = cartSlice.actions;
 
 export default cartSlice.reducer;

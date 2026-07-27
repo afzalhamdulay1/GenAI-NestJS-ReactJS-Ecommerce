@@ -1,14 +1,14 @@
 import React, { Fragment, useRef, useState, useEffect } from "react";
-import "./LoginSignup.css";
-import Loader from "../Layout/Loader/Loader";
+import "@/components/User/LoginSignup.css";
+import Loader from "@/components/Layout/Loader/Loader";
 import { Link, useNavigate } from "react-router-dom";
 import FaceIcon from "@mui/icons-material/Face";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
-import { clearErrors, loginUser, registerUser } from "../../features/user/userSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { clearErrors, loginUser, registerUser } from "@/features/user/userSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { toast } from "react-toastify";
-import dummyProfile from '../../images/Profile.png';
+import dummyProfile from '@/images/Profile.png';
 
 const LoginSignup: React.FC = () => {
   const dispatch = useAppDispatch();

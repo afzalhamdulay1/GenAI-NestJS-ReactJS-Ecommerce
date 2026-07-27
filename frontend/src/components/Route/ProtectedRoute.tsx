@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { clearErrors } from "../../features/user/userSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { clearErrors } from "@/features/user/userSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { toast } from "react-toastify";
-import Loader from "../Layout/Loader/Loader";
+import Loader from "@/components/Layout/Loader/Loader";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

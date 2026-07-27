@@ -1,20 +1,20 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-import "./ProductDetails.css";
+import "@/components/Product/ProductDetails.css";
 import {
   fetchProductDetails,
   clearErrors,
-} from "../../features/products/productSlice";
-import ReviewCard from "./ReviewCard";
-import Loader from "../Layout/Loader/Loader";
+} from "@/features/products/productSlice";
+import ReviewCard from "@/components/Product/ReviewCard";
+import Loader from "@/components/Layout/Loader/Loader";
 import { toast } from "react-toastify";
-import MetaData from "../Layout/MetaData";
-import { addItemsToCart } from "../../features/cart/cartSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import MetaData from "@/components/Layout/MetaData";
+import { addItemsToCart } from "@/features/cart/cartSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Rating } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import { createNewReview } from "../../features/review/reviewSlice";
+import { createNewReview } from "@/features/review/reviewSlice";
 
 const ProductDetails: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -28,8 +28,14 @@ const ProductDetails: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState("");
+  const [stock, setStock] = useState(0);
+  const stockCount = stock;
 
-  const stockCount = product?.Stock ?? (product as any)?.stock ?? 0;
+  useEffect(() => {
+    if (product) {
+      setStock(product.stock || 0);
+    }
+  }, [product]);
 
   const options = {
     size: "large" as const,

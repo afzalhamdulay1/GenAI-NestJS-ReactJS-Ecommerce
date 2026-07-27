@@ -20,7 +20,7 @@ export class OrdersService {
 
   async createOrder(createOrderDto: CreateOrderDto, user: UserDocument) {
     const order = await this.orderModel.create({
-      ...createOrderDto,
+      ...(createOrderDto as any),
       paidAt: Date.now(),
       user: user._id as any,
     });
@@ -30,11 +30,11 @@ export class OrdersService {
     try {
       await this.mailService.sendEmail({
         email: user.email,
-        subject: `Order Confirmation - #${order._id}`,
-        message: `Hi ${user.name},\n\nThank you for placing an order with us! Your order #${order._id} has been successfully placed. Please find your invoice attached.\n\nHappy Shopping!`,
+        subject: `Order Confirmation - #${(order as any)._id}`,
+        message: `Hi ${user.name},\n\nThank you for placing an order with us! Your order #${(order as any)._id} has been successfully placed. Please find your invoice attached.\n\nHappy Shopping!`,
         attachments: [
           {
-            filename: `Invoice_${order._id}.pdf`,
+            filename: `Invoice_${(order as any)._id}.pdf`,
             content: invoiceBuffer,
             contentType: 'application/pdf',
           },
@@ -64,7 +64,7 @@ export class OrdersService {
   }
 
   async myOrders(user: UserDocument) {
-    const orders = await this.orderModel.find({ user: user._id as any });
+    const orders = await this.orderModel.find({ user: user._id as any }).sort({ createdAt: -1 });
     return {
       success: true,
       orders,
@@ -73,7 +73,7 @@ export class OrdersService {
 
   // Admin Routes
   async getAllOrders() {
-    const orders = await this.orderModel.find().populate('user', 'name email');
+    const orders = await this.orderModel.find().populate('user', 'name email').sort({ createdAt: -1 });
 
     let totalAmount = 0;
     orders.forEach((order) => {

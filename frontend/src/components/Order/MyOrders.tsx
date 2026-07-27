@@ -1,13 +1,13 @@
 import React, { Fragment, useEffect } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import "./MyOrders.css";
-import { clearErrors, getMyOrders } from "../../features/order/orderSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import Loader from "../Layout/Loader/Loader";
+import "@/components/Order/MyOrders.css";
+import { clearErrors, getMyOrders } from "@/features/order/orderSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import Loader from "@/components/Layout/Loader/Loader";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import Typography from "@mui/material/Typography";
-import MetaData from "../Layout/MetaData";
+import MetaData from "@/components/Layout/MetaData";
 import LaunchIcon from "@mui/icons-material/Launch";
 
 const MyOrders: React.FC = () => {
@@ -56,7 +56,14 @@ const MyOrders: React.FC = () => {
     },
   ];
 
-  const rows: any[] = [];
+  interface OrderRow {
+    id: string;
+    status: string;
+    itemsQty: number;
+    amount: number;
+  }
+
+  const rows: OrderRow[] = [];
 
   myOrders &&
     myOrders.forEach((order) => {

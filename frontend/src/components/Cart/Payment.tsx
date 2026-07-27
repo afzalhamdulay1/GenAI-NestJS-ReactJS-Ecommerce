@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
-import CheckoutSteps from "./CheckoutSteps";
-import MetaData from "../Layout/MetaData";
+import CheckoutSteps from "@/components/Cart/CheckoutSteps";
+import MetaData from "@/components/Layout/MetaData";
 import { toast } from "react-toastify";
 import {
   CardNumberElement,
@@ -9,14 +9,17 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
-import "./Payment.css";
+import "@/components/Cart/Payment.css";
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import EventIcon from "@mui/icons-material/Event";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import { createOrder, clearErrors } from "../../features/order/orderSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { api } from "../../services/api";
+import { createOrder, clearErrors } from "@/features/order/orderSlice";
+import { emptyCart } from "@/features/cart/cartSlice";
+import { Order } from "@/types";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { api } from "@/services/api";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Payment: React.FC = () => {
   const navigate = useNavigate();
@@ -37,9 +40,16 @@ const Payment: React.FC = () => {
     amount: Math.round((orderInfo?.totalPrice || 0) * 100),
   };
 
-  const order: any = {
-    shippingInfo,
-    orderItems: cartItems,
+  const order: Partial<Order> = {
+    shippingInfo: shippingInfo ? {
+      ...shippingInfo,
+      pinCode: Number(shippingInfo.pinCode),
+      phoneNo: Number(shippingInfo.phoneNo)
+    } : undefined,
+    orderItems: cartItems.map(item => ({
+      ...item,
+      product: item.product || item.productId
+    })),
     itemsPrice: orderInfo?.subtotal || 0,
     taxPrice: orderInfo?.tax || 0,
     shippingPrice: orderInfo?.shippingCharges || 0,
@@ -99,18 +109,32 @@ const Payment: React.FC = () => {
             status: result.paymentIntent.status,
           };
 
-          dispatch(createOrder(order));
-          navigate("/success");
+          try {
+            await dispatch(createOrder(order as Omit<Order, '_id' | 'createdAt' | 'user' | 'orderStatus' | 'deliveredAt'>)).unwrap();
+            dispatch(emptyCart());
+            navigate("/success");
+          } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : typeof err === 'string' ? err : "Failed to create order on server";
+            toast.error(errorMessage);
+            if (payBtn.current) {
+              payBtn.current.disabled = false;
+            }
+            setIsProcessing(false);
+          }
         } else {
           toast.error("There's some issue while processing payment");
         }
       }
-    } catch (error: any) {
+    } catch (error) {
       if (payBtn.current) {
         payBtn.current.disabled = false;
       }
       setIsProcessing(false);
-      toast.error(error.response?.data?.message || "Payment processing failed");
+      if (axios.isAxiosError(error) && error.response) {
+        toast.error(error.response.data.message || "Payment processing failed");
+      } else {
+        toast.error("Payment processing failed");
+      }
     }
   };
 

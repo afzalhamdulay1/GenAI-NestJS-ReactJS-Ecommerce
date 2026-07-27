@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState } from "react";
-import "./NewProduct.css";
-import { clearErrors, createProduct, resetProductState } from "../../features/products/productSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import "@/components/Admin/NewProduct.css";
+import { clearErrors, createProduct, resetProductState } from "@/features/products/productSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { 
   Button, 
   Typography, 
@@ -16,13 +16,13 @@ import {
   IconButton,
   Tooltip
 } from "@mui/material";
-import MetaData from "../Layout/MetaData";
+import MetaData from "@/components/Layout/MetaData";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import DescriptionIcon from "@mui/icons-material/Description";
 import StorageIcon from "@mui/icons-material/Storage";
 import SpellcheckIcon from "@mui/icons-material/Spellcheck";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import SideBar from "./Sidebar";
+import SideBar from "@/components/Admin/Sidebar";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';

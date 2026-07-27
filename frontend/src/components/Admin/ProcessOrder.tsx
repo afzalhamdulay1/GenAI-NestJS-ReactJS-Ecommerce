@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import MetaData from "../Layout/MetaData";
+import MetaData from "@/components/Layout/MetaData";
 import { Link, useParams } from "react-router-dom";
 import { 
   Typography, 
@@ -19,20 +19,21 @@ import {
   ListItemText,
   Avatar
 } from "@mui/material";
-import SideBar from "./Sidebar";
+import SideBar from "@/components/Admin/Sidebar";
 import {
   getOrderDetails,
   clearErrors,
   updateOrder,
-  resetOrderState
-} from "../../features/order/orderSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import Loader from "../Layout/Loader/Loader";
+  resetOrderState,
+  isUserObject
+} from "@/features/order/orderSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import Loader from "@/components/Layout/Loader/Loader";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import PaymentIcon from '@mui/icons-material/Payment';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
-import "./ProcessOrder.css";
+import "@/components/Admin/ProcessOrder.css";
 import { toast } from "react-toastify";
 
 const ProcessOrder: React.FC = () => {
@@ -49,9 +50,7 @@ const ProcessOrder: React.FC = () => {
     }
     if (!id) return;
 
-    const myForm = new FormData();
-    myForm.set("status", status);
-    dispatch(updateOrder({ id, orderData: myForm }));
+    dispatch(updateOrder({ id, orderData: { status } }));
   };
 
   useEffect(() => {
@@ -108,8 +107,8 @@ const ProcessOrder: React.FC = () => {
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <Typography variant="caption" color="text.secondary">Customer Contact</Typography>
-                                <Typography sx={{ fontWeight: 600 }}>{order.user && typeof order.user === 'object' ? order.user.name : order.user}</Typography>
-                                <Typography variant="body2">{order.user && typeof order.user === 'object' ? order.user.email : ''}</Typography>
+                                <Typography sx={{ fontWeight: 600 }}>{isUserObject(order.user) ? order.user.name : String(order.user)}</Typography>
+                                <Typography variant="body2">{isUserObject(order.user) ? order.user.email : ''}</Typography>
                                 <Typography variant="body2">{order.shippingInfo?.phoneNo}</Typography>
                             </Grid>
                             <Grid item xs={12} sm={6}>

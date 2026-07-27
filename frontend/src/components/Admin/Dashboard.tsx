@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
-import Sidebar from "./Sidebar";
-import "./Dashboard.css";
+import Sidebar from "@/components/Admin/Sidebar";
+import "@/components/Admin/Dashboard.css";
 import { Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 import { Doughnut, Line } from "react-chartjs-2";
-import { getAdminProducts } from "../../features/products/productsSlice";
-import { getAllOrders } from "../../features/order/orderSlice";
-import { getAllUsers } from "../../features/user/userSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import MetaData from "../Layout/MetaData";
+import { getAdminProducts } from "@/features/products/productsSlice";
+import { getAllOrders } from "@/features/order/orderSlice";
+import { getAllUsers } from "@/features/user/userSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import MetaData from "@/components/Layout/MetaData";
 
 import {
   Chart as ChartJS,
@@ -56,7 +56,7 @@ const Dashboard: React.FC = () => {
 
   products &&
     products.forEach((item) => {
-      const stockVal = item.Stock ?? (item as any).stock ?? 0;
+      const stockVal = item.stock || 0;
       if (stockVal === 0) {
         outOfStock += 1;
       } else {
@@ -65,7 +65,7 @@ const Dashboard: React.FC = () => {
     });
 
   useEffect(() => {
-    dispatch(getAdminProducts({}));
+    dispatch(getAdminProducts());
     dispatch(getAllOrders());
     dispatch(getAllUsers());
   }, [dispatch]);
@@ -161,7 +161,14 @@ const Dashboard: React.FC = () => {
     { field: "amount", headerName: "Amount", type: "number", minWidth: 150, flex: 0.5 },
   ];
 
-  const rows: any[] = [];
+  interface RecentOrderRow {
+    id: string;
+    itemsQty: number;
+    amount: string;
+    status: string;
+  }
+
+  const rows: RecentOrderRow[] = [];
   recentOrders.forEach((item) => {
     rows.push({
       id: item._id,

@@ -1,10 +1,10 @@
 import React, { Fragment, useState, useEffect } from "react";
-import "./ResetPassword.css";
-import Loader from "../Layout/Loader/Loader";
-import { resetPassword, clearErrors, clearSuccess } from "../../features/user/userSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import "@/components/User/ResetPassword.css";
+import Loader from "@/components/Layout/Loader/Loader";
+import { resetPassword, clearErrors, clearSuccess } from "@/features/user/userSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { toast } from "react-toastify";
-import MetaData from "../Layout/MetaData";
+import MetaData from "@/components/Layout/MetaData";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockIcon from "@mui/icons-material/Lock";
 import { useParams, useNavigate } from "react-router-dom";

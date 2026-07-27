@@ -250,7 +250,14 @@ export class UsersService {
   }
 
   async updateProfile(updateProfileDto: UpdateProfileDto, user: UserDocument) {
-    const newUserData: any = {
+    const newUserData: {
+      name?: string;
+      email?: string;
+      avatar?: {
+        public_id: string;
+        url: string;
+      };
+    } = {
       name: updateProfileDto.name,
       email: updateProfileDto.email,
     };

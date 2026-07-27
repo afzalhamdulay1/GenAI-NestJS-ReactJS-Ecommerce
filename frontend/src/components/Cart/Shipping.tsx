@@ -1,8 +1,8 @@
 import React, { Fragment, useState } from "react";
-import "./Shipping.css";
-import { saveShippingInfo } from "../../features/cart/cartSlice";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import MetaData from "../Layout/MetaData";
+import "@/components/Cart/Shipping.css";
+import { saveShippingInfo } from "@/features/cart/cartSlice";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import MetaData from "@/components/Layout/MetaData";
 import PinDropIcon from "@mui/icons-material/PinDrop";
 import HomeIcon from "@mui/icons-material/Home";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
@@ -11,7 +11,7 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import TransferWithinAStationIcon from "@mui/icons-material/TransferWithinAStation";
 import { Country, State } from "country-state-city";
 import { toast } from "react-toastify";
-import CheckoutSteps from "./CheckoutSteps";
+import CheckoutSteps from "@/components/Cart/CheckoutSteps";
 import { useNavigate } from "react-router-dom";
 
 const Shipping: React.FC = () => {
@@ -34,7 +34,14 @@ const Shipping: React.FC = () => {
       return;
     }
     dispatch(
-      saveShippingInfo({ address, city, state, country, pinCode, phoneNo })
+      saveShippingInfo({ 
+        address, 
+        city, 
+        state, 
+        country, 
+        pinCode: Number(pinCode), 
+        phoneNo: Number(phoneNo) 
+      })
     );
     navigate("/order/confirm");
   };

@@ -1,6 +1,6 @@
 import React from "react";
 import { FaHardHat } from "react-icons/fa";
-import "./Maintenance.css";
+import "@/components/Layout/Maintenance/Maintenance.css";
 
 const Maintenance: React.FC = () => {
   return (
