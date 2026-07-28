@@ -32,8 +32,6 @@ Rather than maintaining separate hosting environments, this repository runs as a
 ### 📐 Robust Frontend Architecture
 * **Strict Type-Safe Forms:** 100% of the application's forms (Authentication, Cart, and Admin Dashboard) are powered by **React Hook Form** + **Zod** schema validation, ensuring zero unnecessary re-renders and guaranteeing mathematical type safety before data hits the backend.
 * **Route-Based Code Splitting:** `React.lazy()` and `Suspense` chunk the application down to highly optimized bundles, loading massive third-party packages dynamically only when users visit specific flows (like the Checkout page).
-* **Absolute Path Aliasing:** `@/*` configured seamlessly across `vite.config.ts` and `tsconfig.json` for infinitely scalable module imports.
-* **UI Polish:** Integrated `react-toastify` for unified error handling, modern glassmorphism features, and highly responsive CSS grids.
 
 ### 📦 Product & Order Engine
 * **Dynamic Reviews:** Automated score recalculation whenever products are reviewed or rated.
