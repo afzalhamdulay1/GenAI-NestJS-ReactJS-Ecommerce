@@ -42,6 +42,12 @@ Rather than maintaining separate hosting environments, this repository runs as a
 * **Stripe Gateway:** Secure server-side Stripe integration to create payment intents and secure credits.
 * **Cloudinary Storage:** Media handling using Multer for base64 photo uploads.
 
+### 💡 Code Architecture & Best Practices
+* **Domain-Driven Backend:** The NestJS architecture is highly modular (Users, Orders, Products, Auth), utilizing **DTOs (Data Transfer Objects)** for strict payload validation and **Custom Decorators** (like `@CurrentUser`) to keep controllers completely DRY.
+* **Global Exception Handling:** Custom Exception Filters catch and format Mongoose/MongoDB errors symmetrically before returning them to the client.
+* **Predictable State Management:** The frontend leverages **Redux Toolkit** (Slices) to eliminate Redux boilerplate, keeping global state predictable and easily debuggable.
+* **Separation of Concerns:** Deeply nested UI components rely on custom hooks (`useAppSelector`, `useAppDispatch`) rather than excessive prop drilling, keeping the component tree clean and maintainable.
+
 ---
 
 ## 🛠️ Tech Stack
