@@ -1,4 +1,7 @@
 import React, { Fragment, useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import "@/components/User/UpdateProfile.css";
 import Loader from "@/components/Layout/Loader/Loader";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
@@ -10,22 +13,34 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import dummyProfile from '@/images/Profile.png';
 
+const updateProfileSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email"),
+});
+
+type UpdateProfileFormValues = z.infer<typeof updateProfileSchema>;
+
 const UpdateProfile: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user, error, isUpdated, loading } = useAppSelector((state) => state.user);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [avatar, setAvatar] = useState<string | ArrayBuffer | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>(dummyProfile);
 
-  const updateProfileSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<UpdateProfileFormValues>({
+    resolver: zodResolver(updateProfileSchema),
+  });
 
+  const onUpdateProfileSubmit = (data: UpdateProfileFormValues) => {
     const myForm = new FormData();
-    myForm.set("name", name);
-    myForm.set("email", email);
+    myForm.set("name", data.name);
+    myForm.set("email", data.email);
     if (avatar && typeof avatar === "string") {
       myForm.set("avatar", avatar);
     }
@@ -33,7 +48,7 @@ const UpdateProfile: React.FC = () => {
     dispatch(updateProfile(myForm));
   };
 
-  const updateProfileDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const reader = new FileReader();
@@ -51,8 +66,8 @@ const UpdateProfile: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      setName(user.name);
-      setEmail(user.email);
+      setValue("name", user.name || "");
+      setValue("email", user.email || "");
       setAvatarPreview(user.avatar?.url || dummyProfile);
     }
 
@@ -65,7 +80,7 @@ const UpdateProfile: React.FC = () => {
       toast.success("Profile Updated Successfully");
       navigate("/account");
     }
-  }, [dispatch, error, user, isUpdated, navigate]);
+  }, [dispatch, error, user, isUpdated, navigate, setValue]);
 
   return (
     <Fragment>
@@ -81,30 +96,27 @@ const UpdateProfile: React.FC = () => {
               <form
                 className="updateProfileForm"
                 encType="multipart/form-data"
-                onSubmit={updateProfileSubmit}
+                onSubmit={handleSubmit(onUpdateProfileSubmit)}
               >
                 <div className="updateProfileName">
                   <FaceIcon />
                   <input
                     type="text"
                     placeholder="Name"
-                    required
-                    name="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    {...register("name")}
                   />
                 </div>
+                {errors.name && <span className="text-red-500 text-xs mt-1 ml-10">{errors.name.message}</span>}
+
                 <div className="updateProfileEmail">
                   <MailOutlineIcon />
                   <input
                     type="email"
                     placeholder="Email"
-                    required
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...register("email")}
                   />
                 </div>
+                {errors.email && <span className="text-red-500 text-xs mt-1 ml-10">{errors.email.message}</span>}
 
                 <div id="updateProfileImage">
                   <img src={avatarPreview} alt="Avatar Preview" />
@@ -115,7 +127,7 @@ const UpdateProfile: React.FC = () => {
                     type="file"
                     name="avatar"
                     accept="image/*"
-                    onChange={updateProfileDataChange}
+                    onChange={handleAvatarChange}
                   />
                 </div>
                 <input

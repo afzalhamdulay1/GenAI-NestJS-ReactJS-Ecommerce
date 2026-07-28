@@ -1,4 +1,7 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import "@/components/User/ResetPassword.css";
 import Loader from "@/components/Layout/Loader/Loader";
 import { resetPassword, clearErrors, clearSuccess } from "@/features/user/userSlice";
@@ -9,6 +12,16 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockIcon from "@mui/icons-material/Lock";
 import { useParams, useNavigate } from "react-router-dom";
 
+const resetPasswordSchema = z.object({
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+  confirmPassword: z.string().min(1, "Confirm password is required"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
+
 const ResetPassword: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -16,19 +29,17 @@ const ResetPassword: React.FC = () => {
 
   const { error, success, loading } = useAppSelector((state) => state.user);
 
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ResetPasswordFormValues>({
+    resolver: zodResolver(resetPasswordSchema),
+  });
 
-  const resetPasswordSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-
+  const onResetPasswordSubmit = (data: ResetPasswordFormValues) => {
     if (token) {
-      dispatch(resetPassword({ token, resetData: { password, confirmPassword } }));
+      dispatch(resetPassword({ token, resetData: { password: data.password, confirmPassword: data.confirmPassword } }));
     }
   };
 
@@ -58,28 +69,28 @@ const ResetPassword: React.FC = () => {
 
               <form
                 className="resetPasswordForm"
-                onSubmit={resetPasswordSubmit}
+                onSubmit={handleSubmit(onResetPasswordSubmit)}
               >
                 <div>
                   <LockOpenIcon />
                   <input
                     type="password"
                     placeholder="New Password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    {...register("password")}
                   />
                 </div>
+                {errors.password && <span className="text-red-500 text-xs mt-1 ml-10">{errors.password.message}</span>}
+
                 <div className="loginPassword">
                   <LockIcon />
                   <input
                     type="password"
                     placeholder="Confirm Password"
-                    required
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    {...register("confirmPassword")}
                   />
                 </div>
+                {errors.confirmPassword && <span className="text-red-500 text-xs mt-1 ml-10">{errors.confirmPassword.message}</span>}
+
                 <input
                   type="submit"
                   value="Update"

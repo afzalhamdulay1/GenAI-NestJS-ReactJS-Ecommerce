@@ -1,4 +1,7 @@
 import React, { Fragment, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import "@/components/Admin/NewProduct.css";
 import { clearErrors, createProduct, resetProductState } from "@/features/products/productSlice";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
@@ -14,7 +17,8 @@ import {
   Paper,
   Grid,
   IconButton,
-  Tooltip
+  Tooltip,
+  FormHelperText
 } from "@mui/material";
 import MetaData from "@/components/Layout/MetaData";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
@@ -28,17 +32,22 @@ import { useNavigate } from "react-router-dom";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
 
+const newProductSchema = z.object({
+  name: z.string().min(1, "Product Name is required"),
+  price: z.coerce.number().min(1, "Price must be greater than 0"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  stock: z.coerce.number().min(0, "Stock cannot be negative"),
+});
+
+type NewProductFormValues = z.infer<typeof newProductSchema>;
+
 const NewProduct: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const { loading, error, success } = useAppSelector((state) => state.product);
 
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState<number | string>(0);
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [Stock, setStock] = useState<number | string>(0);
   const [images, setImages] = useState<string[]>([]);
   const [imagesPreview, setImagesPreview] = useState<string[]>([]);
 
@@ -51,6 +60,21 @@ const NewProduct: React.FC = () => {
     "Camera",
     "SmartPhones",
   ];
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<NewProductFormValues>({
+    resolver: zodResolver(newProductSchema) as any,
+    defaultValues: {
+      name: "",
+      price: 0,
+      description: "",
+      category: "",
+      stock: 0,
+    }
+  });
 
   useEffect(() => {
     if (error) {
@@ -65,16 +89,19 @@ const NewProduct: React.FC = () => {
     }
   }, [dispatch, error, success, navigate]);
 
-  const createProductSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onCreateProductSubmit = (data: NewProductFormValues) => {
+    if (images.length === 0) {
+      toast.error("Please add at least one product image");
+      return;
+    }
 
     const myForm = new FormData();
 
-    myForm.set("name", name);
-    myForm.set("price", String(price));
-    myForm.set("description", description);
-    myForm.set("category", category);
-    myForm.set("stock", String(Stock));
+    myForm.set("name", data.name);
+    myForm.set("price", String(data.price));
+    myForm.set("description", data.description);
+    myForm.set("category", data.category);
+    myForm.set("stock", String(data.stock));
 
     images.forEach((image) => {
       myForm.append("images", image);
@@ -109,6 +136,11 @@ const NewProduct: React.FC = () => {
     });
   };
 
+  const removeImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+    setImagesPreview(imagesPreview.filter((_, i) => i !== index));
+  };
+
   return (
     <Fragment>
       <MetaData title="Create Product - Admin Panel" />
@@ -123,7 +155,7 @@ const NewProduct: React.FC = () => {
             <form
               className="createProductForm"
               encType="multipart/form-data"
-              onSubmit={createProductSubmitHandler}
+              onSubmit={handleSubmit(onCreateProductSubmit)}
             >
               <Grid container spacing={3}>
                 <Grid item xs={12}>
@@ -131,9 +163,9 @@ const NewProduct: React.FC = () => {
                     fullWidth
                     label="Product Name"
                     variant="outlined"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    {...register("name")}
+                    error={!!errors.name}
+                    helperText={errors.name?.message}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -150,9 +182,9 @@ const NewProduct: React.FC = () => {
                     type="number"
                     label="Price (INR)"
                     variant="outlined"
-                    required
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
+                    {...register("price")}
+                    error={!!errors.price}
+                    helperText={errors.price?.message}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -169,9 +201,9 @@ const NewProduct: React.FC = () => {
                     type="number"
                     label="Stock Quantity"
                     variant="outlined"
-                    required
-                    value={Stock}
-                    onChange={(e) => setStock(e.target.value)}
+                    {...register("stock")}
+                    error={!!errors.stock}
+                    helperText={errors.stock?.message}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -183,14 +215,13 @@ const NewProduct: React.FC = () => {
                 </Grid>
 
                 <Grid item xs={12}>
-                  <FormControl fullWidth variant="outlined">
+                  <FormControl fullWidth variant="outlined" error={!!errors.category}>
                     <InputLabel id="category-label">Choose Category</InputLabel>
                     <Select
                       labelId="category-label"
                       label="Choose Category"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value as string)}
-                      required
+                      defaultValue=""
+                      {...register("category")}
                       startAdornment={
                         <InputAdornment position="start">
                           <AccountTreeIcon />
@@ -203,6 +234,7 @@ const NewProduct: React.FC = () => {
                         </MenuItem>
                       ))}
                     </Select>
+                    {errors.category && <FormHelperText>{errors.category.message}</FormHelperText>}
                   </FormControl>
                 </Grid>
 
@@ -210,16 +242,15 @@ const NewProduct: React.FC = () => {
                   <TextField
                     fullWidth
                     multiline
-                    minRows={3}
-                    maxRows={6}
+                    rows={4}
                     label="Product Description"
                     variant="outlined"
-                    required
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    {...register("description")}
+                    error={!!errors.description}
+                    helperText={errors.description?.message}
                     InputProps={{
                       startAdornment: (
-                        <InputAdornment position="start">
+                        <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}>
                           <DescriptionIcon />
                         </InputAdornment>
                       ),
@@ -230,20 +261,20 @@ const NewProduct: React.FC = () => {
                 <Grid item xs={12}>
                   <div className="fileUploadContainer">
                     <input
-                      type="file"
-                      id="productImageInput"
                       accept="image/*"
-                      onChange={createProductImagesChange}
+                      style={{ display: 'none' }}
+                      id="raised-button-file"
                       multiple
-                      style={{ display: "none" }}
+                      type="file"
+                      onChange={createProductImagesChange}
                     />
-                    <label htmlFor="productImageInput">
-                      <Button
-                        variant="outlined"
+                    <label htmlFor="raised-button-file">
+                      <Button 
+                        variant="outlined" 
                         component="span"
                         fullWidth
-                        className="uploadButton"
                         startIcon={<CloudUploadIcon />}
+                        className="uploadButton"
                       >
                         Upload Product Images
                       </Button>
@@ -256,17 +287,14 @@ const NewProduct: React.FC = () => {
                     <div className="imagePreviewGrid">
                       {imagesPreview.map((image, index) => (
                         <div key={index} className="previewItem">
-                          <img src={image} alt={`Preview ${index}`} />
-                          <Tooltip title="Remove">
+                          <img src={image} alt={`Product Preview ${index + 1}`} />
+                          <Tooltip title="Remove Image">
                             <IconButton 
-                              size="small" 
                               className="removeImgBtn"
-                              onClick={() => {
-                                setImagesPreview(imagesPreview.filter((_, i) => i !== index));
-                                setImages(images.filter((_, i) => i !== index));
-                              }}
+                              size="small"
+                              onClick={() => removeImage(index)}
                             >
-                              <CloseIcon fontSize="inherit" />
+                              <CloseIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         </div>
@@ -284,7 +312,7 @@ const NewProduct: React.FC = () => {
                     disabled={loading}
                     size="large"
                   >
-                    {loading ? "Creating Product..." : "Create Product"}
+                    {loading ? "Creating..." : "Create Product"}
                   </Button>
                 </Grid>
               </Grid>

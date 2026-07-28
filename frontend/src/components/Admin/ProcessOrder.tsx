@@ -1,4 +1,7 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import MetaData from "@/components/Layout/MetaData";
 import { Link, useParams } from "react-router-dom";
 import { 
@@ -17,7 +20,8 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Avatar
+  Avatar,
+  FormHelperText
 } from "@mui/material";
 import SideBar from "@/components/Admin/Sidebar";
 import {
@@ -36,21 +40,34 @@ import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import "@/components/Admin/ProcessOrder.css";
 import { toast } from "react-toastify";
 
+const processOrderSchema = z.object({
+  status: z.string().min(1, "Please select a status"),
+});
+
+type ProcessOrderFormValues = z.infer<typeof processOrderSchema>;
+
 const ProcessOrder: React.FC = () => {
   const dispatch = useAppDispatch();
-  const [status, setStatus] = useState("");
   const { orderDetails: order, error, loading, isUpdated } = useAppSelector((state) => state.order);
   const { id } = useParams<{ id: string }>();
 
-  const updateOrderSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!status) {
-      toast.error('Please select a status');
-      return;
-    }
-    if (!id) return;
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<ProcessOrderFormValues>({
+    resolver: zodResolver(processOrderSchema) as any,
+    defaultValues: {
+      status: "",
+    },
+  });
 
-    dispatch(updateOrder({ id, orderData: { status } }));
+  const selectedStatus = watch("status");
+
+  const onUpdateOrderSubmit = (data: ProcessOrderFormValues) => {
+    if (!id) return;
+    dispatch(updateOrder({ id, orderData: { status: data.status } }));
   };
 
   useEffect(() => {
@@ -212,14 +229,14 @@ const ProcessOrder: React.FC = () => {
                         </Typography>
 
                         {order.orderStatus !== "Delivered" && (
-                            <form onSubmit={updateOrderSubmitHandler}>
-                                <FormControl fullWidth sx={{ mb: 3 }}>
+                            <form onSubmit={handleSubmit(onUpdateOrderSubmit)}>
+                                <FormControl fullWidth sx={{ mb: 3 }} error={!!errors.status}>
                                     <InputLabel id="status-label">Transition To</InputLabel>
                                     <Select
                                         labelId="status-label"
                                         label="Transition To"
-                                        value={status}
-                                        onChange={(e) => setStatus(e.target.value as string)}
+                                        defaultValue=""
+                                        {...register("status")}
                                         sx={{ backgroundColor: 'white' }}
                                     >
                                         <MenuItem value="">Choose Logistics Step</MenuItem>
@@ -230,13 +247,14 @@ const ProcessOrder: React.FC = () => {
                                             <MenuItem value="Delivered">Completed (Delivered)</MenuItem>
                                         )}
                                     </Select>
+                                    {errors.status && <FormHelperText>{errors.status.message}</FormHelperText>}
                                 </FormControl>
                                 <Button
                                     type="submit"
                                     variant="contained"
                                     fullWidth
                                     size="large"
-                                    disabled={loading || !status}
+                                    disabled={loading || !selectedStatus}
                                     sx={{ 
                                         borderRadius: '0.75rem',
                                         py: 1.5,

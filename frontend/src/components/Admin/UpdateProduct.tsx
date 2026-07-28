@@ -1,4 +1,7 @@
 import React, { Fragment, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { clearErrors, updateProduct, resetProductState, fetchProductDetails } from "@/features/products/productSlice";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { ProductImage } from "@/types";
@@ -15,7 +18,8 @@ import {
   Grid,
   IconButton,
   Tooltip,
-  Divider
+  Divider,
+  FormHelperText
 } from "@mui/material";
 import { toast } from "react-toastify";
 import MetaData from "@/components/Layout/MetaData";
@@ -29,6 +33,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
 
+const updateProductSchema = z.object({
+  name: z.string().min(1, "Product Name is required"),
+  price: z.coerce.number().min(1, "Price must be greater than 0"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  stock: z.coerce.number().min(0, "Stock cannot be negative"),
+});
+
+type UpdateProductFormValues = z.infer<typeof updateProductSchema>;
+
 const UpdateProduct: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -36,11 +50,6 @@ const UpdateProduct: React.FC = () => {
 
   const { product, loading, error, success } = useAppSelector((state) => state.product);
 
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState<number | string>(0);
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [stock, setStock] = useState<number | string>(0);
   const [images, setImages] = useState<string[]>([]);
   const [oldImages, setOldImages] = useState<ProductImage[]>([]);
   const [imagesPreview, setImagesPreview] = useState<string[]>([]);
@@ -55,15 +64,31 @@ const UpdateProduct: React.FC = () => {
     "SmartPhones",
   ];
 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<UpdateProductFormValues>({
+    resolver: zodResolver(updateProductSchema) as any,
+    defaultValues: {
+      name: "",
+      price: 0,
+      description: "",
+      category: "",
+      stock: 0,
+    }
+  });
+
   useEffect(() => {
     if (id && product && product._id !== id) {
       dispatch(fetchProductDetails(id));
     } else if (product) {
-      setName(product.name || "");
-      setDescription(product.description || "");
-      setPrice(product.price || 0);
-      setCategory(product.category || "");
-      setStock(product.stock || 0);
+      setValue("name", product.name || "");
+      setValue("description", product.description || "");
+      setValue("price", product.price || 0);
+      setValue("category", product.category || "");
+      setValue("stock", product.stock || 0);
       setOldImages(product.images || []);
     }
 
@@ -77,20 +102,21 @@ const UpdateProduct: React.FC = () => {
       navigate("/admin/products");
       dispatch(resetProductState());
     }
-  }, [dispatch, error, id, product, navigate, success]);
+  }, [dispatch, error, id, product, navigate, success, setValue]);
 
-  const updateProductSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onUpdateProductSubmit = (data: UpdateProductFormValues) => {
     if (!id) return;
     const myForm = new FormData();
-    myForm.set("name", name);
-    myForm.set("price", String(price));
-    myForm.set("description", description);
-    myForm.set("category", category);
-    myForm.set("stock", String(stock));
+    myForm.set("name", data.name);
+    myForm.set("price", String(data.price));
+    myForm.set("description", data.description);
+    myForm.set("category", data.category);
+    myForm.set("stock", String(data.stock));
+    
     images.forEach((image) => {
       myForm.append("images", image);
     });
+    
     dispatch(updateProduct({ id, myForm }));
   };
 
@@ -99,6 +125,7 @@ const UpdateProduct: React.FC = () => {
     setImages([]);
     setImagesPreview([]);
     setOldImages([]);
+    
     files.forEach((file) => {
       const reader = new FileReader();
       reader.onload = () => {
@@ -126,7 +153,7 @@ const UpdateProduct: React.FC = () => {
             <form
               className="createProductForm"
               encType="multipart/form-data"
-              onSubmit={updateProductSubmitHandler}
+              onSubmit={handleSubmit(onUpdateProductSubmit)}
             >
               <Grid container spacing={3}>
                 <Grid item xs={12}>
@@ -134,9 +161,9 @@ const UpdateProduct: React.FC = () => {
                     fullWidth
                     label="Product Name"
                     variant="outlined"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    {...register("name")}
+                    error={!!errors.name}
+                    helperText={errors.name?.message}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -153,9 +180,9 @@ const UpdateProduct: React.FC = () => {
                     type="number"
                     label="Price (INR)"
                     variant="outlined"
-                    required
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
+                    {...register("price")}
+                    error={!!errors.price}
+                    helperText={errors.price?.message}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -172,9 +199,9 @@ const UpdateProduct: React.FC = () => {
                     type="number"
                     label="Stock Quantity"
                     variant="outlined"
-                    required
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
+                    {...register("stock")}
+                    error={!!errors.stock}
+                    helperText={errors.stock?.message}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -186,14 +213,13 @@ const UpdateProduct: React.FC = () => {
                 </Grid>
 
                 <Grid item xs={12}>
-                  <FormControl fullWidth variant="outlined">
+                  <FormControl fullWidth variant="outlined" error={!!errors.category}>
                     <InputLabel id="category-label">Choose Category</InputLabel>
                     <Select
                       labelId="category-label"
                       label="Choose Category"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value as string)}
-                      required
+                      defaultValue=""
+                      {...register("category")}
                       startAdornment={
                         <InputAdornment position="start">
                           <AccountTreeIcon />
@@ -206,6 +232,7 @@ const UpdateProduct: React.FC = () => {
                         </MenuItem>
                       ))}
                     </Select>
+                    {errors.category && <FormHelperText>{errors.category.message}</FormHelperText>}
                   </FormControl>
                 </Grid>
 
@@ -217,9 +244,9 @@ const UpdateProduct: React.FC = () => {
                     maxRows={6}
                     label="Product Description"
                     variant="outlined"
-                    required
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    {...register("description")}
+                    error={!!errors.description}
+                    helperText={errors.description?.message}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">

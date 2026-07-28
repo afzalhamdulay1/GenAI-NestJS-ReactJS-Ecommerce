@@ -1,5 +1,8 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import "@/components/Admin/ProductReviews.css";
 import {
   clearErrors,
@@ -34,33 +37,48 @@ import { toast } from "react-toastify";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { Link } from "react-router-dom";
 
+const productReviewsSchema = z.object({
+  productId: z.string().length(24, "Product ID must be exactly 24 characters"),
+});
+
+type ProductReviewsFormValues = z.infer<typeof productReviewsSchema>;
+
 const ProductReviews: React.FC = () => {
   const dispatch = useAppDispatch();
 
   const { error, reviews, loading, isDeleted } = useAppSelector((state) => state.reviews);
   const { products } = useAppSelector((state) => state.products);
 
-  const [productId, setProductId] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Partial<Product> | null>(null);
 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<ProductReviewsFormValues>({
+    resolver: zodResolver(productReviewsSchema) as any,
+    defaultValues: {
+      productId: "",
+    },
+  });
+
+  const watchProductId = watch("productId");
+
   const deleteReviewHandler = (reviewId: string) => {
-    dispatch(deleteReview({ reviewId, productId: selectedProduct?._id || productId }));
+    dispatch(deleteReview({ reviewId, productId: selectedProduct?._id || watchProductId }));
   };
 
-  const productReviewsSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (productId.length === 24) {
-      dispatch(getAllReviews(productId));
-      const found = products?.find(p => p._id === productId);
-      setSelectedProduct(found || { _id: productId, name: "Remote Product" });
-    } else {
-      toast.warn("Please enter a valid Product ID (24 characters)");
-    }
+  const onProductReviewsSubmit = (data: ProductReviewsFormValues) => {
+    dispatch(getAllReviews(data.productId));
+    const found = products?.find(p => p._id === data.productId);
+    setSelectedProduct(found || { _id: data.productId, name: "Remote Product" });
   };
 
   const handleSelectProduct = (prod: Product) => {
     setSelectedProduct(prod);
-    setProductId(prod._id);
+    setValue("productId", prod._id);
     dispatch(getAllReviews(prod._id));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -75,9 +93,9 @@ const ProductReviews: React.FC = () => {
     if (isDeleted) {
       toast.success("Review Deleted Successfully");
       dispatch(resetReviewState());
-      dispatch(getAllReviews(selectedProduct?._id || productId));
+      dispatch(getAllReviews(selectedProduct?._id || watchProductId));
     }
-  }, [dispatch, error, isDeleted, selectedProduct, productId]);
+  }, [dispatch, error, isDeleted, selectedProduct, watchProductId]);
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "Review ID", minWidth: 180, flex: 0.5 },
@@ -187,17 +205,18 @@ const ProductReviews: React.FC = () => {
             {/* Search Top Bar */}
             <Grid item xs={12}>
                 <Paper elevation={0} sx={{ p: 4, borderRadius: '1rem', border: '1px solid #f1f5f9' }}>
-                    <form className="productReviewsForm" onSubmit={productReviewsSubmitHandler} style={{ padding: 0, margin: 0, width: '100%', maxWidth: 'none', boxShadow: 'none' }}>
+                    <form className="productReviewsForm" onSubmit={handleSubmit(onProductReviewsSubmit)} style={{ padding: 0, margin: 0, width: '100%', maxWidth: 'none', boxShadow: 'none' }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
                             <SearchIcon color="primary" /> Find Specific Product Reviews
                         </Typography>
-                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
                             <TextField
                                 fullWidth
                                 placeholder="Enter Product ID (e.g. 5f8d...)"
                                 variant="outlined"
-                                value={productId}
-                                onChange={(e) => setProductId(e.target.value)}
+                                {...register("productId")}
+                                error={!!errors.productId}
+                                helperText={errors.productId?.message}
                                 InputProps={{
                                     startAdornment: (
                                         <InputAdornment position="start">
@@ -215,7 +234,7 @@ const ProductReviews: React.FC = () => {
                                 id="createProductBtn"
                                 type="submit"
                                 variant="contained"
-                                disabled={loading || !productId}
+                                disabled={loading || !watchProductId}
                                 sx={{ 
                                     height: '56px', 
                                     minWidth: '180px', 

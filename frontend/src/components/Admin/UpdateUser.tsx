@@ -1,4 +1,7 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { 
   Button, 
   Box, 
@@ -12,7 +15,8 @@ import {
   Paper,
   Grid,
   Avatar,
-  Divider
+  Divider,
+  FormHelperText
 } from "@mui/material";
 import MetaData from "@/components/Layout/MetaData";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
@@ -26,6 +30,14 @@ import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
+const updateUserSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email format"),
+  role: z.string().min(1, "Role is required"),
+});
+
+type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
+
 const UpdateUser: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -33,18 +45,31 @@ const UpdateUser: React.FC = () => {
 
   const { loading, error, userDetails, isUpdated } = useAppSelector((state) => state.user);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<UpdateUserFormValues>({
+    resolver: zodResolver(updateUserSchema) as any,
+    defaultValues: {
+      name: "",
+      email: "",
+      role: "",
+    },
+  });
+
+  const selectedRole = watch("role");
 
   useEffect(() => {
     if (!id) return;
     if (!userDetails || userDetails._id !== id) {
       dispatch(getUserDetails(id));
     } else {
-      setName(userDetails.name || "");
-      setEmail(userDetails.email || "");
-      setRole(userDetails.role || "");
+      setValue("name", userDetails.name || "");
+      setValue("email", userDetails.email || "");
+      setValue("role", userDetails.role || "");
     }
 
     if (error) {
@@ -57,11 +82,10 @@ const UpdateUser: React.FC = () => {
       navigate("/admin/users");
       dispatch(resetUserState());
     }
-  }, [dispatch, error, isUpdated, navigate, userDetails, id]);
+  }, [dispatch, error, isUpdated, navigate, userDetails, id, setValue]);
 
-  const updateUserSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    dispatch(updateUser({ id, userData: { name, email, role } }));
+  const onUpdateUserSubmit = (data: UpdateUserFormValues) => {
+    dispatch(updateUser({ id, userData: data }));
   };
 
   return (
@@ -93,7 +117,7 @@ const UpdateUser: React.FC = () => {
 
               <form
                 className="createProductForm"
-                onSubmit={updateUserSubmitHandler}
+                onSubmit={handleSubmit(onUpdateUserSubmit)}
               >
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
@@ -101,9 +125,9 @@ const UpdateUser: React.FC = () => {
                       fullWidth
                       label="Full Name"
                       variant="outlined"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      {...register("name")}
+                      error={!!errors.name}
+                      helperText={errors.name?.message}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -120,9 +144,9 @@ const UpdateUser: React.FC = () => {
                       type="email"
                       label="Email Address"
                       variant="outlined"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      {...register("email")}
+                      error={!!errors.email}
+                      helperText={errors.email?.message}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -134,14 +158,13 @@ const UpdateUser: React.FC = () => {
                   </Grid>
 
                   <Grid item xs={12}>
-                    <FormControl fullWidth variant="outlined">
+                    <FormControl fullWidth variant="outlined" error={!!errors.role}>
                       <InputLabel id="role-label">Account Role</InputLabel>
                       <Select
                         labelId="role-label"
                         label="Account Role"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value as string)}
-                        required
+                        defaultValue=""
+                        {...register("role")}
                         startAdornment={
                           <InputAdornment position="start">
                             <VerifiedUserIcon />
@@ -152,6 +175,7 @@ const UpdateUser: React.FC = () => {
                         <MenuItem value="admin">Administrator</MenuItem>
                         <MenuItem value="user">Standard User</MenuItem>
                       </Select>
+                      {errors.role && <FormHelperText>{errors.role.message}</FormHelperText>}
                     </FormControl>
                   </Grid>
 
@@ -161,7 +185,7 @@ const UpdateUser: React.FC = () => {
                       type="submit"
                       variant="contained"
                       fullWidth
-                      disabled={loading || role === ""}
+                      disabled={loading || !selectedRole}
                       size="large"
                       sx={{ mt: 2 }}
                     >

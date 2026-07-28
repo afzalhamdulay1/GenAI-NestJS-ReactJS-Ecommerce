@@ -1,16 +1,32 @@
-import React, { useState, Fragment } from "react";
+import React, { Fragment } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import MetaData from "@/components/Layout/MetaData";
 import "@/components/Product/Search.css";
 
+const searchSchema = z.object({
+  keyword: z.string().optional(),
+});
+
+type SearchFormValues = z.infer<typeof searchSchema>;
+
 const Search: React.FC = () => {
-  const [keyword, setKeyword] = useState("");
   const navigate = useNavigate();
 
-  const searchSubmitHandler = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+  } = useForm<SearchFormValues>({
+    resolver: zodResolver(searchSchema),
+    defaultValues: {
+      keyword: "",
+    },
+  });
 
-    const trimmedKeyword = keyword.trim();
+  const onSearchSubmit = (data: SearchFormValues) => {
+    const trimmedKeyword = data.keyword?.trim();
     if (trimmedKeyword) {
       navigate(`/products/${trimmedKeyword}`);
     } else {
@@ -29,12 +45,11 @@ const Search: React.FC = () => {
           <p>Find the best gadgets, fashion, and lifestyle essentials with ease.</p>
         </div>
 
-        <form className="searchInputContainer" onSubmit={searchSubmitHandler}>
+        <form className="searchInputContainer" onSubmit={handleSubmit(onSearchSubmit)}>
           <input
             type="text"
             placeholder="Search our catalog (e.g. Laptop, Nike, Blue)..."
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            {...register("keyword")}
           />
           <input type="submit" value="Search Now" />
         </form>
