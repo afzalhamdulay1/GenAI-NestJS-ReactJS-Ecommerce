@@ -5,8 +5,9 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Stripe](https://img.shields.io/badge/Stripe-625DF5?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com/)
 [![Passport](https://img.shields.io/badge/Passport-34E27A?style=for-the-badge&logo=passport&logoColor=white)](http://www.passportjs.org/)
+[![Zod](https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white)](https://zod.dev/)
 
-A highly scalable, production-ready Full-Stack E-Commerce platform. This application features a unified architecture where the robust **NestJS + TypeScript** backend directly serves the modern **React + Vite** frontend. It includes native Google OAuth, secure Stripe checkout, and role-based administration features.
+A highly scalable, production-ready Full-Stack E-Commerce platform. This application features a unified architecture where the robust **NestJS + TypeScript** backend directly serves the modern **React + Vite** frontend. It includes native Google OAuth, secure Stripe checkout, advanced type-safe forms, and role-based administration features.
 
 🔗 **Live Demo:** [https://nestjs-reactjs-ecommerce.onrender.com/](https://nestjs-reactjs-ecommerce.onrender.com/)
 
@@ -28,6 +29,12 @@ Rather than maintaining separate hosting environments, this repository runs as a
 * **Smart Route Guards:** Custom `GoogleAuthGuard` detects login cancellations or failures and redirects users back to `/login` rather than exposing raw JSON error pages.
 * **Secure JWT Sessions:** Encrypted JWT tokens stored in HTTP-Only cookies to protect against XSS/CSRF.
 
+### 📐 Robust Frontend Architecture
+* **Strict Type-Safe Forms:** 100% of the application's forms (Authentication, Cart, and Admin Dashboard) are powered by **React Hook Form** + **Zod** schema validation, ensuring zero unnecessary re-renders and guaranteeing mathematical type safety before data hits the backend.
+* **Route-Based Code Splitting:** `React.lazy()` and `Suspense` chunk the application down to highly optimized bundles, loading massive third-party packages dynamically only when users visit specific flows (like the Checkout page).
+* **Absolute Path Aliasing:** `@/*` configured seamlessly across `vite.config.ts` and `tsconfig.json` for infinitely scalable module imports.
+* **UI Polish:** Integrated `react-toastify` for unified error handling, modern glassmorphism features, and highly responsive CSS grids.
+
 ### 📦 Product & Order Engine
 * **Dynamic Reviews:** Automated score recalculation whenever products are reviewed or rated.
 * **Inventory Control:** Real-time stock deduction upon order confirmation.
@@ -43,6 +50,7 @@ Rather than maintaining separate hosting environments, this repository runs as a
 
 * **Backend Framework:** NestJS (NodeJS) + TypeScript
 * **Frontend Library:** React (Vite) + Tailwind CSS + Redux Toolkit
+* **Form & Validation Engine:** React Hook Form + Zod
 * **Database:** MongoDB & Mongoose
 * **Auth Core:** PassportJS (`passport-jwt`, `passport-google-oauth20`)
 * **Styling & Assets:** Vanilla CSS, Material UI (MUI Icons)
