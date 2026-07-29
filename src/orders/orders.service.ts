@@ -9,6 +9,7 @@ import { UserDocument } from '../users/schemas/user.schema';
 import { MailService } from '../mail/mail.service';
 import { generateInvoice } from '../common/utils/generate-invoice.util';
 import { ProductDocument, Product } from '../products/schemas/product.schema';
+import { PaymentsService } from '../payments/payments.service';
 
 @Injectable()
 export class OrdersService {
@@ -16,6 +17,7 @@ export class OrdersService {
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>, // We should inject model directly for stock update
     private mailService: MailService,
+    private paymentsService: PaymentsService,
   ) {}
 
   async createOrder(createOrderDto: CreateOrderDto, user: UserDocument) {
@@ -77,7 +79,9 @@ export class OrdersService {
 
     let totalAmount = 0;
     orders.forEach((order) => {
-      totalAmount += order.totalPrice;
+      if (order.orderStatus !== 'Cancelled') {
+        totalAmount += order.totalPrice;
+      }
     });
 
     return {
@@ -88,7 +92,7 @@ export class OrdersService {
   }
 
   async updateOrder(id: string, updateOrderStatusDto: UpdateOrderStatusDto) {
-    const order = await this.orderModel.findById(id);
+    const order = await this.orderModel.findById(id).populate('user', 'name email');
 
     if (!order) {
       throw new NotFoundException('Order not found');
@@ -128,6 +132,29 @@ export class OrdersService {
 
     await order.save({ validateBeforeSave: false });
 
+    // Send Cancellation Email if Admin cancelled it
+    if (updateOrderStatusDto.status === 'Cancelled' && order.user) {
+      if (order.paymentInfo && order.paymentInfo.id) {
+        try {
+          await this.paymentsService.refundPayment(order.paymentInfo.id);
+        } catch (error) {
+          console.error('Failed to process refund (admin):', error);
+          // depending on requirements, we might not want to block the DB update if refund fails, or maybe we do.
+          // For now, let's log it.
+        }
+      }
+
+      try {
+        await this.mailService.sendEmail({
+          email: (order.user as any).email,
+          subject: `Order Cancelled - #${(order as any)._id}`,
+          message: `Hi ${(order.user as any).name},\n\nYour order #${(order as any)._id} has been cancelled by our administration team. If you have any questions, please contact support.`,
+        });
+      } catch (error) {
+        console.error('Error sending order cancellation email (admin):', error);
+      }
+    }
+
     return {
       success: true,
     };
@@ -158,6 +185,24 @@ export class OrdersService {
 
     order.orderStatus = 'Cancelled';
     await order.save({ validateBeforeSave: false });
+
+    if (order.paymentInfo && order.paymentInfo.id) {
+      try {
+        await this.paymentsService.refundPayment(order.paymentInfo.id);
+      } catch (error) {
+        console.error('Failed to process refund:', error);
+      }
+    }
+
+    try {
+      await this.mailService.sendEmail({
+        email: user.email,
+        subject: `Order Cancelled - #${(order as any)._id}`,
+        message: `Hi ${user.name},\n\nYour order #${(order as any)._id} has been successfully cancelled. If you have any questions, please contact our support team.`,
+      });
+    } catch (error) {
+      console.error('Error sending order cancellation email:', error);
+    }
 
     return {
       success: true,

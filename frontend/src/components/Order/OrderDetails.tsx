@@ -89,8 +89,8 @@ const OrderDetails: React.FC = () => {
                   </div>
                   <div>
                     <p>Status:</p>
-                    <span className={orderDetails.paymentInfo?.status === "succeeded" ? "greenColor" : "redColor"}>
-                      {orderDetails.paymentInfo?.status === "succeeded" ? "Transaction Successful" : "Payment Required"}
+                    <span className={orderDetails.orderStatus === "Cancelled" ? "redColor" : orderDetails.paymentInfo?.status === "succeeded" ? "greenColor" : "redColor"}>
+                      {orderDetails.orderStatus === "Cancelled" ? (orderDetails.paymentInfo?.status === "succeeded" ? "Refunded" : "Voided") : orderDetails.paymentInfo?.status === "succeeded" ? "Transaction Successful" : "Payment Required"}
                     </span>
                   </div>
                   <div>

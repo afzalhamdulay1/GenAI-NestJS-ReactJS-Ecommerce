@@ -34,13 +34,13 @@ Rather than maintaining separate hosting environments, this repository runs as a
 * **Route-Based Code Splitting:** `React.lazy()` and `Suspense` chunk the application down to highly optimized bundles, loading massive third-party packages dynamically only when users visit specific flows (like the Checkout page).
 
 ### 📦 Product & Order Engine
-* **Order Cancellation System:** Users can easily cancel 'Processing' orders directly from their dashboard. Admins can Void/Cancel shipped orders.
+* **Automated Cancellations:** Users and Admins can instantly cancel orders, triggering automated email confirmations sent directly via Nodemailer.
 * **Smart Inventory Management:** Automated real-time stock deduction upon shipping confirmation (not order creation) and automatic stock restoration if an order is cancelled.
 * **Dynamic Reviews:** Automated score recalculation whenever products are reviewed or rated.
 * **Admin Dashboard:** Full CRUD endpoints to manage users, products, orders, and reviews with a standardized, breadcrumb-navigation UI header.
 
 ### 💳 Payments & Media Storage
-* **Stripe Gateway:** Secure server-side Stripe integration to create payment intents and secure credits.
+* **Stripe Gateway & Automated Refunds:** Secure server-side Stripe integration to create payment intents. Directly integrates with the Stripe SDK to process instant, automated refunds to the user's card upon order cancellation.
 * **Cloudinary Storage:** Media handling using Multer for base64 photo uploads.
 
 ### 🧩 Modular UI & Code Separation

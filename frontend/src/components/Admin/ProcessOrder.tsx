@@ -148,9 +148,9 @@ const ProcessOrder: React.FC = () => {
                                 <Typography variant="caption" color="text.secondary">Payment Status</Typography>
                                 <Box sx={{ mt: 0.5 }}>
                                     <Chip 
-                                        label={order.paymentInfo?.status === "succeeded" ? "PAID" : "UNPAID"} 
+                                        label={order.orderStatus === "Cancelled" ? (order.paymentInfo?.status === "succeeded" ? "REFUNDED" : "VOIDED") : order.paymentInfo?.status === "succeeded" ? "PAID" : "UNPAID"} 
                                         size="small"
-                                        color={order.paymentInfo?.status === "succeeded" ? "success" : "error"}
+                                        color={order.orderStatus === "Cancelled" ? "default" : order.paymentInfo?.status === "succeeded" ? "success" : "error"}
                                         variant="outlined"
                                         sx={{ fontWeight: 700 }}
                                     />

@@ -32,4 +32,19 @@ export class PaymentsService {
       stripeApiKey: this.configService.get<string>('STRIPE_API_KEY'),
     };
   }
+
+  async refundPayment(paymentIntentId: string) {
+    try {
+      const refund = await this.stripe.refunds.create({
+        payment_intent: paymentIntentId,
+      });
+      return {
+        success: true,
+        status: refund.status,
+      };
+    } catch (error: any) {
+      console.error('Stripe refund error:', error);
+      throw new Error(`Refund failed: ${error.message}`);
+    }
+  }
 }
