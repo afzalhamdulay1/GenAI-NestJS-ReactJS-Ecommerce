@@ -38,7 +38,6 @@ const Search: React.FC = () => {
     <Fragment>
       <MetaData title="Search A Product -- ECOMMERCE" />
       <div className="searchBox">
-        <MetaData title="Explore Our Products -- ECOMMERCE" />
         
         <div className="searchHeader">
           <h1>Discover Something New</h1>

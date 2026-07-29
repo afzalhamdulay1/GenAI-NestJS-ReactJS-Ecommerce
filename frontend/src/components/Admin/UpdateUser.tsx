@@ -6,18 +6,13 @@ import {
   Button, 
   Box, 
   Typography, 
-  TextField, 
-  Select, 
-  MenuItem, 
-  FormControl, 
-  InputLabel, 
-  InputAdornment, 
-  Paper,
   Grid,
   Avatar,
+  Paper,
   Divider,
-  FormHelperText
 } from "@mui/material";
+import FormInput from "@/components/Form/FormInput";
+import FormSelect from "@/components/Form/FormSelect";
 import MetaData from "@/components/Layout/MetaData";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import PersonIcon from "@mui/icons-material/Person";
@@ -121,62 +116,36 @@ const UpdateUser: React.FC = () => {
               >
                 <Grid container spacing={3}>
                   <Grid item xs={12}>
-                    <TextField
-                      fullWidth
+                    <FormInput
                       label="Full Name"
-                      variant="outlined"
-                      {...register("name")}
-                      error={!!errors.name}
-                      helperText={errors.name?.message}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <PersonIcon />
-                          </InputAdornment>
-                        ),
-                      }}
+                      register={register("name")}
+                      error={errors.name}
+                      icon={<PersonIcon />}
                     />
                   </Grid>
 
                   <Grid item xs={12}>
-                    <TextField
-                      fullWidth
+                    <FormInput
                       type="email"
                       label="Email Address"
-                      variant="outlined"
-                      {...register("email")}
-                      error={!!errors.email}
-                      helperText={errors.email?.message}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <MailOutlineIcon />
-                          </InputAdornment>
-                        ),
-                      }}
+                      register={register("email")}
+                      error={errors.email}
+                      icon={<MailOutlineIcon />}
                     />
                   </Grid>
 
                   <Grid item xs={12}>
-                    <FormControl fullWidth variant="outlined" error={!!errors.role}>
-                      <InputLabel id="role-label">Account Role</InputLabel>
-                      <Select
-                        labelId="role-label"
-                        label="Account Role"
-                        defaultValue=""
-                        {...register("role")}
-                        startAdornment={
-                          <InputAdornment position="start">
-                            <VerifiedUserIcon />
-                          </InputAdornment>
-                        }
-                      >
-                        <MenuItem value="">Choose Role</MenuItem>
-                        <MenuItem value="admin">Administrator</MenuItem>
-                        <MenuItem value="user">Standard User</MenuItem>
-                      </Select>
-                      {errors.role && <FormHelperText>{errors.role.message}</FormHelperText>}
-                    </FormControl>
+                    <FormSelect
+                      label="Account Role"
+                      options={[
+                        { label: "Choose Role", value: "" },
+                        { label: "Administrator", value: "admin" },
+                        { label: "Standard User", value: "user" }
+                      ]}
+                      register={register("role")}
+                      error={errors.role}
+                      icon={<VerifiedUserIcon />}
+                    />
                   </Grid>
 
                   <Grid item xs={12}>

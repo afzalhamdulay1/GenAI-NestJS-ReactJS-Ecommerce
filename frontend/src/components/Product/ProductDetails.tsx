@@ -1,6 +1,4 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { Carousel } from "react-responsive-carousel";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
 import "@/components/Product/ProductDetails.css";
 import {
   fetchProductDetails,
@@ -12,7 +10,9 @@ import { toast } from "react-toastify";
 import MetaData from "@/components/Layout/MetaData";
 import { addItemsToCart } from "@/features/cart/cartSlice";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Rating } from "@mui/material";
+import { Rating } from "@mui/material";
+import ProductImageGallery from "@/components/Product/Sections/ProductImageGallery";
+import SubmitReviewDialog from "@/components/Product/Sections/SubmitReviewDialog";
 import { useParams, useNavigate } from "react-router-dom";
 import { createNewReview } from "@/features/review/reviewSlice";
 
@@ -117,28 +117,7 @@ const ProductDetails: React.FC = () => {
           <MetaData title={`${product?.name || 'Product'} -- ECOMMERCE`} />
           <div className="ProductDetails">
             <div>
-              <Carousel
-                showArrows={true}
-                showThumbs={false}
-                showStatus={false}
-                infiniteLoop={true}
-                autoPlay={true}
-                interval={3000}
-                dynamicHeight={true}
-                emulateTouch={true}
-              >
-                {product?.images &&
-                  product.images.map((item, i) => (
-                    <div key={i}>
-                      <img
-                        className="CarouselImage"
-                        src={item.url}
-                        alt={`${i} Slide`}
-                        style={{ maxHeight: "400px", objectFit: "contain" }}
-                      />
-                    </div>
-                  ))}
-              </Carousel>
+              <ProductImageGallery images={product?.images} />
             </div>
 
             <div>
@@ -190,36 +169,15 @@ const ProductDetails: React.FC = () => {
 
           <h3 className="reviewsHeading">REVIEWS</h3>
 
-          <Dialog
-            aria-labelledby="simple-dialog-title"
+          <SubmitReviewDialog
             open={open}
             onClose={submitReviewToggle}
-          >
-            <DialogTitle>Submit Review</DialogTitle>
-            <DialogContent className="submitDialog">
-              <Rating
-                onChange={(_e, newValue) => setRating(newValue || 0)}
-                value={rating}
-                size="large"
-              />
-
-              <textarea
-                className="submitDialogTextArea"
-                cols={30}
-                rows={5}
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              ></textarea>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={submitReviewToggle} color="secondary">
-                Cancel
-              </Button>
-              <Button onClick={reviewSubmitHandler} color="primary">
-                Submit
-              </Button>
-            </DialogActions>
-          </Dialog>
+            rating={rating}
+            setRating={setRating}
+            comment={comment}
+            setComment={setComment}
+            onSubmit={reviewSubmitHandler}
+          />
 
           {product?.reviews?.length ? (
             <div className="reviews">

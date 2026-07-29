@@ -1,35 +1,35 @@
-import React, { Fragment, useEffect, useState } from "react";
-import "@/components/Product/Products.css";
-import ProductCard from "@/components/Home/ProductCard";
-import MetaData from "@/components/Layout/MetaData";
-import Loader from "@/components/Layout/Loader/Loader";
-import Pagination from "react-js-pagination";
-import { toast } from "react-toastify";
-import { useParams, useLocation } from "react-router-dom";
-import { getProducts, clearErrors } from "@/features/products/productsSlice";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { Slider, Typography, Button } from "@mui/material";
+import React, { Fragment, useEffect, useState } from 'react';
+import '@/components/Product/Products.css';
+import ProductCard from '@/components/Home/ProductCard';
+import MetaData from '@/components/Layout/MetaData';
+import Loader from '@/components/Layout/Loader/Loader';
+import Pagination from 'react-js-pagination';
+import { toast } from 'react-toastify';
+import { useParams, useLocation } from 'react-router-dom';
+import { getProducts, clearErrors } from '@/features/products/productsSlice';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import ProductFilterSidebar from '@/components/Product/Sections/ProductFilterSidebar';
 
 const categories = [
-  "All",
-  "Laptop",
-  "Footwear",
-  "Bottom",
-  "Clothing",
-  "Tops",
-  "Attire",
-  "Camera",
-  "SmartPhones",
+  'All',
+  'Laptop',
+  'Footwear',
+  'Bottom',
+  'Clothing',
+  'Tops',
+  'Attire',
+  'Camera',
+  'SmartPhones',
 ];
 
 const Products: React.FC = () => {
   const dispatch = useAppDispatch();
   const { keyword } = useParams<{ keyword?: string }>();
-  const mykeyword = keyword || "";
+  const mykeyword = keyword || '';
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const initialCategory = searchParams.get("category") || "";
+  const initialCategory = searchParams.get('category') || '';
 
   const [currentPage, setCurrentPage] = useState(1);
   const [price, setPrice] = useState<number[]>([0, 250000]);
@@ -42,13 +42,12 @@ const Products: React.FC = () => {
     ratings: 0,
   });
 
-  const { products, resultPerPage, filteredProductsCount, loading, error } = useAppSelector(
-    (state) => state.products
-  );
+  const { products, resultPerPage, filteredProductsCount, loading, error } =
+    useAppSelector((state) => state.products);
 
   const setCurrentPageNo = (pageNumber: number) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = () => {
@@ -65,10 +64,10 @@ const Products: React.FC = () => {
   useEffect(() => {
     const params: Record<string, string | number> = {
       keyword: mykeyword,
-      "price[lte]": filters.price[1],
-      "price[gte]": filters.price[0],
+      'price[lte]': filters.price[1],
+      'price[gte]': filters.price[0],
       page: currentPage,
-      "ratings[gte]": filters.ratings,
+      'ratings[gte]': filters.ratings,
     };
 
     if (filters.category) {
@@ -96,54 +95,25 @@ const Products: React.FC = () => {
               </div>
 
               <div className="productsLayout">
-                <div className="filterBox">
-                  <Typography>Price</Typography>
-                  <Slider
-                    value={price}
-                    onChange={(_event: Event, newPrice: number | number[]) => setPrice(newPrice as number[])}
-                    valueLabelDisplay="auto"
-                    aria-labelledby="range-slider"
-                    min={0}
-                    max={250000}
-                  />
-
-                  <Typography>Categories</Typography>
-                  <ul className="categoryBox">
-                    {categories.map((cat) => (
-                      <li
-                        className={`category-link ${
-                          category === cat || (cat === "All" && category === "") ? "active" : ""
-                        }`}
-                        key={cat}
-                        onClick={() => setCategory(cat === "All" ? "" : cat)}
-                      >
-                        {cat}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <fieldset>
-                    <Typography component="legend">Ratings Above</Typography>
-                    <Slider
-                      value={ratings}
-                      onChange={(_e: Event, newRating: number | number[]) => setRatings(newRating as number)}
-                      aria-labelledby="continuous-slider"
-                      valueLabelDisplay="auto"
-                      min={0}
-                      max={5}
-                    />
-                  </fieldset>
-
-                  <Button variant="contained" className="applyFiltersBtn" onClick={handleSubmit}>
-                    Apply Filters
-                  </Button>
-                </div>
+                <ProductFilterSidebar
+                  price={price}
+                  setPrice={setPrice}
+                  category={category}
+                  setCategory={setCategory}
+                  ratings={ratings}
+                  setRatings={setRatings}
+                  categories={categories}
+                  handleSubmit={handleSubmit}
+                />
 
                 <div className="ProductsContainer">
                   {products && products.length === 0 ? (
                     <div className="noProductsInside">
                       <h2>No Products Found</h2>
-                      <p>Try adjusting your filters to find what you're looking for.</p>
+                      <p>
+                        Try adjusting your filters to find what you're looking
+                        for.
+                      </p>
                     </div>
                   ) : (
                     products &&

@@ -2,6 +2,9 @@ import React, { useEffect } from "react";
 import Sidebar from "@/components/Admin/Sidebar";
 import "@/components/Admin/Dashboard.css";
 import { Typography } from "@mui/material";
+import SummaryCard from "@/components/Admin/Widgets/SummaryCard";
+import SalesChart from "@/components/Admin/Charts/SalesChart";
+import InventoryChart from "@/components/Admin/Charts/InventoryChart";
 import { Link } from "react-router-dom";
 import { Doughnut, Line } from "react-chartjs-2";
 import { getAdminProducts } from "@/features/products/productsSlice";
@@ -215,22 +218,7 @@ const Dashboard: React.FC = () => {
     ],
   };
 
-  const revenueChartData = {
-    labels: Object.keys(earningsByDay).slice(-7),
-    datasets: [
-      {
-        label: "Revenue (₹)",
-        data: Object.values(earningsByDay).slice(-7),
-        borderColor: "rgb(79, 70, 229)",
-        backgroundColor: "rgba(79, 70, 229, 0.1)",
-        fill: true,
-        tension: 0.4,
-        pointBackgroundColor: "rgb(79, 70, 229)",
-        pointBorderColor: "#fff",
-        pointHoverRadius: 6,
-      },
-    ],
-  };
+
 
   const orderStatusData = {
     labels: Object.keys(orderStatusCounts),
@@ -243,17 +231,6 @@ const Dashboard: React.FC = () => {
           "rgba(75, 192, 192, 0.8)",
         ],
         hoverOffset: 4,
-      },
-    ],
-  };
-
-  const stockChartData = {
-    labels: ["Out of Stock", "In Stock"],
-    datasets: [
-      {
-        backgroundColor: ["#FF6384", "#36A2EB"],
-        hoverBackgroundColor: ["#FF6384", "#36A2EB"],
-        data: [outOfStock, inStock],
       },
     ],
   };
@@ -301,38 +278,32 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="dashboardSummary">
-          <div className="totalRevenueBox">
-            <div className="boxIcon">
-              <TrendingUpIcon />
-            </div>
-            <div className="boxContent">
-              <p>Total Revenue</p>
-              <span>₹{totalAmount.toLocaleString()}</span>
-            </div>
-          </div>
+          <SummaryCard 
+            title="Total Revenue" 
+            value={`₹${totalAmount.toLocaleString()}`} 
+            icon={<TrendingUpIcon />} 
+            className="totalRevenueBox" 
+          />
 
           <div className="dashboardSummaryBox2">
-            <Link to="/admin/products" className="summaryBox">
-              <InventoryIcon className="boxIcon" />
-              <div className="boxContent">
-                <p>Products</p>
-                <span>{products && products.length}</span>
-              </div>
-            </Link>
-            <Link to="/admin/orders" className="summaryBox">
-              <ShoppingBagIcon className="boxIcon" />
-              <div className="boxContent">
-                <p>Orders</p>
-                <span>{orders && orders.length}</span>
-              </div>
-            </Link>
-            <Link to="/admin/users" className="summaryBox">
-              <GroupIcon className="boxIcon" />
-              <div className="boxContent">
-                <p>Users</p>
-                <span>{users && users.length}</span>
-              </div>
-            </Link>
+            <SummaryCard 
+              title="Products" 
+              value={products?.length || 0} 
+              icon={<InventoryIcon />} 
+              to="/admin/products" 
+            />
+            <SummaryCard 
+              title="Orders" 
+              value={orders?.length || 0} 
+              icon={<ShoppingBagIcon />} 
+              to="/admin/orders" 
+            />
+            <SummaryCard 
+              title="Users" 
+              value={users?.length || 0} 
+              icon={<GroupIcon />} 
+              to="/admin/users" 
+            />
           </div>
         </div>
 
@@ -380,7 +351,7 @@ const Dashboard: React.FC = () => {
               <p>Sales performance over time</p>
             </div>
             <div className="lineChart">
-              <Line data={revenueChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+              <SalesChart earningsByDay={earningsByDay} />
             </div>
           </div>
 
@@ -401,7 +372,7 @@ const Dashboard: React.FC = () => {
                 <p>Stock availability overview</p>
               </div>
               <div className="doughnutChart">
-                <Doughnut data={stockChartData} />
+                <InventoryChart outOfStock={outOfStock} inStock={inStock} />
               </div>
             </div>
 
