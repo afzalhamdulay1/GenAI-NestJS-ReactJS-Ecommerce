@@ -11,6 +11,7 @@ import MetaData from "@/components/Layout/MetaData";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockIcon from "@mui/icons-material/Lock";
 import { useParams, useNavigate } from "react-router-dom";
+import FormInput from "@/components/Form/FormInput";
 
 const resetPasswordSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters long"),
@@ -71,25 +72,21 @@ const ResetPassword: React.FC = () => {
                 className="resetPasswordForm"
                 onSubmit={handleSubmit(onResetPasswordSubmit)}
               >
-                <div>
-                  <LockOpenIcon />
-                  <input
-                    type="password"
-                    placeholder="New Password"
-                    {...register("password")}
-                  />
-                </div>
-                {errors.password && <span className="text-red-500 text-xs mt-1 ml-10">{errors.password.message}</span>}
+                <FormInput
+                  type="password"
+                  label="New Password"
+                  icon={<LockOpenIcon />}
+                  register={register("password")}
+                  error={errors.password}
+                />
 
-                <div className="loginPassword">
-                  <LockIcon />
-                  <input
-                    type="password"
-                    placeholder="Confirm Password"
-                    {...register("confirmPassword")}
-                  />
-                </div>
-                {errors.confirmPassword && <span className="text-red-500 text-xs mt-1 ml-10">{errors.confirmPassword.message}</span>}
+                <FormInput
+                  type="password"
+                  label="Confirm Password"
+                  icon={<LockIcon />}
+                  register={register("confirmPassword")}
+                  error={errors.confirmPassword}
+                />
 
                 <input
                   type="submit"

@@ -4,6 +4,7 @@ import MetaData from "@/components/Layout/MetaData";
 import "@/components/Cart/ConfirmOrder.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppSelector } from "@/app/hooks";
+import OrderSummaryCard from "@/components/Cart/Sections/OrderSummaryCard";
 
 const ConfirmOrder: React.FC = () => {
   const navigate = useNavigate();
@@ -76,32 +77,13 @@ const ConfirmOrder: React.FC = () => {
           </div>
         </div>
 
-        <div className="orderSummaryContainer">
-          <div className="orderSummary">
-            <p>Order Summary</p>
-            <div className="orderSummaryBox">
-              <div>
-                <p>Subtotal:</p>
-                <span>₹{subtotal}</span>
-              </div>
-              <div>
-                <p>Shipping Charges:</p>
-                <span>₹{shippingCharges}</span>
-              </div>
-              <div>
-                <p>GST (18%):</p>
-                <span>₹{tax}</span>
-              </div>
-            </div>
-
-            <div className="orderSummaryTotal">
-              <p>Total:</p>
-              <span>₹{totalPrice}</span>
-            </div>
-
-            <button onClick={proceedToPayment}>Proceed To Payment</button>
-          </div>
-        </div>
+        <OrderSummaryCard
+          subtotal={subtotal}
+          shippingCharges={shippingCharges}
+          tax={tax}
+          totalPrice={totalPrice}
+          onProceedToPayment={proceedToPayment}
+        />
       </div>
     </Fragment>
   );

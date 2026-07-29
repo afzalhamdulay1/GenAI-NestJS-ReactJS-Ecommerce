@@ -15,6 +15,7 @@ import MetaData from "@/components/Layout/MetaData";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SideBar from "@/components/Admin/Sidebar";
+import AdminPageHeader from "@/components/Admin/AdminPageHeader";
 import {
   deleteOrder,
   getAllOrders,
@@ -177,17 +178,10 @@ const OrdersList: React.FC = () => {
       <div className="dashboard">
         <SideBar />
         <div className="productListContainer">
-          <Box className="headerSection">
-            <Box>
-                <Typography variant="h6" className="pageHeading">
-                    Financial Orders
-                </Typography>
-                <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb">
-                    <Link to="/admin/dashboard" className="breadcrumbLink">Admin</Link>
-                    <Typography color="text.primary" fontSize="0.875rem">Orders</Typography>
-                </Breadcrumbs>
-            </Box>
-          </Box>
+          <AdminPageHeader
+            title="Financial Orders"
+            breadcrumbText="Orders"
+          />
 
           <Paper elevation={0} className="productListTableContainer">
             <DataGrid

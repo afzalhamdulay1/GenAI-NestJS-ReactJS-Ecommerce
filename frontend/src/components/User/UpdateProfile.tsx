@@ -12,6 +12,7 @@ import MetaData from "@/components/Layout/MetaData";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import dummyProfile from '@/images/Profile.png';
+import FormInput from "@/components/Form/FormInput";
 
 const updateProfileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -98,25 +99,21 @@ const UpdateProfile: React.FC = () => {
                 encType="multipart/form-data"
                 onSubmit={handleSubmit(onUpdateProfileSubmit)}
               >
-                <div className="updateProfileName">
-                  <FaceIcon />
-                  <input
-                    type="text"
-                    placeholder="Name"
-                    {...register("name")}
-                  />
-                </div>
-                {errors.name && <span className="text-red-500 text-xs mt-1 ml-10">{errors.name.message}</span>}
+                <FormInput
+                  icon={<FaceIcon />}
+                  type="text"
+                  label="Name"
+                  register={register("name")}
+                  error={errors.name}
+                />
 
-                <div className="updateProfileEmail">
-                  <MailOutlineIcon />
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    {...register("email")}
-                  />
-                </div>
-                {errors.email && <span className="text-red-500 text-xs mt-1 ml-10">{errors.email.message}</span>}
+                <FormInput
+                  icon={<MailOutlineIcon />}
+                  type="email"
+                  label="Email"
+                  register={register("email")}
+                  error={errors.email}
+                />
 
                 <div id="updateProfileImage">
                   <img src={avatarPreview} alt="Avatar Preview" />

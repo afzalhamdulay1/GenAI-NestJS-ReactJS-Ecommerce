@@ -129,6 +129,22 @@ export const deleteOrder = createAsyncThunk<
   }
 });
 
+export const cancelOrder = createAsyncThunk<
+  { success: boolean },
+  string,
+  { rejectValue: string }
+>('order/cancelOrder', async (id, { rejectWithValue }) => {
+  try {
+    const response = await api.put(`/order/${id}/cancel`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return rejectWithValue(error.response.data.message || 'Failed to cancel order');
+    }
+    return rejectWithValue('Failed to cancel order');
+  }
+});
+
 const orderSlice = createSlice({
   name: 'order',
   initialState,
@@ -226,6 +242,19 @@ const orderSlice = createSlice({
       .addCase(deleteOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to delete order';
+      })
+      
+      .addCase(cancelOrder.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(cancelOrder.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isUpdated = action.payload.success;
+        state.error = null;
+      })
+      .addCase(cancelOrder.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to cancel order';
       });
   },
 });

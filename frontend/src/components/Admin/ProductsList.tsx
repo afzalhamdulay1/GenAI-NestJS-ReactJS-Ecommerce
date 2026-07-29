@@ -21,9 +21,10 @@ import {
 import MetaData from "@/components/Layout/MetaData";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
 import SideBar from "@/components/Admin/Sidebar";
+import AdminPageHeader from "@/components/Admin/AdminPageHeader";
 import { toast } from "react-toastify";
+import AddIcon from '@mui/icons-material/Add';
 import { deleteProduct, resetProductState } from "@/features/products/productSlice";
 import Loader from "@/components/Layout/Loader/Loader";
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -186,16 +187,10 @@ const ProductsList: React.FC = () => {
       <div className="dashboard">
         <SideBar />
         <div className="productListContainer">
-          <Box className="headerSection">
-            <Box>
-                <Typography variant="h6" className="pageHeading">
-                    Product Inventory
-                </Typography>
-                <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb">
-                    <Link to="/admin/dashboard" className="breadcrumbLink">Admin</Link>
-                    <Typography color="text.primary" fontSize="0.875rem">Products</Typography>
-                </Breadcrumbs>
-            </Box>
+          <AdminPageHeader
+            title="Product Inventory"
+            breadcrumbText="Products"
+          >
             <Button 
                 variant="contained" 
                 startIcon={<AddIcon />}
@@ -205,7 +200,7 @@ const ProductsList: React.FC = () => {
             >
                 Add New Product
             </Button>
-          </Box>
+          </AdminPageHeader>
 
           <Paper elevation={0} className="productListTableContainer">
             {loading ? <Loader/> : 

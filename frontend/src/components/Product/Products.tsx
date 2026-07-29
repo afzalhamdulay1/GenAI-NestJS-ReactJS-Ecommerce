@@ -5,10 +5,13 @@ import MetaData from '@/components/Layout/MetaData';
 import Loader from '@/components/Layout/Loader/Loader';
 import Pagination from 'react-js-pagination';
 import { toast } from 'react-toastify';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getProducts, clearErrors } from '@/features/products/productsSlice';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import ProductFilterSidebar from '@/components/Product/Sections/ProductFilterSidebar';
+import { Drawer, Button, useMediaQuery, useTheme, IconButton } from '@mui/material';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import CloseIcon from '@mui/icons-material/Close';
 
 const categories = [
   'All',
@@ -28,8 +31,13 @@ const Products: React.FC = () => {
   const mykeyword = keyword || '';
 
   const location = useLocation();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const initialCategory = searchParams.get('category') || '';
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [price, setPrice] = useState<number[]>([0, 250000]);
@@ -52,6 +60,28 @@ const Products: React.FC = () => {
 
   const handleSubmit = () => {
     setFilters({ price, category, ratings });
+    if (isMobile) {
+      setMobileFiltersOpen(false);
+    }
+  };
+
+  const handleClearFilters = () => {
+    setPrice([0, 250000]);
+    setCategory('');
+    setRatings(0);
+    setFilters({ price: [0, 250000], category: '', ratings: 0 });
+    
+    if (location.search) {
+      if (mykeyword) {
+        navigate(`/products/${mykeyword}`);
+      } else {
+        navigate('/products');
+      }
+    }
+
+    if (isMobile) {
+      setMobileFiltersOpen(false);
+    }
   };
 
   useEffect(() => {
@@ -95,16 +125,82 @@ const Products: React.FC = () => {
               </div>
 
               <div className="productsLayout">
-                <ProductFilterSidebar
-                  price={price}
-                  setPrice={setPrice}
-                  category={category}
-                  setCategory={setCategory}
-                  ratings={ratings}
-                  setRatings={setRatings}
-                  categories={categories}
-                  handleSubmit={handleSubmit}
-                />
+                {isMobile && (
+                  <div style={{ display: 'flex', gap: '1rem', width: '100%', marginBottom: '1.5rem' }}>
+                    <Button 
+                      variant="outlined" 
+                      startIcon={<FilterListIcon />}
+                      onClick={() => setMobileFiltersOpen(true)}
+                      className="mobileFilterBtn"
+                    >
+                      Filters
+                    </Button>
+                    <Button 
+                      variant="outlined" 
+                      onClick={handleClearFilters}
+                      className="mobileFilterBtn"
+                      style={{ color: '#ef4444', borderColor: '#ef4444' }}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                )}
+
+                {isMobile ? (
+                  <Drawer
+                    anchor="bottom"
+                    open={mobileFiltersOpen}
+                    onClose={() => setMobileFiltersOpen(false)}
+                    PaperProps={{
+                      sx: {
+                        borderTopLeftRadius: '1.5rem',
+                        borderTopRightRadius: '1.5rem',
+                        padding: 0,
+                        maxHeight: '90vh',
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }
+                    }}
+                  >
+                    <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 10 }}>
+                      <IconButton onClick={() => setMobileFiltersOpen(false)} size="small">
+                        <CloseIcon />
+                      </IconButton>
+                    </div>
+                    <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', paddingTop: '3rem' }}>
+                      <ProductFilterSidebar
+                        price={price}
+                        setPrice={setPrice}
+                        category={category}
+                        setCategory={setCategory}
+                        ratings={ratings}
+                        setRatings={setRatings}
+                        categories={categories}
+                        handleSubmit={handleSubmit}
+                        handleClearFilters={handleClearFilters}
+                        isMobile={true}
+                      />
+                    </div>
+                    <div style={{ padding: '1.5rem', borderTop: '1px solid #e2e8f0', backgroundColor: '#fff' }}>
+                      <Button onClick={handleSubmit} fullWidth variant="contained" className="applyFiltersBtn">
+                        Apply Filters
+                      </Button>
+                    </div>
+                  </Drawer>
+                ) : (
+                  <ProductFilterSidebar
+                    price={price}
+                    setPrice={setPrice}
+                    category={category}
+                    setCategory={setCategory}
+                    ratings={ratings}
+                    setRatings={setRatings}
+                    categories={categories}
+                    handleSubmit={handleSubmit}
+                    handleClearFilters={handleClearFilters}
+                    isMobile={false}
+                  />
+                )}
 
                 <div className="ProductsContainer">
                   {products && products.length === 0 ? (

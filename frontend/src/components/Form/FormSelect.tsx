@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl, InputLabel, Select, MenuItem, FormHelperText, InputAdornment, SelectProps } from "@mui/material";
+import { FormControl, InputLabel, Select, FormHelperText, InputAdornment, SelectProps } from "@mui/material";
 import { UseFormRegisterReturn, FieldError } from "react-hook-form";
 
 type FormSelectProps = Omit<SelectProps, "error" | "name" | "variant"> & {
@@ -23,6 +23,7 @@ const FormSelect: React.FC<FormSelectProps> = ({
     <FormControl fullWidth variant="outlined" error={!!error}>
       <InputLabel id={labelId}>{label}</InputLabel>
       <Select
+        native
         labelId={labelId}
         label={label}
         defaultValue=""
@@ -40,9 +41,9 @@ const FormSelect: React.FC<FormSelectProps> = ({
           const value = typeof opt === "string" ? opt : opt.value;
           const displayLabel = typeof opt === "string" ? opt : opt.label;
           return (
-            <MenuItem key={index} value={value}>
+            <option key={index} value={value}>
               {displayLabel}
-            </MenuItem>
+            </option>
           );
         })}
       </Select>

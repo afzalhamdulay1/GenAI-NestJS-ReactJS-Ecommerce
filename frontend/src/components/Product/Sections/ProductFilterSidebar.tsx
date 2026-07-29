@@ -10,6 +10,8 @@ interface ProductFilterSidebarProps {
   setRatings: (ratings: number) => void;
   categories: string[];
   handleSubmit: () => void;
+  handleClearFilters: () => void;
+  isMobile?: boolean;
 }
 
 const ProductFilterSidebar: React.FC<ProductFilterSidebarProps> = ({
@@ -21,6 +23,8 @@ const ProductFilterSidebar: React.FC<ProductFilterSidebarProps> = ({
   setRatings,
   categories,
   handleSubmit,
+  handleClearFilters,
+  isMobile = false,
 }) => {
   return (
     <div className="filterBox">
@@ -61,9 +65,32 @@ const ProductFilterSidebar: React.FC<ProductFilterSidebarProps> = ({
         />
       </fieldset>
 
-      <Button variant="contained" className="applyFiltersBtn" onClick={handleSubmit}>
-        Apply Filters
-      </Button>
+      {!isMobile && (
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexDirection: 'column' }}>
+          <Button variant="contained" className="applyFiltersBtn" onClick={handleSubmit}>
+            Apply Filters
+          </Button>
+          <Button 
+            variant="outlined" 
+            onClick={handleClearFilters}
+            sx={{
+              borderRadius: '50px',
+              padding: '0.8rem',
+              textTransform: 'none',
+              fontWeight: 700,
+              fontFamily: '"Outfit", sans-serif',
+              color: '#64748b',
+              borderColor: '#e2e8f0',
+              '&:hover': {
+                borderColor: '#cbd5e1',
+                backgroundColor: '#f8fafc'
+              }
+            }}
+          >
+            Clear Filters
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

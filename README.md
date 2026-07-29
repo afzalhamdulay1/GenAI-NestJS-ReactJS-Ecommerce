@@ -34,13 +34,20 @@ Rather than maintaining separate hosting environments, this repository runs as a
 * **Route-Based Code Splitting:** `React.lazy()` and `Suspense` chunk the application down to highly optimized bundles, loading massive third-party packages dynamically only when users visit specific flows (like the Checkout page).
 
 ### 📦 Product & Order Engine
+* **Order Cancellation System:** Users can easily cancel 'Processing' orders directly from their dashboard. Admins can Void/Cancel shipped orders.
+* **Smart Inventory Management:** Automated real-time stock deduction upon shipping confirmation (not order creation) and automatic stock restoration if an order is cancelled.
 * **Dynamic Reviews:** Automated score recalculation whenever products are reviewed or rated.
-* **Inventory Control:** Real-time stock deduction upon order confirmation.
-* **Admin Dashboard:** Full CRUD endpoints to manage users, products, orders, and review reviews.
+* **Admin Dashboard:** Full CRUD endpoints to manage users, products, orders, and reviews with a standardized, breadcrumb-navigation UI header.
 
 ### 💳 Payments & Media Storage
 * **Stripe Gateway:** Secure server-side Stripe integration to create payment intents and secure credits.
 * **Cloudinary Storage:** Media handling using Multer for base64 photo uploads.
+
+### 🧩 Modular UI & Code Separation
+* **Reusable Form Components:** Form controls like Inputs and Select dropdowns are abstracted into fully reusable wrapper components (`<FormInput />`, `<FormSelect />`). These wrappers seamlessly bridge Material-UI with React Hook Form, eliminating boilerplate and guaranteeing consistent validation UI everywhere.
+* **Reusable Layout Components:** Shared UI elements (like `AdminPageHeader` and custom Dialogs) are abstracted into standalone components to prevent code duplication across pages.
+* **Component-Level Styling:** CSS is heavily scoped and separated to individual component stylesheets to prevent global namespace pollution and ensure predictability.
+* **Clean File Structure:** Large, monolithic page components are broken down into logical sub-components (e.g. separating sidebars and layout wrappers) to maintain readability and scalability.
 
 ### 💡 Code Architecture & Best Practices
 * **Domain-Driven Backend:** The NestJS architecture is highly modular (Users, Orders, Products, Auth), utilizing **DTOs (Data Transfer Objects)** for strict payload validation and **Custom Decorators** (like `@CurrentUser`) to keep controllers completely DRY.
@@ -141,6 +148,8 @@ nestjs-ecom-backend/
 | **GET** | `/api/v1/me` | Fetch authenticated profile details | User |
 | **PUT** | `/api/v1/me/update` | Update user profile and avatar | User |
 | **POST** | `/api/v1/payment/process` | Create Stripe Payment intent | User |
+| **PUT** | `/api/v1/order/:id/cancel` | Cancel an active 'Processing' order | User |
 | **GET** | `/api/v1/admin/users` | Fetch list of all registered users | **Admin Only** |
 | **POST** | `/api/v1/admin/product/new` | Create new shop product listing | **Admin Only** |
+| **PUT** | `/api/v1/admin/order/:id` | Update logistics status (e.g. Shipped) | **Admin Only** |
 | **DELETE** | `/api/v1/admin/user/:id` | Remove user registration | **Admin Only** |

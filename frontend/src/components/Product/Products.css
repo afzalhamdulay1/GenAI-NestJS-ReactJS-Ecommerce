@@ -226,14 +226,31 @@
     width: 100%;
     position: static;
     margin-bottom: 2rem;
+    box-shadow: none;
+    border: none;
+    padding: 1rem 0.5rem;
+  }
+  .mobileFilterBtn {
+    width: 100%;
+    border-radius: 50px !important;
+    padding: 0.8rem !important;
+    text-transform: none !important;
+    font-family: "Outfit", sans-serif !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    border-color: #cbd5e1 !important;
+    margin-bottom: 1.5rem !important;
   }
 }
 
 @media screen and (max-width: 600px) {
   .ProductsPage {
-    padding: 2rem;
+    padding: 2rem 4%;
   }
   .ProductsContainer {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+    box-sizing: border-box;
+    width: 100%;
   }
 }

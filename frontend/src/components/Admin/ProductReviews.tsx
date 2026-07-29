@@ -28,14 +28,15 @@ import {
   Rating,
   InputAdornment
 } from "@mui/material";
-import MetaData from "@/components/Layout/MetaData";
+import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import InventoryIcon from '@mui/icons-material/Inventory';
 import SearchIcon from '@mui/icons-material/Search';
+import InventoryIcon from '@mui/icons-material/Inventory';
 import SideBar from "@/components/Admin/Sidebar";
+import AdminPageHeader from "@/components/Admin/AdminPageHeader";
+import MetaData from "@/components/Layout/MetaData";
 import { toast } from "react-toastify";
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const productReviewsSchema = z.object({
   productId: z.string().length(24, "Product ID must be exactly 24 characters"),
@@ -189,17 +190,10 @@ const ProductReviews: React.FC = () => {
       <div className="dashboard">
         <SideBar />
         <div className="productReviewsContainer">
-          <Box className="headerSection">
-            <Box>
-                <Typography variant="h6" className="pageHeading">
-                    Review Moderation
-                </Typography>
-                <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="breadcrumb">
-                    <Link to="/admin/dashboard" className="breadcrumbLink">Admin</Link>
-                    <Typography color="text.primary" fontSize="0.875rem">Reviews</Typography>
-                </Breadcrumbs>
-            </Box>
-          </Box>
+          <AdminPageHeader
+            title="Review Moderation"
+            breadcrumbText="Reviews"
+          />
 
           <Grid container spacing={3}>
             {/* Search Top Bar */}

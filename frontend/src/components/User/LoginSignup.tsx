@@ -16,6 +16,7 @@ import {
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { toast } from 'react-toastify';
 import dummyProfile from '@/images/Profile.png';
+import FormInput from '@/components/Form/FormInput';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -157,33 +158,21 @@ const LoginSignup: React.FC = () => {
             ref={loginTab}
             onSubmit={handleLoginSubmit(onLoginSubmit)}
           >
-            <div className="loginEmail">
-              <MailOutlineIcon />
-              <input
-                type="email"
-                placeholder="Email"
-                {...registerLogin('email')}
-              />
-            </div>
-            {loginErrors.email && (
-              <span className="text-red-500 text-xs mt-1 ml-10">
-                {loginErrors.email.message}
-              </span>
-            )}
+            <FormInput
+              icon={<MailOutlineIcon />}
+              type="email"
+              label="Email"
+              register={registerLogin('email')}
+              error={loginErrors.email}
+            />
 
-            <div className="loginPassword">
-              <LockOpenIcon />
-              <input
-                type="password"
-                placeholder="Password"
-                {...registerLogin('password')}
-              />
-            </div>
-            {loginErrors.password && (
-              <span className="text-red-500 text-xs mt-1 ml-10">
-                {loginErrors.password.message}
-              </span>
-            )}
+            <FormInput
+              icon={<LockOpenIcon />}
+              type="password"
+              label="Password"
+              register={registerLogin('password')}
+              error={loginErrors.password}
+            />
 
             <Link to="/password/forgot">Forget Password ?</Link>
             <input type="submit" value="Login" className="loginBtn" />
@@ -234,51 +223,38 @@ const LoginSignup: React.FC = () => {
             encType="multipart/form-data"
             onSubmit={handleRegisterSubmit(onRegisterSubmit)}
           >
-            <div className="signUpName">
-              <FaceIcon />
-              <input
-                type="text"
-                placeholder="Name"
-                {...registerSignup('name')}
-              />
-            </div>
-            {registerErrors.name && (
-              <span className="text-red-500 text-xs mt-1 ml-10">
-                {registerErrors.name.message}
-              </span>
-            )}
+            <FormInput
+              icon={<FaceIcon />}
+              type="text"
+              label="Name"
+              register={registerSignup('name')}
+              error={registerErrors.name}
+            />
 
-            <div className="signUpEmail">
-              <MailOutlineIcon />
-              <input
-                type="email"
-                placeholder="Email"
-                {...registerSignup('email')}
-              />
-            </div>
-            {registerErrors.email && (
-              <span className="text-red-500 text-xs mt-1 ml-10">
-                {registerErrors.email.message}
-              </span>
-            )}
+            <FormInput
+              icon={<MailOutlineIcon />}
+              type="email"
+              label="Email"
+              register={registerSignup('email')}
+              error={registerErrors.email}
+            />
 
-            <div className="signUpPassword">
-              <LockOpenIcon />
-              <input
-                type="password"
-                placeholder="Password"
-                {...registerSignup('password')}
-              />
-            </div>
-            {registerErrors.password && (
-              <span className="text-red-500 text-xs mt-1 ml-10">
-                {registerErrors.password.message}
-              </span>
-            )}
+            <FormInput
+              icon={<LockOpenIcon />}
+              type="password"
+              label="Password"
+              register={registerSignup('password')}
+              error={registerErrors.password}
+            />
 
             <div id="registerImage">
               <img src={avatarPreview} alt="Avatar Preview" />
+              <div className="registerImageInfo">
+                <label htmlFor="avatarFileInputRegister">📷 Choose Photo</label>
+                <p>JPG, PNG or GIF · Max 2MB</p>
+              </div>
               <input
+                id="avatarFileInputRegister"
                 type="file"
                 name="avatar"
                 accept="image/*"

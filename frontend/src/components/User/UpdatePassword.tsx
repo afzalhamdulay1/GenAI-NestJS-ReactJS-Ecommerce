@@ -12,6 +12,7 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LockIcon from "@mui/icons-material/Lock";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { useNavigate } from "react-router-dom";
+import FormInput from "@/components/Form/FormInput";
 
 const updatePasswordSchema = z.object({
   oldPassword: z.string().min(1, "Old password is required"),
@@ -73,35 +74,29 @@ const UpdatePassword: React.FC = () => {
               <h2 className="updatePasswordHeading">Change Password</h2>
 
               <form className="updatePasswordForm" onSubmit={handleSubmit(onUpdatePasswordSubmit)}>
-                <div className="loginPassword">
-                  <VpnKeyIcon />
-                  <input
-                    type="password"
-                    placeholder="Old Password"
-                    {...register("oldPassword")}
-                  />
-                </div>
-                {errors.oldPassword && <span className="text-red-500 text-xs mt-1 ml-10">{errors.oldPassword.message}</span>}
+                <FormInput
+                  type="password"
+                  label="Old Password"
+                  icon={<VpnKeyIcon />}
+                  register={register("oldPassword")}
+                  error={errors.oldPassword}
+                />
 
-                <div className="loginPassword">
-                  <LockOpenIcon />
-                  <input
-                    type="password"
-                    placeholder="New Password"
-                    {...register("newPassword")}
-                  />
-                </div>
-                {errors.newPassword && <span className="text-red-500 text-xs mt-1 ml-10">{errors.newPassword.message}</span>}
+                <FormInput
+                  type="password"
+                  label="New Password"
+                  icon={<LockOpenIcon />}
+                  register={register("newPassword")}
+                  error={errors.newPassword}
+                />
 
-                <div className="loginPassword">
-                  <LockIcon />
-                  <input
-                    type="password"
-                    placeholder="Confirm Password"
-                    {...register("confirmPassword")}
-                  />
-                </div>
-                {errors.confirmPassword && <span className="text-red-500 text-xs mt-1 ml-10">{errors.confirmPassword.message}</span>}
+                <FormInput
+                  type="password"
+                  label="Confirm Password"
+                  icon={<LockIcon />}
+                  register={register("confirmPassword")}
+                  error={errors.confirmPassword}
+                />
 
                 <input
                   type="submit"

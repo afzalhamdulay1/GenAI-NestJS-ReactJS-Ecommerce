@@ -223,12 +223,12 @@ const ProcessOrder: React.FC = () => {
                     >
                         <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>Logistics Center</Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                            {order.orderStatus === "Delivered" 
-                             ? "This order has been completed and archived." 
+                            {order.orderStatus === "Delivered" || order.orderStatus === "Cancelled"
+                             ? "This order has been completed/voided and archived." 
                              : "Update the delivery pipeline for this shipment."}
                         </Typography>
 
-                        {order.orderStatus !== "Delivered" && (
+                        {order.orderStatus !== "Delivered" && order.orderStatus !== "Cancelled" && (
                             <form onSubmit={handleSubmit(onUpdateOrderSubmit)}>
                                 <FormControl fullWidth sx={{ mb: 3 }} error={!!errors.status}>
                                     <InputLabel id="status-label">Transition To</InputLabel>
@@ -246,6 +246,7 @@ const ProcessOrder: React.FC = () => {
                                         {order.orderStatus === "Shipped" && (
                                             <MenuItem value="Delivered">Completed (Delivered)</MenuItem>
                                         )}
+                                        <MenuItem value="Cancelled">Void (Cancelled)</MenuItem>
                                     </Select>
                                     {errors.status && <FormHelperText>{errors.status.message}</FormHelperText>}
                                 </FormControl>

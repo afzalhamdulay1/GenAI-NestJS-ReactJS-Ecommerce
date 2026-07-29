@@ -17,6 +17,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SideBar from '@/components/Admin/Sidebar';
+import AdminPageHeader from '@/components/Admin/AdminPageHeader';
 import {
   getAllUsers,
   clearErrors,
@@ -204,24 +205,10 @@ const UsersList: React.FC = () => {
       <div className="dashboard">
         <SideBar />
         <div className="productListContainer">
-          <Box className="headerSection">
-            <Box>
-              <Typography variant="h6" className="pageHeading">
-                User Accounts
-              </Typography>
-              <Breadcrumbs
-                separator={<NavigateNextIcon fontSize="small" />}
-                aria-label="breadcrumb"
-              >
-                <Link to="/admin/dashboard" className="breadcrumbLink">
-                  Admin
-                </Link>
-                <Typography color="text.primary" fontSize="0.875rem">
-                  Users
-                </Typography>
-              </Breadcrumbs>
-            </Box>
-          </Box>
+          <AdminPageHeader
+            title="User Accounts"
+            breadcrumbText="Users"
+          />
 
           <Paper elevation={0} className="productListTableContainer">
             <DataGrid

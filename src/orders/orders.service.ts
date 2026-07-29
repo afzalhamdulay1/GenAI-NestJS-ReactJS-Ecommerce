@@ -98,12 +98,26 @@ export class OrdersService {
       throw new BadRequestException('You have already delivered this order');
     }
 
+    if (order.orderStatus === 'Cancelled') {
+      throw new BadRequestException('Order is already cancelled');
+    }
+
     if (!updateOrderStatusDto.status) {
       throw new BadRequestException('Status field is required');
     }
 
-    for (const item of order.orderItems) {
-      await this.updateStock(item.productId.toString(), item.quantity);
+    // Deduct stock only when order ships
+    if (order.orderStatus === 'Processing' && updateOrderStatusDto.status === 'Shipped') {
+      for (const item of order.orderItems) {
+        await this.updateStock(item.productId.toString(), item.quantity);
+      }
+    }
+
+    // Restore stock if a shipped order is cancelled
+    if (order.orderStatus === 'Shipped' && updateOrderStatusDto.status === 'Cancelled') {
+      for (const item of order.orderItems) {
+        await this.updateStock(item.productId.toString(), -item.quantity);
+      }
     }
 
     order.orderStatus = updateOrderStatusDto.status;
@@ -125,6 +139,29 @@ export class OrdersService {
       product.stock -= quantity;
       await product.save({ validateBeforeSave: false });
     }
+  }
+
+  async cancelMyOrder(id: string, user: UserDocument) {
+    const order = await this.orderModel.findById(id);
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (order.user.toString() !== user._id.toString()) {
+      throw new BadRequestException('You do not have permission to cancel this order');
+    }
+
+    if (order.orderStatus !== 'Processing') {
+      throw new BadRequestException('You cannot cancel this order at its current stage');
+    }
+
+    order.orderStatus = 'Cancelled';
+    await order.save({ validateBeforeSave: false });
+
+    return {
+      success: true,
+    };
   }
 
   async deleteOrder(id: string) {

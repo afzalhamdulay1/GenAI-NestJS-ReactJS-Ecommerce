@@ -15,6 +15,8 @@ import TransferWithinAStationIcon from "@mui/icons-material/TransferWithinAStati
 import { Country, State } from "country-state-city";
 import CheckoutSteps from "@/components/Cart/CheckoutSteps";
 import { useNavigate } from "react-router-dom";
+import FormInput from "@/components/Form/FormInput";
+import FormSelect from "@/components/Form/FormSelect";
 
 const shippingSchema = z.object({
   address: z.string().min(1, "Address is required"),
@@ -100,76 +102,62 @@ const Shipping: React.FC = () => {
             encType="multipart/form-data"
             onSubmit={handleSubmit(onShippingSubmit)}
           >
-            <div>
-              <HomeIcon />
-              <input
-                type="text"
-                placeholder="Address"
-                {...register("address")}
-              />
-            </div>
-            {errors.address && <span className="text-red-500 text-xs mt-1 ml-10">{errors.address.message}</span>}
+            <FormInput
+              icon={<HomeIcon />}
+              type="text"
+              label="Address"
+              register={register("address")}
+              error={errors.address}
+            />
 
-            <div>
-              <LocationCityIcon />
-              <input
-                type="text"
-                placeholder="City"
-                {...register("city")}
-              />
-            </div>
-            {errors.city && <span className="text-red-500 text-xs mt-1 ml-10">{errors.city.message}</span>}
+            <FormInput
+              icon={<LocationCityIcon />}
+              type="text"
+              label="City"
+              register={register("city")}
+              error={errors.city}
+            />
 
-            <div>
-              <PinDropIcon />
-              <input
-                type="number"
-                placeholder="Pin Code"
-                {...register("pinCode")}
-              />
-            </div>
-            {errors.pinCode && <span className="text-red-500 text-xs mt-1 ml-10">{errors.pinCode.message}</span>}
+            <FormInput
+              icon={<PinDropIcon />}
+              type="number"
+              label="Pin Code"
+              register={register("pinCode")}
+              error={errors.pinCode}
+            />
 
-            <div>
-              <PhoneIcon />
-              <input
-                type="number"
-                placeholder="Phone Number"
-                {...register("phoneNo")}
-                maxLength={10}
-              />
-            </div>
-            {errors.phoneNo && <span className="text-red-500 text-xs mt-1 ml-10">{errors.phoneNo.message}</span>}
+            <FormInput
+              icon={<PhoneIcon />}
+              type="number"
+              label="Phone Number"
+              register={register("phoneNo")}
+              error={errors.phoneNo}
+              inputProps={{ maxLength: 10 }}
+            />
 
-            <div>
-              <PublicIcon />
-              <select {...register("country")}>
-                <option value="">Country</option>
-                {Country &&
-                  Country.getAllCountries().map((item) => (
-                    <option key={item.isoCode} value={item.isoCode}>
-                      {item.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-            {errors.country && <span className="text-red-500 text-xs mt-1 ml-10">{errors.country.message}</span>}
+            <FormSelect
+              icon={<PublicIcon />}
+              label="Country"
+              register={register("country")}
+              error={errors.country}
+              options={Country.getAllCountries().map((item) => ({
+                label: item.name,
+                value: item.isoCode,
+              }))}
+            />
 
             {selectedCountry && (
-              <div>
-                <TransferWithinAStationIcon />
-                <select {...register("state")}>
-                  <option value="">State</option>
-                  {State &&
-                    State.getStatesOfCountry(selectedCountry).map((item) => (
-                      <option key={item.isoCode} value={item.isoCode}>
-                        {item.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
+              <FormSelect
+                icon={<TransferWithinAStationIcon />}
+                label="State"
+                register={register("state")}
+                error={errors.state}
+                options={State.getStatesOfCountry(selectedCountry).map((item) => ({
+                  label: item.name,
+                  value: item.isoCode,
+                }))}
+              />
             )}
-            {errors.state && <span className="text-red-500 text-xs mt-1 ml-10">{errors.state.message}</span>}
 
             <input
               type="submit"

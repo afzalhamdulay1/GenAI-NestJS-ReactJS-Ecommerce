@@ -46,10 +46,11 @@ const MyOrders: React.FC = () => {
       flex: 0.3,
       headerName: "Actions",
       minWidth: 150,
-      type: "number",
       sortable: false,
+      align: "center",
+      headerAlign: "center",
       renderCell: (params) => (
-        <Link to={`/order/${params.row.id}`}>
+        <Link to={`/order/${params.row.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#6366f1' }}>
           <LaunchIcon />
         </Link>
       ),

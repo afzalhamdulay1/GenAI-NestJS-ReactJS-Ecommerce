@@ -24,7 +24,7 @@ function Header(): React.ReactElement {
   ];
 
   return (
-    <header className="py-3 shadow bg-red-400">
+    <header className="py-3 shadow bg-red-400 relative z-50">
       <Container>
         <nav className="flex items-center justify-between">
           {/* Logo Section */}
@@ -36,7 +36,7 @@ function Header(): React.ReactElement {
 
           {/* Hamburger Button */}
           <button
-            className="block lg:hidden p-2 text-white"
+            className="block lg:hidden p-2 text-white relative z-50"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             <svg
@@ -57,7 +57,7 @@ function Header(): React.ReactElement {
 
           {/* Nav Links */}
           <ul
-            className={`lg:flex lg:items-center lg:gap-6 absolute lg:static top-16 left-0 w-full lg:w-auto bg-red-400 lg:bg-transparent p-4 lg:p-0 transition-transform duration-300 ease-in-out ${
+            className={`lg:flex lg:items-center lg:gap-6 absolute lg:static top-16 left-0 w-full lg:w-auto bg-red-400 lg:bg-transparent p-4 lg:p-0 transition-transform duration-300 ease-in-out z-50 ${
               menuOpen ? "block" : "hidden"
             }`}
           >

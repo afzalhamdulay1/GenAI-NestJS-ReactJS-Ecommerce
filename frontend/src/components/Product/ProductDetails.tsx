@@ -4,7 +4,6 @@ import {
   fetchProductDetails,
   clearErrors,
 } from "@/features/products/productSlice";
-import ReviewCard from "@/components/Product/ReviewCard";
 import Loader from "@/components/Layout/Loader/Loader";
 import { toast } from "react-toastify";
 import MetaData from "@/components/Layout/MetaData";
@@ -13,6 +12,7 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { Rating } from "@mui/material";
 import ProductImageGallery from "@/components/Product/Sections/ProductImageGallery";
 import SubmitReviewDialog from "@/components/Product/Sections/SubmitReviewDialog";
+import ProductReviewsSection from "@/components/Product/Sections/ProductReviewsSection";
 import { useParams, useNavigate } from "react-router-dom";
 import { createNewReview } from "@/features/review/reviewSlice";
 
@@ -179,15 +179,7 @@ const ProductDetails: React.FC = () => {
             onSubmit={reviewSubmitHandler}
           />
 
-          {product?.reviews?.length ? (
-            <div className="reviews">
-              {product.reviews.map((review) => (
-                <ReviewCard key={review._id} review={review} />
-              ))}
-            </div>
-          ) : (
-            <p className="noReviews">No Reviews Yet</p>
-          )}
+          <ProductReviewsSection reviews={product?.reviews} />
         </Fragment>
       )}
     </Fragment>

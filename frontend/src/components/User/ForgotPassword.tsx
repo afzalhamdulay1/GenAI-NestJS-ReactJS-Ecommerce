@@ -9,6 +9,7 @@ import { forgotPassword, clearErrors, clearMessage } from "@/features/user/userS
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { toast } from "react-toastify";
 import MetaData from "@/components/Layout/MetaData";
+import FormInput from "@/components/Form/FormInput";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -60,15 +61,13 @@ const ForgotPassword: React.FC = () => {
                 className="forgotPasswordForm"
                 onSubmit={handleSubmit(onForgotPasswordSubmit)}
               >
-                <div className="forgotPasswordEmail">
-                  <MailOutlineIcon />
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    {...register("email")}
-                  />
-                </div>
-                {errors.email && <span className="text-red-500 text-xs mt-1 ml-10">{errors.email.message}</span>}
+                <FormInput
+                  icon={<MailOutlineIcon />}
+                  type="email"
+                  label="Email"
+                  register={register("email")}
+                  error={errors.email}
+                />
 
                 <input
                   type="submit"

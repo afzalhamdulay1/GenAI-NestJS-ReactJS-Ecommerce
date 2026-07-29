@@ -383,17 +383,80 @@ body {
   .bannerContent .subtitle {
     font-size: 0.95rem;
   }
-  .container {
-    padding: 0 5%;
-    gap: 2rem;
-  }
-  .productCard > img {
-    height: 200px;
-  }
+  
+  /* Services: 2 per row */
   .servicesSection {
     padding: 3rem 5%;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
+  .serviceCard {
+    padding: 1rem;
+  }
+  .serviceIcon {
+    font-size: 1.8rem;
+  }
+  .serviceCard h3 {
+    font-size: 0.9rem;
+  }
+  .serviceCard p {
+    font-size: 0.75rem;
+  }
+
+  /* Categories: 3 per row */
   .categoriesSection {
     padding: 3rem 5%;
+  }
+  .categoriesGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+  .categoryImagePlaceholder {
+    padding: 1rem 0.5rem;
+  }
+  .categoryImagePlaceholder span {
+    font-size: 0.8rem;
+  }
+
+  /* Products: 2 per row */
+  .container {
+    padding: 0 4%;
+    gap: 0.8rem;
+    grid-template-columns: repeat(2, 1fr);
+    box-sizing: border-box;
+    width: 100%;
+  }
+  .productCard {
+    padding: 0.6rem;
+    box-sizing: border-box;
+    min-width: 0; /* Prevents flex/grid children from overflowing */
+  }
+  .productCard > img {
+    height: 120px;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    object-fit: contain;
+  }
+  .productCard > p {
+    font-size: 0.85rem;
+    margin: 0 0 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .productCard > span {
+    font-size: 1rem;
+    margin: auto 0 0.2rem;
+  }
+  .productCard > div {
+    margin: 0 0 0.5rem;
+    flex-wrap: wrap; /* Allows rating and text to wrap if they are too wide */
+    gap: 4px;
+  }
+  .productCard .MuiRating-root {
+    font-size: 1.1rem !important; /* Scale down the stars */
+  }
+  .productCardSpan {
+    font-size: 0.75rem;
   }
 }
