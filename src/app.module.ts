@@ -10,6 +10,9 @@ import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { MailModule } from './mail/mail.module';
+import { CouponsModule } from './coupons/coupons.module';
+import { SettingsModule } from './settings/settings.module';
+import { CategoriesModule } from './categories/categories.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -37,6 +40,9 @@ import { join } from 'path';
     PaymentsModule,
     CloudinaryModule,
     MailModule,
+    CouponsModule,
+    SettingsModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

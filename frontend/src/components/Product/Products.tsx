@@ -9,21 +9,11 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getProducts, clearErrors } from '@/features/products/productsSlice';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import ProductFilterSidebar from '@/components/Product/Sections/ProductFilterSidebar';
-import { Drawer, Button, useMediaQuery, useTheme, IconButton } from '@mui/material';
+import { Drawer, Button, useMediaQuery, useTheme, IconButton, TextField, InputAdornment } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
-
-const categories = [
-  'All',
-  'Laptop',
-  'Footwear',
-  'Bottom',
-  'Clothing',
-  'Tops',
-  'Attire',
-  'Camera',
-  'SmartPhones',
-];
+import SearchIcon from '@mui/icons-material/Search';
+import { api } from '@/services/api';
 
 const Products: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -38,6 +28,44 @@ const Products: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const [searchInput, setSearchInput] = useState(mykeyword);
+
+  useEffect(() => {
+    setSearchInput(mykeyword);
+  }, [mykeyword]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      navigate(`/products/${searchInput.trim()}`);
+    } else {
+      navigate('/products');
+    }
+  };
+
+  const [categoriesList, setCategoriesList] = useState<string[]>([
+    'All',
+    'Laptop',
+    'Footwear',
+    'Bottom',
+    'Tops',
+    'Attire',
+    'Camera',
+    'SmartPhones',
+  ]);
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const { data } = await api.get('/categories');
+        if (data.categories && data.categories.length > 0) {
+          setCategoriesList(['All', ...data.categories.map((c: any) => c.name)]);
+        }
+      } catch (err) {}
+    };
+    fetchCats();
+  }, []);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [price, setPrice] = useState<number[]>([0, 250000]);
@@ -120,6 +148,35 @@ const Products: React.FC = () => {
             <MetaData title="ECOMMERCE" />
 
             <Fragment>
+              <div className="productsSearchContainer">
+                <form onSubmit={handleSearchSubmit} className="productsSearchForm">
+                  <SearchIcon sx={{ color: '#0284c7', fontSize: 24, ml: 0.5 }} />
+                  <input
+                    type="text"
+                    className="productsSearchInput"
+                    placeholder={isMobile ? "Search products..." : "Search products by name, category, or keyword..."}
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                  />
+                  {searchInput && (
+                    <button
+                      type="button"
+                      className="clearSearchBtn"
+                      onClick={() => {
+                        setSearchInput('');
+                        navigate('/products');
+                      }}
+                      title="Clear Search"
+                    >
+                      <CloseIcon fontSize="small" />
+                    </button>
+                  )}
+                  <button type="submit" className="searchSubmitBtn">
+                    <span>Search</span>
+                  </button>
+                </form>
+              </div>
+
               <div className="totalProductsText">
                 Total Products: {filteredProductsCount}
               </div>
@@ -175,7 +232,7 @@ const Products: React.FC = () => {
                         setCategory={setCategory}
                         ratings={ratings}
                         setRatings={setRatings}
-                        categories={categories}
+                        categories={categoriesList}
                         handleSubmit={handleSubmit}
                         handleClearFilters={handleClearFilters}
                         isMobile={true}
@@ -195,7 +252,7 @@ const Products: React.FC = () => {
                     setCategory={setCategory}
                     ratings={ratings}
                     setRatings={setRatings}
-                    categories={categories}
+                    categories={categoriesList}
                     handleSubmit={handleSubmit}
                     handleClearFilters={handleClearFilters}
                     isMobile={false}

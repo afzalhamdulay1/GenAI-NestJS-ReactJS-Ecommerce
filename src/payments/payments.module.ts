@@ -3,8 +3,10 @@ import { PaymentsService } from './payments.service';
 import { PaymentsController } from './payments.controller';
 import { ConfigModule } from '@nestjs/config';
 
+import { SettingsModule } from '../settings/settings.module';
+
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, SettingsModule],
   providers: [PaymentsService],
   controllers: [PaymentsController],
   exports: [PaymentsService],

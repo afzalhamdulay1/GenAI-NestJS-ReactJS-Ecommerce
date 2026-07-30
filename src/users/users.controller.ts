@@ -108,6 +108,21 @@ export class UsersController {
     return this.usersService.updateProfile(updateProfileDto, user);
   }
 
+  @Post('wishlist/:id')
+  @UseGuards(JwtAuthGuard)
+  async toggleWishlist(
+    @Param('id') id: string,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.usersService.toggleWishlist(id, user);
+  }
+
+  @Get('wishlist')
+  @UseGuards(JwtAuthGuard)
+  async getWishlist(@CurrentUser() user: UserDocument) {
+    return this.usersService.getWishlist(user);
+  }
+
   // Admin Routes
   @Get('admin/users')
   @UseGuards(JwtAuthGuard, RolesGuard)

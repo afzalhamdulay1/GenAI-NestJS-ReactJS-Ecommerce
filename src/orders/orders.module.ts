@@ -5,12 +5,14 @@ import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { ProductsModule } from '../products/products.module';
 import { PaymentsModule } from '../payments/payments.module';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
-    ProductsModule, // we need ProductsService or Product model here to update stock
+    ProductsModule,
     PaymentsModule,
+    SettingsModule,
   ],
   providers: [OrdersService],
   controllers: [OrdersController],

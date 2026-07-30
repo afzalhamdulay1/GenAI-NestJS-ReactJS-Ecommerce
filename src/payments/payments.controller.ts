@@ -8,8 +8,8 @@ export class PaymentsController {
 
   @Post('payment/process')
   @UseGuards(JwtAuthGuard)
-  async processPayment(@Body('amount') amount: number) {
-    return this.paymentsService.processPayment(amount);
+  async processPayment(@Body() body: { amount?: number; orderItems?: any[]; couponCode?: string }) {
+    return this.paymentsService.processPayment(body);
   }
 
   @Get('stripeapikey')

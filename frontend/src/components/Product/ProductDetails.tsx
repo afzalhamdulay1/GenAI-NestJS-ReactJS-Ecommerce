@@ -15,6 +15,9 @@ import SubmitReviewDialog from "@/components/Product/Sections/SubmitReviewDialog
 import ProductReviewsSection from "@/components/Product/Sections/ProductReviewsSection";
 import { useParams, useNavigate } from "react-router-dom";
 import { createNewReview } from "@/features/review/reviewSlice";
+import { toggleWishlist } from "@/features/user/userSlice";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 const ProductDetails: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -22,7 +25,20 @@ const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
 
   const { product, loading, error } = useAppSelector((state) => state.product);
-  const { user } = useAppSelector((state) => state.user);
+  const { user, wishlist, isAuthenticated } = useAppSelector((state) => state.user);
+
+  const isWishlisted = wishlist?.some((item) => item._id === product?._id);
+
+  const wishlistToggleHandler = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+    if (product?._id) {
+      dispatch(toggleWishlist(product._id));
+      toast.success(isWishlisted ? "Removed from Wishlist" : "Added to Wishlist");
+    }
+  };
 
   const [quantity, setQuantity] = useState(1);
   const [open, setOpen] = useState(false);
@@ -140,10 +156,25 @@ const ProductDetails: React.FC = () => {
                     <button onClick={increaseQuantity}>+</button>
                   </div>
                   <button
+                    className="addToCartBtn"
                     disabled={stockCount < 1}
                     onClick={addToCartHandler}
                   >
                     Add to Cart
+                  </button>
+                </div>
+
+                <div style={{ marginBottom: "1.5rem" }}>
+                  <button
+                    className={`wishlistBtnDetail ${isWishlisted ? "saved" : "unsaved"}`}
+                    onClick={wishlistToggleHandler}
+                  >
+                    {isWishlisted ? (
+                      <FavoriteIcon sx={{ color: "#ef4444", fontSize: "1.2rem" }} />
+                    ) : (
+                      <FavoriteBorderIcon sx={{ fontSize: "1.2rem" }} />
+                    )}
+                    <span>{isWishlisted ? "Wishlisted" : "Save to Wishlist"}</span>
                   </button>
                 </div>
 

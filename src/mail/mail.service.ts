@@ -6,6 +6,7 @@ export interface SendEmailOptions {
   email: string;
   subject: string;
   message: string;
+  html?: string;
   attachments?: any[];
 }
 
@@ -31,6 +32,7 @@ export class MailService {
       to: options.email,
       subject: options.subject,
       text: options.message,
+      html: options.html,
       attachments: options.attachments,
     };
 

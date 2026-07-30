@@ -1,12 +1,12 @@
 import React, { Fragment, useState } from "react";
 import "@/components/Layout/Header/UserOptions.css";
-import { SpeedDial, SpeedDialAction } from "@mui/material";
-import { Backdrop } from "@mui/material";
+import { SpeedDial, SpeedDialAction, Backdrop } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PersonIcon from "@mui/icons-material/Person";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logout } from "@/features/user/userSlice";
@@ -26,8 +26,10 @@ interface SpeedDialOption {
 
 const UserOptions: React.FC<UserOptionsProps> = ({ user }) => {
   const { cartItems } = useAppSelector((state) => state.cart);
+  const { wishlist } = useAppSelector((state) => state.user);
 
   const [open, setOpen] = useState(false);
+
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
@@ -43,6 +45,9 @@ const UserOptions: React.FC<UserOptionsProps> = ({ user }) => {
   }
   function cart() {
     navigate("/cart");
+  }
+  function wishlistFunc() {
+    navigate("/wishlist");
   }
   function logoutUser() {
     navigate("/");
@@ -62,6 +67,15 @@ const UserOptions: React.FC<UserOptionsProps> = ({ user }) => {
       name: `Cart(${cartItems.length})`,
       func: cart,
     },
+    {
+      icon: (
+        <FavoriteIcon
+          style={{ color: wishlist && wishlist.length > 0 ? "#ef4444" : "unset" }}
+        />
+      ),
+      name: `Wishlist(${wishlist ? wishlist.length : 0})`,
+      func: wishlistFunc,
+    },
     { icon: <ExitToAppIcon />, name: "Logout", func: logoutUser },
   ];
 
@@ -75,15 +89,15 @@ const UserOptions: React.FC<UserOptionsProps> = ({ user }) => {
 
   return (
     <Fragment>
-      <Backdrop open={open} style={{ zIndex: "10" }} />
+      <Backdrop open={open} style={{ zIndex: 10 }} />
       <SpeedDial
-        ariaLabel="SpeedDial tooltip example"
+        ariaLabel="User Profile Options"
         onClose={() => setOpen(false)}
         onOpen={() => setOpen(true)}
-        style={{ zIndex: "11" }}
         open={open}
         direction="down"
         className="speedDial"
+        style={{ zIndex: 11 }}
         icon={
           <img
             className="speedDialIcon"

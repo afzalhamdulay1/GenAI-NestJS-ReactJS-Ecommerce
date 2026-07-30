@@ -12,6 +12,7 @@ export interface User {
   createdAt?: string;
   updatedAt?: string;
   googleId?: string;
+  wishlist?: Product[] | string[];
 }
 
 export interface ProductImage {

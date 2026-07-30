@@ -1,0 +1,193 @@
+.wishlistContainer {
+  padding: 3rem 5%;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 80vh;
+}
+
+.wishlistHeader {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.wishlistHeader h1 {
+  font-family: "Outfit", sans-serif;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.wishlistHeader p {
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.wishlistGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 2rem;
+  width: 100%;
+}
+
+.wishlistCard {
+  background: #ffffff;
+  border-radius: 1.25rem;
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.wishlistCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.wishlistImageWrapper {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  background-color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.wishlistImageWrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.wishlistCard:hover .wishlistImageWrapper img {
+  transform: scale(1.05);
+}
+
+.wishlistDetails {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.wishlistCategory {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #ef4444;
+  letter-spacing: 1px;
+  margin-bottom: 0.25rem;
+}
+
+.wishlistTitle {
+  font-family: "Outfit", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+}
+
+.wishlistPrice {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 1.25rem;
+}
+
+.wishlistActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.addToCartWishlistBtn {
+  flex: 1;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.addToCartWishlistBtn:hover {
+  background: linear-gradient(135deg, #1e293b, #334155);
+  transform: translateY(-2px);
+}
+
+.removeWishlistBtn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.removeWishlistBtn:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+.emptyWishlist {
+  text-align: center;
+  padding: 5rem 2rem;
+  background: white;
+  border-radius: 1.5rem;
+  border: 1px dashed #cbd5e1;
+  margin-top: 2rem;
+}
+
+.emptyWishlistIcon {
+  font-size: 4rem;
+  color: #cbd5e1;
+  margin-bottom: 1rem;
+}
+
+.emptyWishlist h2 {
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.emptyWishlist p {
+  color: #64748b;
+  margin-bottom: 2rem;
+}
+
+.exploreBtn {
+  padding: 0.85rem 2rem;
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  color: white;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+  transition: all 0.3s ease;
+}
+
+.exploreBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(239, 68, 68, 0.5);
+}

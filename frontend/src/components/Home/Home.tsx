@@ -12,12 +12,35 @@ import HeroBanner from '@/components/Home/Sections/HeroBanner';
 import ServicesSection from '@/components/Home/Sections/ServicesSection';
 import CategorySection from '@/components/Home/Sections/CategorySection';
 import FeaturedProducts from '@/components/Home/Sections/FeaturedProducts';
+import { api } from '@/services/api';
 
 const Home: React.FC = () => {
   const dispatch = useAppDispatch();
   const { products, loading, error } = useAppSelector(
     (state) => state.products,
   );
+
+  const [categories, setCategories] = React.useState<string[]>([
+    'Laptop',
+    'Footwear',
+    'Bottom',
+    'Tops',
+    'Attire',
+    'Camera',
+    'SmartPhones',
+  ]);
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const { data } = await api.get('/categories');
+        if (data.categories && data.categories.length > 0) {
+          setCategories(data.categories.map((c: any) => c.name));
+        }
+      } catch (err) {}
+    };
+    fetchCats();
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -29,16 +52,6 @@ const Home: React.FC = () => {
   useEffect(() => {
     dispatch(getProducts({ keyword: '' }));
   }, [dispatch]);
-
-  const categories = [
-    'Laptop',
-    'Footwear',
-    'Bottom',
-    'Tops',
-    'Attire',
-    'Camera',
-    'SmartPhones',
-  ];
 
   return (
     <Fragment>

@@ -14,6 +14,10 @@ import PeopleIcon from "@mui/icons-material/People";
 import RateReviewIcon from "@mui/icons-material/RateReview";
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import CategoryIcon from "@mui/icons-material/Category";
+import SettingsIcon from "@mui/icons-material/Settings";
+
 const Sidebar: React.FC = () => {
   return (
     <div className="sidebar">
@@ -66,11 +70,27 @@ const Sidebar: React.FC = () => {
         </SimpleTreeView>
 
         <NavLink 
+          to="/admin/categories" 
+          className={({ isActive }) => isActive ? "navLink active" : "navLink"}
+        >
+          <CategoryIcon className="navIcon" />
+          <span>Categories</span>
+        </NavLink>
+
+        <NavLink 
           to="/admin/orders" 
           className={({ isActive }) => isActive ? "navLink active" : "navLink"}
         >
           <ListAltIcon className="navIcon" />
           <span>Orders</span>
+        </NavLink>
+
+        <NavLink 
+          to="/admin/coupons" 
+          className={({ isActive }) => isActive ? "navLink active" : "navLink"}
+        >
+          <LocalOfferIcon className="navIcon" />
+          <span>Coupons</span>
         </NavLink>
 
         <NavLink 
@@ -87,6 +107,14 @@ const Sidebar: React.FC = () => {
         >
           <RateReviewIcon className="navIcon" />
           <span>Reviews</span>
+        </NavLink>
+
+        <NavLink 
+          to="/admin/settings" 
+          className={({ isActive }) => isActive ? "navLink active" : "navLink"}
+        >
+          <SettingsIcon className="navIcon" />
+          <span>Store Settings</span>
         </NavLink>
       </nav>
     </div>

@@ -28,6 +28,7 @@ import SideBar from "@/components/Admin/Sidebar";
 import { useNavigate, useParams } from "react-router-dom";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
+import { api } from "@/services/api";
 
 const updateProductSchema = z.object({
   name: z.string().min(1, "Product Name is required"),
@@ -50,7 +51,7 @@ const UpdateProduct: React.FC = () => {
   const [oldImages, setOldImages] = useState<ProductImage[]>([]);
   const [imagesPreview, setImagesPreview] = useState<string[]>([]);
 
-  const categories = [
+  const [categories, setCategories] = useState<string[]>([
     "Laptop",
     "Footwear",
     "Bottom",
@@ -58,12 +59,30 @@ const UpdateProduct: React.FC = () => {
     "Attire",
     "Camera",
     "SmartPhones",
-  ];
+    "Other",
+  ]);
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const { data } = await api.get("/categories");
+        if (data.categories && data.categories.length > 0) {
+          const list = data.categories.map((c: any) => c.name);
+          if (!list.some((cat: string) => cat.toLowerCase() === "other")) {
+            list.push("Other");
+          }
+          setCategories(list);
+        }
+      } catch (err) {}
+    };
+    fetchCats();
+  }, []);
 
   const {
     register,
     handleSubmit,
     setValue,
+    control,
     formState: { errors },
   } = useForm<UpdateProductFormValues>({
     resolver: zodResolver(updateProductSchema) as any,
@@ -167,6 +186,8 @@ const UpdateProduct: React.FC = () => {
                 <Grid item xs={12}>
                   <FormSelect
                     label="Choose Category"
+                    control={control}
+                    name="category"
                     options={categories}
                     register={register("category")}
                     error={errors.category}
@@ -204,14 +225,16 @@ const UpdateProduct: React.FC = () => {
                   </Grid>
                 )}
 
-                <ImageUploader
-                  imagesPreview={imagesPreview}
-                  setImages={setImages}
-                  setImagesPreview={setImagesPreview}
-                  multiple={true}
-                  previewTitle="New Selection (Will replace current images):"
-                  onUploadStart={() => setOldImages([])}
-                />
+                <Grid item xs={12}>
+                  <ImageUploader
+                    imagesPreview={imagesPreview}
+                    setImages={setImages}
+                    setImagesPreview={setImagesPreview}
+                    multiple={true}
+                    previewTitle="New Selection (Will replace current images):"
+                    onUploadStart={() => setOldImages([])}
+                  />
+                </Grid>
 
                 <Grid item xs={12}>
                   <Button

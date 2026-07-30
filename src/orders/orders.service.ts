@@ -8,8 +8,11 @@ import { ProductsService } from '../products/products.service';
 import { UserDocument } from '../users/schemas/user.schema';
 import { MailService } from '../mail/mail.service';
 import { generateInvoice } from '../common/utils/generate-invoice.util';
+import { generateOrderStatusHtml } from '../common/utils/order-email-template.util';
 import { ProductDocument, Product } from '../products/schemas/product.schema';
 import { PaymentsService } from '../payments/payments.service';
+
+import { SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class OrdersService {
@@ -18,22 +21,47 @@ export class OrdersService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>, // We should inject model directly for stock update
     private mailService: MailService,
     private paymentsService: PaymentsService,
+    private settingsService: SettingsService,
   ) {}
 
   async createOrder(createOrderDto: CreateOrderDto, user: UserDocument) {
+    const orderItemsInput = createOrderDto.orderItems.map((item) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+    }));
+
+    const pricing = await this.settingsService.calculatePricing(
+      orderItemsInput,
+      (createOrderDto as any).couponCode,
+    );
+
     const order = await this.orderModel.create({
       ...(createOrderDto as any),
+      itemsPrice: pricing.itemsPrice,
+      taxPrice: pricing.taxPrice,
+      shippingPrice: pricing.shippingPrice,
+      totalPrice: pricing.totalPrice,
+      orderItems: pricing.verifiedOrderItems,
       paidAt: Date.now(),
       user: user._id as any,
     });
 
     const invoiceBuffer = await generateInvoice(order, user);
 
+    const htmlContent = generateOrderStatusHtml({
+      status: 'Processing',
+      userName: user.name,
+      orderId: (order as any)._id.toString(),
+      items: order.orderItems,
+      totalPrice: order.totalPrice,
+    });
+
     try {
       await this.mailService.sendEmail({
         email: user.email,
-        subject: `Order Confirmation - #${(order as any)._id}`,
+        subject: `🛍️ Order Confirmation - #${(order as any)._id}`,
         message: `Hi ${user.name},\n\nThank you for placing an order with us! Your order #${(order as any)._id} has been successfully placed. Please find your invoice attached.\n\nHappy Shopping!`,
+        html: htmlContent,
         attachments: [
           {
             filename: `Invoice_${(order as any)._id}.pdf`,
@@ -132,26 +160,42 @@ export class OrdersService {
 
     await order.save({ validateBeforeSave: false });
 
-    // Send Cancellation Email if Admin cancelled it
-    if (updateOrderStatusDto.status === 'Cancelled' && order.user) {
-      if (order.paymentInfo && order.paymentInfo.id) {
-        try {
-          await this.paymentsService.refundPayment(order.paymentInfo.id);
-        } catch (error) {
-          console.error('Failed to process refund (admin):', error);
-          // depending on requirements, we might not want to block the DB update if refund fails, or maybe we do.
-          // For now, let's log it.
-        }
+    // Handle Stripe Refund if Admin cancelled a paid order
+    if (updateOrderStatusDto.status === 'Cancelled' && order.paymentInfo && order.paymentInfo.id) {
+      try {
+        await this.paymentsService.refundPayment(order.paymentInfo.id);
+      } catch (error) {
+        console.error('Failed to process refund (admin):', error);
       }
+    }
+
+    // Send automated status update email to customer for ALL status updates
+    if (order.user) {
+      const userObj = order.user as any;
+      const statusSubjects: Record<string, string> = {
+        Shipped: `🚚 Your Order #${(order as any)._id} Has Shipped!`,
+        Delivered: `🎉 Order #${(order as any)._id} Delivered!`,
+        Cancelled: `❌ Order #${(order as any)._id} Cancelled`,
+      };
+
+      const subject = statusSubjects[updateOrderStatusDto.status] || `Order Update - #${(order as any)._id}`;
+      const htmlContent = generateOrderStatusHtml({
+        status: updateOrderStatusDto.status as any,
+        userName: userObj.name || 'Customer',
+        orderId: (order as any)._id.toString(),
+        items: order.orderItems,
+        totalPrice: order.totalPrice,
+      });
 
       try {
         await this.mailService.sendEmail({
-          email: (order.user as any).email,
-          subject: `Order Cancelled - #${(order as any)._id}`,
-          message: `Hi ${(order.user as any).name},\n\nYour order #${(order as any)._id} has been cancelled by our administration team. If you have any questions, please contact support.`,
+          email: userObj.email,
+          subject,
+          message: `Hi ${userObj.name},\n\nYour order #${(order as any)._id} status has been updated to: ${updateOrderStatusDto.status}.`,
+          html: htmlContent,
         });
       } catch (error) {
-        console.error('Error sending order cancellation email (admin):', error);
+        console.error(`Error sending order ${updateOrderStatusDto.status} email (admin):`, error);
       }
     }
 
@@ -194,11 +238,20 @@ export class OrdersService {
       }
     }
 
+    const htmlContent = generateOrderStatusHtml({
+      status: 'Cancelled',
+      userName: user.name,
+      orderId: (order as any)._id.toString(),
+      items: order.orderItems,
+      totalPrice: order.totalPrice,
+    });
+
     try {
       await this.mailService.sendEmail({
         email: user.email,
-        subject: `Order Cancelled - #${(order as any)._id}`,
+        subject: `❌ Order Cancelled - #${(order as any)._id}`,
         message: `Hi ${user.name},\n\nYour order #${(order as any)._id} has been successfully cancelled. If you have any questions, please contact our support team.`,
+        html: htmlContent,
       });
     } catch (error) {
       console.error('Error sending order cancellation email:', error);

@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { api } from '@/services/api';
 import axios from 'axios';
 
-import { User, UserAvatar } from '@/types';
+import { User, UserAvatar, Product } from '@/types';
 
 export interface UserState {
   success: boolean | null;
@@ -17,6 +17,7 @@ export interface UserState {
   isUpdated: boolean;
   isDeleted: boolean;
   message: string | null;
+  wishlist: Product[];
 }
 
 const initialState: UserState = {
@@ -32,6 +33,7 @@ const initialState: UserState = {
   isUpdated: false,
   isDeleted: false,
   message: null,
+  wishlist: [],
 };
 
 // Thunks
@@ -277,6 +279,44 @@ export const deleteUser = createAsyncThunk<
   }
 );
 
+export const toggleWishlist = createAsyncThunk<
+  { success: boolean; isAdded: boolean; wishlist: Product[] },
+  string,
+  { rejectValue: string }
+>(
+  'user/toggleWishlist',
+  async (productId, { rejectWithValue }) => {
+    try {
+      const { data } = await api.post(`/wishlist/${productId}`);
+      return data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to update wishlist');
+      }
+      return rejectWithValue('Failed to update wishlist');
+    }
+  }
+);
+
+export const getWishlist = createAsyncThunk<
+  Product[],
+  void,
+  { rejectValue: string }
+>(
+  'user/getWishlist',
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await api.get('/wishlist');
+      return data.wishlist;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return rejectWithValue(error.response.data.message || 'Failed to fetch wishlist');
+      }
+      return rejectWithValue('Failed to fetch wishlist');
+    }
+  }
+);
+
 // Slice
 
 const userSlice = createSlice({
@@ -349,6 +389,9 @@ const userSlice = createSlice({
         state.user = action.payload.user;
         state.isAuthenticated = true;
         state.loadUserError = null;
+        if (action.payload.user && action.payload.user.wishlist) {
+          state.wishlist = action.payload.user.wishlist as any;
+        }
       })
       .addCase(loadUser.rejected, (state, action) => {
         state.loading = false;
@@ -478,6 +521,22 @@ const userSlice = createSlice({
       .addCase(deleteUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Failed to delete user';
+      })
+
+      // Toggle Wishlist Cases
+      .addCase(toggleWishlist.fulfilled, (state, action) => {
+        state.wishlist = action.payload.wishlist;
+        if (state.user) {
+          state.user.wishlist = action.payload.wishlist;
+        }
+      })
+
+      // Get Wishlist Cases
+      .addCase(getWishlist.fulfilled, (state, action) => {
+        state.wishlist = action.payload;
+        if (state.user) {
+          state.user.wishlist = action.payload;
+        }
       });
   },
 });

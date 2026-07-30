@@ -29,6 +29,7 @@ const Payment = React.lazy(() => import('@/components/Cart/Payment'));
 const OrderSuccess = React.lazy(() => import('@/components/Cart/OrderSuccess'));
 const MyOrders = React.lazy(() => import('@/components/Order/MyOrders'));
 const OrderDetails = React.lazy(() => import('@/components/Order/OrderDetails'));
+const Wishlist = React.lazy(() => import('@/components/User/Wishlist'));
 const Dashboard = React.lazy(() => import('@/components/Admin/Dashboard'));
 const ProductsList = React.lazy(() => import('@/components/Admin/ProductsList'));
 const NewProduct = React.lazy(() => import('@/components/Admin/NewProduct'));
@@ -38,6 +39,11 @@ const ProcessOrder = React.lazy(() => import('@/components/Admin/ProcessOrder'))
 const UsersList = React.lazy(() => import('@/components/Admin/UsersList'));
 const UpdateUser = React.lazy(() => import('@/components/Admin/UpdateUser'));
 const ProductReviews = React.lazy(() => import('@/components/Admin/ProductReviews'));
+const CouponsList = React.lazy(() => import('@/components/Admin/CouponsList'));
+const NewCoupon = React.lazy(() => import('@/components/Admin/NewCoupon'));
+const StoreSettings = React.lazy(() => import('@/components/Admin/StoreSettings'));
+const CategoriesList = React.lazy(() => import('@/components/Admin/CategoriesList'));
+const NewCategory = React.lazy(() => import('@/components/Admin/NewCategory'));
 const NotFound = React.lazy(() => import('@/components/Layout/NotFound/NotFound'));
 import ErrorBoundary from '@/components/Layout/ErrorBoundary/ErrorBoundary';
 
@@ -82,6 +88,14 @@ const router = createBrowserRouter([
       {
         path: '/cart',
         element: <Cart />,
+      },
+      {
+        path: '/wishlist',
+        element: (
+          <ProtectedRoute>
+            <Wishlist />
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/shipping',
@@ -215,6 +229,38 @@ const router = createBrowserRouter([
             ),
           },
           {
+            path: 'coupons',
+            element: (
+              <ProtectedRoute admin={true}>
+                <CouponsList />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'coupon/new',
+            element: (
+              <ProtectedRoute admin={true}>
+                <NewCoupon />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'categories',
+            element: (
+              <ProtectedRoute admin={true}>
+                <CategoriesList />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'category/new',
+            element: (
+              <ProtectedRoute admin={true}>
+                <NewCategory />
+              </ProtectedRoute>
+            ),
+          },
+          {
             path: 'users',
             element: (
               <ProtectedRoute admin={true}>
@@ -235,6 +281,14 @@ const router = createBrowserRouter([
             element: (
               <ProtectedRoute admin={true}>
                 <ProductReviews />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'settings',
+            element: (
+              <ProtectedRoute admin={true}>
+                <StoreSettings />
               </ProtectedRoute>
             ),
           },

@@ -219,7 +219,7 @@ export class UsersService {
   }
 
   async getUserDetails(user: UserDocument) {
-    const foundUser = await this.userModel.findById(user._id);
+    const foundUser = await this.userModel.findById(user._id).populate('wishlist');
     return {
       success: true,
       user: foundUser,
@@ -364,6 +364,44 @@ export class UsersService {
     return {
       success: true,
       message: 'User Deleted Successfully',
+    };
+  }
+
+  async toggleWishlist(productId: string, user: UserDocument) {
+    const foundUser = await this.userModel.findById(user._id);
+    if (!foundUser) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (!foundUser.wishlist) {
+      foundUser.wishlist = [];
+    }
+
+    const index = foundUser.wishlist.findIndex((id) => id.toString() === productId);
+    let isAdded = false;
+
+    if (index > -1) {
+      foundUser.wishlist.splice(index, 1);
+    } else {
+      foundUser.wishlist.push(productId as any);
+      isAdded = true;
+    }
+
+    await foundUser.save();
+    const updatedUser = await this.userModel.findById(user._id).populate('wishlist');
+
+    return {
+      success: true,
+      isAdded,
+      wishlist: updatedUser?.wishlist || [],
+    };
+  }
+
+  async getWishlist(user: UserDocument) {
+    const foundUser = await this.userModel.findById(user._id).populate('wishlist');
+    return {
+      success: true,
+      wishlist: foundUser?.wishlist || [],
     };
   }
 }

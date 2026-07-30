@@ -36,11 +36,15 @@ const Payment: React.FC = () => {
   const { user } = useAppSelector((state) => state.user);
   const { error } = useAppSelector((state) => state.order);
 
-  const paymentData = {
-    amount: Math.round((orderInfo?.totalPrice || 0) * 100),
+  const paymentPayload = {
+    orderItems: cartItems.map((item) => ({
+      productId: item.productId || item.product,
+      quantity: item.quantity,
+    })),
+    couponCode: orderInfo?.couponCode || undefined,
   };
 
-  const order: Partial<Order> = {
+  const order: Partial<Order> & { couponCode?: string } = {
     shippingInfo: shippingInfo ? {
       ...shippingInfo,
       pinCode: Number(shippingInfo.pinCode),
@@ -54,6 +58,7 @@ const Payment: React.FC = () => {
     taxPrice: orderInfo?.tax || 0,
     shippingPrice: orderInfo?.shippingCharges || 0,
     totalPrice: orderInfo?.totalPrice || 0,
+    couponCode: orderInfo?.couponCode || undefined,
   };
 
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -70,7 +75,7 @@ const Payment: React.FC = () => {
           "Content-Type": "application/json",
         },
       };
-      const { data } = await api.post("/payment/process", paymentData, config);
+      const { data } = await api.post("/payment/process", paymentPayload, config);
 
       const client_secret = data.client_secret;
 

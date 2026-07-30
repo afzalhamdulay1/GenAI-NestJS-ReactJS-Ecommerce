@@ -25,6 +25,7 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import SideBar from "@/components/Admin/Sidebar";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { api } from "@/services/api";
 
 const newProductSchema = z.object({
   name: z.string().min(1, "Product Name is required"),
@@ -45,7 +46,7 @@ const NewProduct: React.FC = () => {
   const [images, setImages] = useState<string[]>([]);
   const [imagesPreview, setImagesPreview] = useState<string[]>([]);
 
-  const categories = [
+  const [categories, setCategories] = useState<string[]>([
     "Laptop",
     "Footwear",
     "Bottom",
@@ -53,11 +54,29 @@ const NewProduct: React.FC = () => {
     "Attire",
     "Camera",
     "SmartPhones",
-  ];
+    "Other",
+  ]);
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const { data } = await api.get("/categories");
+        if (data.categories && data.categories.length > 0) {
+          const list = data.categories.map((c: any) => c.name);
+          if (!list.some((cat: string) => cat.toLowerCase() === "other")) {
+            list.push("Other");
+          }
+          setCategories(list);
+        }
+      } catch (err) {}
+    };
+    fetchCats();
+  }, []);
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<NewProductFormValues>({
     resolver: zodResolver(newProductSchema) as any,
@@ -66,8 +85,8 @@ const NewProduct: React.FC = () => {
       price: 0,
       description: "",
       category: "",
-      stock: 0,
-    }
+      stock: 1,
+    },
   });
 
   useEffect(() => {
@@ -153,6 +172,8 @@ const NewProduct: React.FC = () => {
                 <Grid item xs={12}>
                   <FormSelect
                     label="Choose Category"
+                    control={control}
+                    name="category"
                     options={categories}
                     register={register("category")}
                     error={errors.category}
@@ -172,12 +193,14 @@ const NewProduct: React.FC = () => {
                   />
                 </Grid>
 
-                <ImageUploader 
-                  imagesPreview={imagesPreview}
-                  setImages={setImages}
-                  setImagesPreview={setImagesPreview}
-                  multiple={true}
-                />
+                <Grid item xs={12}>
+                  <ImageUploader 
+                    imagesPreview={imagesPreview}
+                    setImages={setImages}
+                    setImagesPreview={setImagesPreview}
+                    multiple={true}
+                  />
+                </Grid>
 
                 <Grid item xs={12}>
                   <Button

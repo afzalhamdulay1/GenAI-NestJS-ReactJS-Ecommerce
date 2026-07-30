@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import * as crypto from 'crypto';
 
@@ -33,6 +33,9 @@ export class User {
 
   @Prop()
   resetPasswordExpire?: Date;
+
+  @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }])
+  wishlist: mongoose.Schema.Types.ObjectId[];
 
   // Methods
   async comparePassword(enteredPassword: string): Promise<boolean> {

@@ -138,6 +138,9 @@ const Shipping: React.FC = () => {
             <FormSelect
               icon={<PublicIcon />}
               label="Country"
+              control={control}
+              name="country"
+              searchable={true}
               register={register("country")}
               error={errors.country}
               options={Country.getAllCountries().map((item) => ({
@@ -150,6 +153,9 @@ const Shipping: React.FC = () => {
               <FormSelect
                 icon={<TransferWithinAStationIcon />}
                 label="State"
+                control={control}
+                name="state"
+                searchable={true}
                 register={register("state")}
                 error={errors.state}
                 options={State.getStatesOfCountry(selectedCountry).map((item) => ({

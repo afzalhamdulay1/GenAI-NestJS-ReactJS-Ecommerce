@@ -23,6 +23,22 @@ Rather than maintaining separate hosting environments, this repository runs as a
 
 ## ✨ Key Features
 
+### 🏷️ Dynamic Category Management Suite
+* **Autonomous Category Module (`CategoriesModule`):** Autonomous database schema (`Category`) backed by idempotent backend auto-seeding for essential categories (`Laptop`, `Footwear`, `Bottom`, `Tops`, `Attire`, `Camera`, `SmartPhones`).
+* **Admin Category CRUD & Deletion Safety:** Dedicated Admin Categories management dashboard (`/admin/categories` and `/admin/category/new`) with real-time assigned product counters (`productsCount`). Prevents category deletion if active products are assigned to it.
+* **Dynamic Catalog Feeds:** All product forms (Add/Edit Product) and store catalog filter feeds fetch live category options dynamically from backend REST endpoints with guaranteed fallback options (`Other`).
+
+### 🎟️ Promotional Coupon & Discount Engine
+* **Full Coupon Management (`CouponsModule`):** End-to-end admin management of promotional discount codes (`/admin/coupons` and `/admin/coupon/new`) supporting percentage discounts, maximum discount caps, minimum order thresholds, and expiration dates.
+* **Real-Time Checkout Validation:** Automated validation and instant discount calculation on the checkout shipping page.
+
+### 🔍 Multi-Field Search Engine
+* **High-Performance Search Engine:** Optimized search query engine querying across **Product Title**, **Category Name**, and **Product Description** simultaneously.
+* **Floating Capsule Search Bar:** Sleek, mobile-responsive inline capsule search bar directly on the `/products` catalog page with clear filters and instant feedback.
+
+### 🏪 Store Settings Engine
+* **Global Store Configuration (`SettingsModule`):** Admin endpoint to dynamically update store-wide parameters like standard tax rates, shipping charges, free shipping thresholds, and currency formatting.
+
 ### 🛡️ Authentication & Google OAuth 2.0
 * **Google Sign-In & Sign-Up:** Complete Google login using Passport OAuth 2.0 strategy.
 * **Auto Account Merging:** Google login automatically links with existing email/password accounts if emails match.
@@ -31,13 +47,15 @@ Rather than maintaining separate hosting environments, this repository runs as a
 
 ### 📐 Robust Frontend Architecture
 * **Strict Type-Safe Forms:** 100% of the application's forms (Authentication, Cart, and Admin Dashboard) are powered by **React Hook Form** + **Zod** schema validation, ensuring zero unnecessary re-renders and guaranteeing mathematical type safety before data hits the backend.
+* **Searchable Select Controls:** Enhanced `<FormSelect />` component supporting an optional `searchable={true}` prop powered by Material-UI `<Autocomplete />` for smooth search filtering across long lists (e.g. Country & State selectors).
 * **Route-Based Code Splitting:** `React.lazy()` and `Suspense` chunk the application down to highly optimized bundles, loading massive third-party packages dynamically only when users visit specific flows (like the Checkout page).
 
 ### 📦 Product & Order Engine
 * **Automated Cancellations:** Users and Admins can instantly cancel orders, triggering automated email confirmations sent directly via Nodemailer.
 * **Smart Inventory Management:** Automated real-time stock deduction upon shipping confirmation (not order creation) and automatic stock restoration if an order is cancelled.
 * **Dynamic Reviews:** Automated score recalculation whenever products are reviewed or rated.
-* **Admin Dashboard:** Full CRUD endpoints to manage users, products, orders, and reviews with a standardized, breadcrumb-navigation UI header.
+* **User Wishlist & Favorites:** Dedicated wishlist management allowing users to save products with heart toggles on product cards and a dedicated `/wishlist` management page.
+* **Unified Admin Dashboard:** Full CRUD endpoints to manage users, products, categories, coupons, orders, and reviews with a standardized, breadcrumb-navigation UI header and unified DataGrid styling.
 
 ### 💳 Payments & Media Storage
 * **Stripe Gateway & Automated Refunds:** Secure server-side Stripe integration to create payment intents. Directly integrates with the Stripe SDK to process instant, automated refunds to the user's card upon order cancellation.
@@ -141,6 +159,7 @@ nestjs-ecom-backend/
 
 | Method | Endpoint | Description | Access |
 | :--- | :--- | :--- | :--- |
+| **GET** | `/api/v1/categories` | Fetch all dynamic store categories | Public |
 | **GET** | `/api/v1/auth/google` | Initiates Google OAuth Login | Public |
 | **GET** | `/api/v1/auth/google/callback` | Google OAuth redirect receiver | Public |
 | **POST** | `/api/v1/register` | Register new user account | Public |
@@ -148,8 +167,11 @@ nestjs-ecom-backend/
 | **GET** | `/api/v1/me` | Fetch authenticated profile details | User |
 | **PUT** | `/api/v1/me/update` | Update user profile and avatar | User |
 | **POST** | `/api/v1/payment/process` | Create Stripe Payment intent | User |
+| **POST** | `/api/v1/coupons/apply` | Validate & calculate coupon discount | User |
 | **PUT** | `/api/v1/order/:id/cancel` | Cancel an active 'Processing' order | User |
 | **GET** | `/api/v1/admin/users` | Fetch list of all registered users | **Admin Only** |
+| **POST** | `/api/v1/admin/category/new` | Create dynamic product category | **Admin Only** |
+| **POST** | `/api/v1/admin/coupon/new` | Create promotional discount coupon | **Admin Only** |
 | **POST** | `/api/v1/admin/product/new` | Create new shop product listing | **Admin Only** |
 | **PUT** | `/api/v1/admin/order/:id` | Update logistics status (e.g. Shipped) | **Admin Only** |
 | **DELETE** | `/api/v1/admin/user/:id` | Remove user registration | **Admin Only** |

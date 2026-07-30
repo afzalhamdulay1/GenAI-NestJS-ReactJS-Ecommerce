@@ -49,3 +49,19 @@ export class Product {
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
+
+ProductSchema.index(
+  {
+    name: 'text',
+    category: 'text',
+    description: 'text',
+  },
+  {
+    weights: {
+      name: 10,
+      category: 5,
+      description: 1,
+    },
+    name: 'ProductTextIndex',
+  },
+);
