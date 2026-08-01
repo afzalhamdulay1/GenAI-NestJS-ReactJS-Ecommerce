@@ -1,13 +1,25 @@
+/* Admin Dashboard Core Grid Layout */
+.dashboard {
+  width: 100%;
+  max-width: 100vw;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  box-sizing: border-box;
+}
+
 .sidebar {
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width: 100%;
+  width: 260px;
   border-right: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.02);
   position: sticky;
   top: 0;
+  box-sizing: border-box;
 }
 
 .logoContainer {
@@ -35,6 +47,7 @@
   flex-direction: column;
   padding: 0 0.75rem;
   gap: 0.25rem;
+  overflow-y: auto;
 }
 
 .navLink, .subNavLink {
@@ -117,8 +130,14 @@
 }
 
 @media screen and (max-width: 768px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
   .sidebar {
+    width: 100%;
     height: auto;
+    position: relative;
     padding: 1rem 0;
   }
   

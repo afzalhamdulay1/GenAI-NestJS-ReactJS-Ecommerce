@@ -26,6 +26,22 @@ export interface Review {
   name: string;
   rating: number;
   comment: string;
+  photos?: ProductImage[];
+  isVerifiedPurchase?: boolean;
+  createdAt?: string;
+}
+
+export interface ProductOption {
+  name: string;
+  values: string[];
+}
+
+export interface ProductVariant {
+  attributes: Record<string, string>;
+  stock: number;
+  price?: number;
+  originalPrice?: number;
+  sku?: string;
 }
 
 export interface Product {
@@ -33,6 +49,8 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  originalPrice?: number;
+  discountType?: 'percentage' | 'fixed';
   ratings: number;
   images: ProductImage[];
   category: string;
@@ -41,6 +59,9 @@ export interface Product {
   reviews?: Review[];
   user?: string;
   createdAt?: string;
+  hasVariants?: boolean;
+  options?: ProductOption[];
+  variants?: ProductVariant[];
 }
 
 export interface PaymentInfo {
@@ -55,6 +76,7 @@ export interface OrderItem {
   image: string;
   product: string;
   productId?: string;
+  selectedVariant?: Record<string, string>;
 }
 
 export interface UserObject {
@@ -72,6 +94,14 @@ export interface ShippingInfo {
   phoneNo?: string | number;
 }
 
+export interface TrackingInfo {
+  courierName?: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+  shippedAt?: string;
+  estimatedDelivery?: string;
+}
+
 export interface Order {
   _id: string;
   shippingInfo: ShippingInfo;
@@ -82,9 +112,14 @@ export interface Order {
   shippingPrice: number;
   totalPrice: number;
   orderStatus: string;
+  trackingInfo?: TrackingInfo;
   deliveredAt?: string;
   createdAt: string;
-  user: string | UserObject;
+  user?: string | UserObject;
+  guestName?: string;
+  guestEmail?: string;
+  guestAccessToken?: string;
+  isGuest?: boolean;
 }
 
 export interface CartItem {
@@ -95,4 +130,5 @@ export interface CartItem {
   image: string;
   stock: number;
   quantity: number;
+  selectedVariant?: Record<string, string>;
 }

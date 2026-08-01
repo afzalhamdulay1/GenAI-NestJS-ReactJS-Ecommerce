@@ -27,7 +27,7 @@ function App(): React.ReactElement {
         setStripePromise(loadStripe(data.stripeApiKey));
       }
     } catch (error) {
-      console.log(error);
+      console.log('Failed to fetch Stripe API Key:', error);
     }
   }
 
@@ -41,6 +41,12 @@ function App(): React.ReactElement {
     store.dispatch(loadUser());
     getStripeApiKey();
   }, []);
+
+  useEffect(() => {
+    if (!stripePromise) {
+      getStripeApiKey();
+    }
+  }, [stripePromise]);
 
   if (isOffline) {
     return <Maintenance />;

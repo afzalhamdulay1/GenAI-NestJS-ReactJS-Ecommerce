@@ -32,6 +32,7 @@ export class Order {
       quantity: { type: Number, required: true },
       image: { type: String, required: true },
       productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+      selectedVariant: { type: Object },
     },
   ])
   orderItems: Array<{
@@ -40,10 +41,23 @@ export class Order {
     quantity: number;
     image: string;
     productId: mongoose.Schema.Types.ObjectId;
+    selectedVariant?: Record<string, string>;
   }>;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-  user: mongoose.Schema.Types.ObjectId;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false })
+  user?: mongoose.Schema.Types.ObjectId;
+
+  @Prop({ type: String })
+  guestName?: string;
+
+  @Prop({ type: String })
+  guestEmail?: string;
+
+  @Prop({ type: String })
+  guestAccessToken?: string;
+
+  @Prop({ type: Boolean, default: false })
+  isGuest?: boolean;
 
   @Prop({
     type: {
@@ -74,6 +88,24 @@ export class Order {
 
   @Prop({ required: true, default: 'Processing' })
   orderStatus: string;
+
+  @Prop({
+    type: {
+      courierName: { type: String },
+      trackingNumber: { type: String },
+      trackingUrl: { type: String },
+      shippedAt: { type: Date },
+      estimatedDelivery: { type: Date },
+    },
+    required: false,
+  })
+  trackingInfo?: {
+    courierName?: string;
+    trackingNumber?: string;
+    trackingUrl?: string;
+    shippedAt?: Date;
+    estimatedDelivery?: Date;
+  };
 
   @Prop()
   deliveredAt: Date;

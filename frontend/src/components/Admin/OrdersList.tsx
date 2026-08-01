@@ -14,8 +14,11 @@ import {
 import MetaData from "@/components/Layout/MetaData";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import SideBar from "@/components/Admin/Sidebar";
 import AdminPageHeader from "@/components/Admin/AdminPageHeader";
+import { Button } from "@mui/material";
+import { exportOrdersToCSV } from "@/utils/csvExporter";
 import {
   deleteOrder,
   getAllOrders,
@@ -181,7 +184,27 @@ const OrdersList: React.FC = () => {
           <AdminPageHeader
             title="Financial Orders"
             breadcrumbText="Orders"
-          />
+          >
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<FileDownloadIcon />}
+              onClick={() => exportOrdersToCSV(orders)}
+              disabled={!orders || orders.length === 0}
+              sx={{
+                borderRadius: '10px',
+                textTransform: 'none',
+                fontWeight: 700,
+                px: 2.5,
+                py: 1,
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)',
+                backgroundColor: '#10b981',
+                '&:hover': { backgroundColor: '#059669' }
+              }}
+            >
+              📄 Export Sales CSV
+            </Button>
+          </AdminPageHeader>
 
           <Paper elevation={0} className="productListTableContainer">
             <DataGrid

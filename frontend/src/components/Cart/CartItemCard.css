@@ -43,21 +43,61 @@
   color: #64748b;
 }
 
-.CartItemCard > div > p {
-  color: rgb(248 113 113);
+.cartActionsGroup {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 0.75rem;
+}
+
+.saveForLaterBtn {
+  color: #0284c7;
   font-family: "Outfit", sans-serif;
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
-  width: fit-content;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: opacity 0.3s ease;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+  transition: all 0.25s ease;
 }
 
-.CartItemCard > div > p:hover {
-  opacity: 0.7;
-  text-decoration: underline;
+.saveForLaterBtn:hover {
+  color: #0369a1;
+  background-color: #e0f2fe;
+  border-color: #7dd3fc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+}
+
+.removeItemBtn {
+  color: #ef4444;
+  font-family: "Outfit", sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  transition: all 0.25s ease;
+}
+
+.removeItemBtn:hover {
+  color: #dc2626;
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }
 
 @media screen and (max-width: 600px) {

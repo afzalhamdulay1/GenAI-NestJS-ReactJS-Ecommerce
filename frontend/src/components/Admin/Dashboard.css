@@ -11,12 +11,13 @@
 }
 
 .dashboard {
-  width: 100vw;
+  width: 100%;
   max-width: 100%;
   display: grid;
-  grid-template-columns: 1fr 5fr;
+  grid-template-columns: 260px 1fr;
   min-height: 100vh;
   background-color: var(--bg-color);
+  box-sizing: border-box;
 }
 
 .dashboardContainer {

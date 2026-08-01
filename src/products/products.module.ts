@@ -7,9 +7,14 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from '../auth/auth.module';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
+import { Order, OrderSchema } from '../orders/schemas/order.schema';
+
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
+    MongooseModule.forFeature([
+      { name: Product.name, schema: ProductSchema },
+      { name: Order.name, schema: OrderSchema },
+    ]),
     ConfigModule,
     forwardRef(() => AuthModule),
     CloudinaryModule,

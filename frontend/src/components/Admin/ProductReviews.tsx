@@ -99,16 +99,30 @@ const ProductReviews: React.FC = () => {
   }, [dispatch, error, isDeleted, selectedProduct, watchProductId]);
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "Review ID", minWidth: 180, flex: 0.5 },
+    {
+      field: "id",
+      headerName: "Review ID",
+      minWidth: 180,
+      flex: 0.5,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+          <Typography variant="body2" sx={{ color: "#64748b", fontFamily: "monospace", fontSize: "0.825rem" }}>
+            {params.value}
+          </Typography>
+        </Box>
+      )
+    },
     {
       field: "user",
       headerName: "Customer Name",
       minWidth: 150,
       flex: 0.5,
       renderCell: (params) => (
-        <Typography variant="body2" sx={{ fontWeight: 600, color: "#1e293b" }}>
-          {params.value}
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: "#1e293b" }}>
+            {params.value}
+          </Typography>
+        </Box>
       )
     },
     {
@@ -117,9 +131,11 @@ const ProductReviews: React.FC = () => {
       minWidth: 350,
       flex: 1,
       renderCell: (params) => (
-        <Typography variant="body2" sx={{ color: "#64748b" }}>
-          {params.value}
-        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+          <Typography variant="body2" sx={{ color: "#64748b" }}>
+            {params.value}
+          </Typography>
+        </Box>
       )
     },
     {
@@ -128,8 +144,10 @@ const ProductReviews: React.FC = () => {
       type: "number",
       minWidth: 160,
       flex: 0.4,
+      align: "left",
+      headerAlign: "left",
       renderCell: (params) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', gap: 1 }}>
             <Rating value={params.value} readOnly size="small" precision={0.5} />
             <Typography variant="caption" sx={{ fontWeight: 700, color: params.value >= 3 ? '#10b981' : '#ef4444' }}>
                 ({params.value})
@@ -147,7 +165,7 @@ const ProductReviews: React.FC = () => {
       headerAlign: 'right',
       renderCell: (params) => {
         return (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', pr: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', width: '100%', height: '100%', pr: 1 }}>
             <Tooltip title="Delete Review">
                 <IconButton 
                     onClick={() => deleteReviewHandler(params.row.id)}
@@ -280,10 +298,17 @@ const ProductReviews: React.FC = () => {
                                 autoHeight
                                 sx={{
                                     "& .MuiDataGrid-columnHeaderTitle": {
-                                      fontSize: "1.125rem !important",
+                                      fontSize: "1rem !important",
                                       fontWeight: "700 !important",
                                       textTransform: "capitalize !important",
                                       color: "#1e293b !important",
+                                    },
+                                    "& .MuiDataGrid-cell": {
+                                      display: "flex !important",
+                                      alignItems: "center !important",
+                                    },
+                                    "& .MuiDataGrid-row": {
+                                      alignItems: "center !important",
                                     }
                                 }}
                             />

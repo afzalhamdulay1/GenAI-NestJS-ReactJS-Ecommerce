@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAppSelector } from "@/app/hooks";
 import Container from "@/components/Container/Container";
+import PredictiveSearch from "@/components/Search/PredictiveSearch";
 
 interface NavItem {
   name: string;
@@ -58,6 +59,11 @@ function Header(): React.ReactElement {
               />
             </svg>
           </button>
+
+          {/* Live Predictive Search Bar */}
+          <div className="flex-1 max-w-md mx-4 hidden sm:block">
+            <PredictiveSearch />
+          </div>
 
           {/* Nav Links */}
           <ul

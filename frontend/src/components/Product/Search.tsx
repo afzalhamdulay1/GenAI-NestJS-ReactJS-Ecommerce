@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MetaData from "@/components/Layout/MetaData";
+import PredictiveSearch from "@/components/Search/PredictiveSearch";
 import "@/components/Product/Search.css";
 
 const searchSchema = z.object({
@@ -44,14 +45,9 @@ const Search: React.FC = () => {
           <p>Find the best gadgets, fashion, and lifestyle essentials with ease.</p>
         </div>
 
-        <form className="searchInputContainer" onSubmit={handleSubmit(onSearchSubmit)}>
-          <input
-            type="text"
-            placeholder="Search our catalog (e.g. Laptop, Nike, Blue)..."
-            {...register("keyword")}
-          />
-          <input type="submit" value="Search Now" />
-        </form>
+        <div className="w-full max-w-xl flex justify-center mt-6">
+          <PredictiveSearch />
+        </div>
       </div>
     </Fragment>
   );

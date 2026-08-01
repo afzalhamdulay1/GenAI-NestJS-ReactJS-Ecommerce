@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import dummyProfile from '@/images/Profile.png';
 import FormInput from "@/components/Form/FormInput";
+import { compressImage } from "@/utils/imageCompressor";
 
 const updateProfileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -48,20 +49,16 @@ const UpdateProfile: React.FC = () => {
 
     dispatch(updateProfile(myForm));
   };
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        if (reader.readyState === 2 && reader.result) {
-          setAvatarPreview(reader.result as string);
-          setAvatar(reader.result);
-        }
-      };
-
-      reader.readAsDataURL(files[0]);
+      try {
+        const compressedBase64 = await compressImage(files[0]);
+        setAvatarPreview(compressedBase64);
+        setAvatar(compressedBase64);
+      } catch (err) {
+        toast.error("Failed to process profile avatar image");
+      }
     }
   };
 

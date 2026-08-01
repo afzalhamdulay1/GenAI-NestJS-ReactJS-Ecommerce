@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsNumber, IsObject, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsObject, IsString, ValidateNested, IsOptional, IsEmail, IsBoolean } from 'class-validator';
 
 export class ShippingInfoDto {
   @IsString()
@@ -99,4 +99,16 @@ export class CreateOrderDto {
   @IsNotEmpty()
   @Type(() => Number)
   totalPrice: number;
+
+  @IsOptional()
+  @IsString()
+  guestName?: string;
+
+  @IsOptional()
+  @IsEmail()
+  guestEmail?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isGuest?: boolean;
 }

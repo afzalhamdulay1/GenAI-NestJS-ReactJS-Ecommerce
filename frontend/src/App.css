@@ -29,6 +29,9 @@
   .redColor {
     color: red !important;
   }
+  .amberColor {
+    color: #d97706 !important;
+  }
 
 
   .headerLink.active{

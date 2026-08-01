@@ -14,15 +14,15 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import { api } from '@/services/api';
+import PredictiveSearch from '@/components/Search/PredictiveSearch';
 
 const Products: React.FC = () => {
   const dispatch = useAppDispatch();
   const { keyword } = useParams<{ keyword?: string }>();
-  const mykeyword = keyword || '';
-
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
+  const mykeyword = keyword || searchParams.get('keyword') || '';
   const initialCategory = searchParams.get('category') || '';
 
   const theme = useTheme();
@@ -148,33 +148,8 @@ const Products: React.FC = () => {
             <MetaData title="ECOMMERCE" />
 
             <Fragment>
-              <div className="productsSearchContainer">
-                <form onSubmit={handleSearchSubmit} className="productsSearchForm">
-                  <SearchIcon sx={{ color: '#0284c7', fontSize: 24, ml: 0.5 }} />
-                  <input
-                    type="text"
-                    className="productsSearchInput"
-                    placeholder={isMobile ? "Search products..." : "Search products by name, category, or keyword..."}
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                  />
-                  {searchInput && (
-                    <button
-                      type="button"
-                      className="clearSearchBtn"
-                      onClick={() => {
-                        setSearchInput('');
-                        navigate('/products');
-                      }}
-                      title="Clear Search"
-                    >
-                      <CloseIcon fontSize="small" />
-                    </button>
-                  )}
-                  <button type="submit" className="searchSubmitBtn">
-                    <span>Search</span>
-                  </button>
-                </form>
+              <div className="productsSearchContainer flex justify-center py-4">
+                <PredictiveSearch variant="pill" initialKeyword={mykeyword} />
               </div>
 
               <div className="totalProductsText">

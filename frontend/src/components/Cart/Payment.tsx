@@ -33,7 +33,7 @@ const Payment: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const { shippingInfo, cartItems } = useAppSelector((state) => state.cart);
-  const { user } = useAppSelector((state) => state.user);
+  const { user, isAuthenticated } = useAppSelector((state) => state.user);
   const { error } = useAppSelector((state) => state.order);
 
   const paymentPayload = {
@@ -44,7 +44,9 @@ const Payment: React.FC = () => {
     couponCode: orderInfo?.couponCode || undefined,
   };
 
-  const order: Partial<Order> & { couponCode?: string } = {
+  const guestName = localStorage.getItem("guestName");
+  const guestEmail = localStorage.getItem("guestEmail");
+  const order: Partial<Order> & { couponCode?: string; guestName?: string; guestEmail?: string; isGuest?: boolean } = {
     shippingInfo: shippingInfo ? {
       ...shippingInfo,
       pinCode: Number(shippingInfo.pinCode),
@@ -59,6 +61,9 @@ const Payment: React.FC = () => {
     shippingPrice: orderInfo?.shippingCharges || 0,
     totalPrice: orderInfo?.totalPrice || 0,
     couponCode: orderInfo?.couponCode || undefined,
+    guestName: !isAuthenticated ? (guestName || undefined) : undefined,
+    guestEmail: !isAuthenticated ? (guestEmail || undefined) : undefined,
+    isGuest: !isAuthenticated,
   };
 
   const submitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -88,8 +93,8 @@ const Payment: React.FC = () => {
         payment_method: {
           card: cardElement,
           billing_details: {
-            name: user?.name || "Customer",
-            email: user?.email || "customer@example.com",
+            name: user?.name || guestName || "Customer",
+            email: user?.email || guestEmail || "customer@example.com",
             address: {
               line1: shippingInfo?.address,
               city: shippingInfo?.city,
@@ -115,8 +120,16 @@ const Payment: React.FC = () => {
           };
 
           try {
-            await dispatch(createOrder(order as Omit<Order, '_id' | 'createdAt' | 'user' | 'orderStatus' | 'deliveredAt'>)).unwrap();
+            const res = await dispatch(createOrder(order as Omit<Order, '_id' | 'createdAt' | 'user' | 'orderStatus' | 'deliveredAt'>)).unwrap();
             dispatch(emptyCart());
+            if (!isAuthenticated) {
+              sessionStorage.setItem("lastGuestOrder", JSON.stringify({
+                email: guestEmail,
+                name: guestName,
+                orderId: res.order?._id,
+                token: (res as any).guestAccessToken
+              }));
+            }
             navigate("/success");
           } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : typeof err === 'string' ? err : "Failed to create order on server";

@@ -31,9 +31,13 @@ export class UsersService {
 
     const cookieExpire = this.configService.get<number>('COOKIE_EXPIRE') || 5;
 
-    const options = {
+    const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+
+    const options: any = {
       expires: new Date(Date.now() + cookieExpire * 24 * 60 * 60 * 1000),
       httpOnly: true,
+      sameSite: isProduction ? 'strict' : 'lax',
+      secure: isProduction,
     };
 
     const userObj = user.toObject ? user.toObject() : { ...user };

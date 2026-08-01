@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateProductDto {
@@ -12,8 +12,19 @@ export class CreateProductDto {
 
   @Type(() => Number)
   @IsNumber()
+  @Min(0, { message: 'Price cannot be negative' })
   @IsNotEmpty({ message: 'Please enter product price' })
   price: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0, { message: 'Original price cannot be negative' })
+  originalPrice?: number;
+
+  @IsOptional()
+  @IsString()
+  discountType?: string;
 
   @IsString()
   @IsNotEmpty({ message: 'Please enter product category' })
@@ -26,4 +37,13 @@ export class CreateProductDto {
 
   @IsOptional()
   images?: string | string[];
+
+  @IsOptional()
+  hasVariants?: boolean | string;
+
+  @IsOptional()
+  options?: any;
+
+  @IsOptional()
+  variants?: any;
 }

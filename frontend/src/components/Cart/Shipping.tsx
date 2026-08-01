@@ -12,13 +12,17 @@ import LocationCityIcon from "@mui/icons-material/LocationCity";
 import PublicIcon from "@mui/icons-material/Public";
 import PhoneIcon from "@mui/icons-material/Phone";
 import TransferWithinAStationIcon from "@mui/icons-material/TransferWithinAStation";
+import MailIcon from "@mui/icons-material/Mail";
 import { Country, State } from "country-state-city";
 import CheckoutSteps from "@/components/Cart/CheckoutSteps";
 import { useNavigate } from "react-router-dom";
 import FormInput from "@/components/Form/FormInput";
+import PersonIcon from "@mui/icons-material/Person";
 import FormSelect from "@/components/Form/FormSelect";
 
 const shippingSchema = z.object({
+  guestName: z.string().min(1, "Full name is required").optional().or(z.literal('')),
+  guestEmail: z.string().email("Valid email address is required").optional().or(z.literal('')),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
   pinCode: z.coerce.number().min(1, "Pin Code is required"),
@@ -33,16 +37,23 @@ const Shipping: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { shippingInfo } = useAppSelector((state) => state.cart);
+  const { isAuthenticated, user } = useAppSelector((state) => state.user);
+
+  const storedGuestName = localStorage.getItem("guestName") || "";
+  const storedGuestEmail = localStorage.getItem("guestEmail") || "";
 
   const {
     register,
     handleSubmit,
     control,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<ShippingFormValues>({
     resolver: zodResolver(shippingSchema) as any,
     defaultValues: {
+      guestName: isAuthenticated ? user?.name : storedGuestName,
+      guestEmail: isAuthenticated ? user?.email : storedGuestEmail,
       address: shippingInfo?.address || "",
       city: shippingInfo?.city || "",
       pinCode: shippingInfo?.pinCode ? Number(shippingInfo.pinCode) : 0,
@@ -63,6 +74,19 @@ const Shipping: React.FC = () => {
   });
 
   const onShippingSubmit = (data: ShippingFormValues) => {
+    if (!isAuthenticated) {
+      if (!data.guestName || data.guestName.trim().length === 0) {
+        setError("guestName", { message: "Full name is required for guest checkout" });
+        return;
+      }
+      if (!data.guestEmail || !data.guestEmail.includes("@")) {
+        setError("guestEmail", { message: "Email address is required for guest checkout" });
+        return;
+      }
+      localStorage.setItem("guestName", data.guestName);
+      localStorage.setItem("guestEmail", data.guestEmail);
+    }
+
     dispatch(
       saveShippingInfo({
         address: data.address,
@@ -102,6 +126,25 @@ const Shipping: React.FC = () => {
             encType="multipart/form-data"
             onSubmit={handleSubmit(onShippingSubmit)}
           >
+            {!isAuthenticated && (
+              <>
+                <FormInput
+                  icon={<PersonIcon />}
+                  type="text"
+                  label="Full Name"
+                  register={register("guestName")}
+                  error={errors.guestName}
+                />
+                <FormInput
+                  icon={<MailIcon />}
+                  type="email"
+                  label="Email Address (for Receipt & Tracking)"
+                  register={register("guestEmail")}
+                  error={errors.guestEmail}
+                />
+              </>
+            )}
+
             <FormInput
               icon={<HomeIcon />}
               type="text"
@@ -132,36 +175,34 @@ const Shipping: React.FC = () => {
               label="Phone Number"
               register={register("phoneNo")}
               error={errors.phoneNo}
-              inputProps={{ maxLength: 10 }}
             />
 
             <FormSelect
               icon={<PublicIcon />}
               label="Country"
-              control={control}
-              name="country"
-              searchable={true}
-              register={register("country")}
-              error={errors.country}
+              value={selectedCountry || ""}
+              onChange={(e: any) => {
+                setValue("country", e.target.value);
+                setValue("state", "");
+              }}
               options={Country.getAllCountries().map((item) => ({
-                label: item.name,
                 value: item.isoCode,
+                label: item.name,
               }))}
+              error={errors.country}
             />
 
             {selectedCountry && (
               <FormSelect
                 icon={<TransferWithinAStationIcon />}
                 label="State"
-                control={control}
-                name="state"
-                searchable={true}
-                register={register("state")}
-                error={errors.state}
+                value={selectedState || ""}
+                onChange={(e: any) => setValue("state", e.target.value)}
                 options={State.getStatesOfCountry(selectedCountry).map((item) => ({
-                  label: item.name,
                   value: item.isoCode,
+                  label: item.name,
                 }))}
+                error={errors.state}
               />
             )}
 

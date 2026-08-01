@@ -101,10 +101,10 @@ const ProductsList: React.FC = () => {
         const stock = params.value;
         return (
           <Chip 
-            label={stock > 0 ? `In Stock (${stock})` : "Out of Stock"}
-            color={stock > 0 ? "success" : "error"}
+            label={stock > 5 ? `In Stock (${stock})` : stock > 0 ? `Low Stock (${stock})` : "Out of Stock"}
+            color={stock > 5 ? "success" : stock > 0 ? "warning" : "error"}
             size="small"
-            sx={{ fontWeight: 600 }}
+            sx={{ fontWeight: 700 }}
           />
         );
       }

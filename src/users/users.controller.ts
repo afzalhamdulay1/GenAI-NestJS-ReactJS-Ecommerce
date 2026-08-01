@@ -48,7 +48,8 @@ export class UsersController {
   @UseGuards(GoogleAuthGuard)
   async googleAuthCallback(@Req() req: any, @Res() res: Response) {
     this.usersService.setCookieToken(req.user, res);
-    res.redirect('/');
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    res.redirect(frontendUrl);
   }
 
   @Post('register')

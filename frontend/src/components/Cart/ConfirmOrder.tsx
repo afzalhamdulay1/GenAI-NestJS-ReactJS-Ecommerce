@@ -3,7 +3,8 @@ import CheckoutSteps from "@/components/Cart/CheckoutSteps";
 import MetaData from "@/components/Layout/MetaData";
 import "@/components/Cart/ConfirmOrder.css";
 import { Link, useNavigate } from "react-router-dom";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector, useAppDispatch } from "@/app/hooks";
+import { removeItem } from "@/features/cart/cartSlice";
 import OrderSummaryCard from "@/components/Cart/Sections/OrderSummaryCard";
 import { api } from "@/services/api";
 import { toast } from "react-toastify";
@@ -107,7 +108,35 @@ const ConfirmOrder: React.FC = () => {
     setCouponMessage(null);
   };
 
-  const proceedToPayment = () => {
+  const dispatch = useAppDispatch();
+  const [validating, setValidating] = useState(false);
+
+  const proceedToPayment = async () => {
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    setValidating(true);
+    let hasUnavailableItem = false;
+
+    // Validate each cart item against backend database before entering payment
+    for (const item of cartItems) {
+      try {
+        await api.get(`/product/${item.productId}`);
+      } catch (err) {
+        hasUnavailableItem = true;
+        dispatch(removeItem({ productId: item.productId, selectedVariant: item.selectedVariant }));
+        toast.error(`"${item.name}" is no longer available and was removed from your cart.`);
+      }
+    }
+
+    setValidating(false);
+
+    if (hasUnavailableItem) {
+      return;
+    }
+
     const data = {
       subtotal,
       shippingCharges,
@@ -148,18 +177,30 @@ const ConfirmOrder: React.FC = () => {
             <p>Your Cart Items:</p>
             <div className="confirmCartItemsContainer">
               {cartItems &&
-                cartItems.map((item) => (
-                  <div key={item.productId}>
-                    <img src={item.image} alt="Product" />
-                    <Link to={`/product/${item.product || item.productId}`}>
-                      {item.name}
-                    </Link>{" "}
-                    <span>
-                      {item.quantity} X ₹{item.price} ={" "}
-                      <b>₹{item.price * item.quantity}</b>
-                    </span>
-                  </div>
-                ))}
+                cartItems.map((item, index) => {
+                  const variantText = item.selectedVariant && Object.keys(item.selectedVariant).length > 0
+                    ? Object.entries(item.selectedVariant).map(([k, v]) => `${k}: ${v}`).join(' | ')
+                    : null;
+                  return (
+                    <div key={`${item.productId}-${index}`}>
+                      <img src={item.image} alt="Product" />
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <Link to={`/product/${item.product || item.productId}`}>
+                          {item.name}
+                        </Link>
+                        {variantText && (
+                          <span style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
+                            {variantText}
+                          </span>
+                        )}
+                      </div>
+                      <span>
+                        {item.quantity} X ₹{item.price} ={" "}
+                        <b>₹{item.price * item.quantity}</b>
+                      </span>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         </div>

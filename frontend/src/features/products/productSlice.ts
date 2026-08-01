@@ -123,9 +123,8 @@ const productSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchProductDetails.pending, (state) => {
-        if (!state.error) {
-          state.loading = true;
-        }
+        state.loading = true;
+        state.success = false;
       })
       .addCase(fetchProductDetails.fulfilled, (state, action) => {
         state.loading = false;
@@ -137,6 +136,7 @@ const productSlice = createSlice({
       })
       .addCase(createProduct.pending, (state) => {
         state.loading = true;
+        state.success = false;
       })
       .addCase(createProduct.fulfilled, (state, action) => {
         state.loading = false;
@@ -149,6 +149,7 @@ const productSlice = createSlice({
       })
       .addCase(updateProduct.pending, (state) => {
         state.loading = true;
+        state.success = false;
       })
       .addCase(updateProduct.fulfilled, (state, action) => {
         state.loading = false;

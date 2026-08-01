@@ -23,7 +23,7 @@ const initialState: ReviewState = {
 
 export const createNewReview = createAsyncThunk<
   boolean,
-  { rating: number; comment: string; productId: string },
+  { rating: number; comment: string; productId: string; images?: string[] },
   { rejectValue: string }
 >(
   'reviews/createNewReview',

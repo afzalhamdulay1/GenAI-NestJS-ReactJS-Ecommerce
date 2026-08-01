@@ -84,6 +84,8 @@ const Dashboard: React.FC = () => {
     categoryChartData,
   } = useDashboardStats(products, orders, users);
 
+  const lowStockCount = products ? products.filter((p) => p.stock <= 5 && p.stock > 0).length : 0;
+
   return (
     <div className="dashboard">
       <MetaData title="Dashboard - Admin Panel" />
@@ -154,6 +156,10 @@ const Dashboard: React.FC = () => {
             <div className="statCard">
               <p>Avg. Order Value</p>
               <h3>₹{avgOrderValue}</h3>
+            </div>
+            <div className="statCard" style={{ borderLeft: '4px solid #f59e0b' }}>
+              <p>Low Stock Alerts (≤5)</p>
+              <h3 style={{ color: '#d97706' }}>{lowStockCount}</h3>
             </div>
             <div className="statCard">
               <p>Out of Stock Rate</p>

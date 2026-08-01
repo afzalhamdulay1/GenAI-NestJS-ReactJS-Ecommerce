@@ -11,6 +11,7 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
+import "@/components/Admin/NewProduct.css";
 import FormInput from "@/components/Form/FormInput";
 import FormSelect from "@/components/Form/FormSelect";
 import MetaData from "@/components/Layout/MetaData";
@@ -45,6 +46,7 @@ const UpdateUser: React.FC = () => {
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<UpdateUserFormValues>({
     resolver: zodResolver(updateUserSchema) as any,
@@ -136,13 +138,13 @@ const UpdateUser: React.FC = () => {
 
                   <Grid item xs={12}>
                     <FormSelect
+                      name="role"
+                      control={control}
                       label="Account Role"
                       options={[
-                        { label: "Choose Role", value: "" },
                         { label: "Administrator", value: "admin" },
                         { label: "Standard User", value: "user" }
                       ]}
-                      register={register("role")}
                       error={errors.role}
                       icon={<VerifiedUserIcon />}
                     />

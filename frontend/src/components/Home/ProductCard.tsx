@@ -8,6 +8,7 @@ import { Product } from '@/types';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { toggleWishlist } from '@/features/user/userSlice';
 import { addItemsToCart } from '@/features/cart/cartSlice';
+import '@/components/Home/ProductCard.css';
 import { toast } from 'react-toastify';
 
 interface ProductCardProps {
@@ -81,6 +82,47 @@ const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </IconButton>
       )}
+      {product.stock <= 5 && product.stock > 0 && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 10,
+            left: 10,
+            zIndex: 2,
+            backgroundColor: '#fef3c7',
+            color: '#b45309',
+            border: '1px solid #fcd34d',
+            borderRadius: '6px',
+            px: 1,
+            py: 0.2,
+            fontSize: '0.72rem',
+            fontWeight: 700,
+          }}
+        >
+          Only {product.stock} left!
+        </Box>
+      )}
+      {/* Offer Discount Badge Pill */}
+      {product.originalPrice && product.originalPrice > product.price && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: product.stock <= 5 && product.stock > 0 ? 38 : 10,
+            left: 10,
+            zIndex: 2,
+            backgroundColor: '#ef4444',
+            color: '#ffffff',
+            borderRadius: '6px',
+            px: 1,
+            py: 0.3,
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            boxShadow: '0 2px 6px rgba(239, 68, 68, 0.3)',
+          }}
+        >
+          {Math.min(100, Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100))}% OFF
+        </Box>
+      )}
       <img src={product.images && product.images[0] ? product.images[0].url : ''} alt={product.name} />
       <p>{product.name}</p>
       <p>{product.category}</p>
@@ -91,7 +133,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
           ({product.numOfReviews} Reviews)
         </span>
       </div>
-      <span>{`₹${product.price}`}</span>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '1.1rem' }}>{`₹${product.price}`}</span>
+        {product.originalPrice && product.originalPrice > product.price && (
+          <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.9rem', fontWeight: 600 }}>
+            {`₹${product.originalPrice}`}
+          </span>
+        )}
+      </Box>
       {showAddToCart && (
         <Box
           onClick={(e) => {

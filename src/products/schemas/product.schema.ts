@@ -14,6 +14,12 @@ export class Product {
   @Prop({ required: true, maxlength: 8 })
   price: number;
 
+  @Prop({ maxlength: 8 })
+  originalPrice?: number;
+
+  @Prop({ default: 'percentage' })
+  discountType?: string;
+
   @Prop({ default: 0 })
   ratings: number;
 
@@ -40,12 +46,56 @@ export class Product {
       name: { type: String, required: true },
       rating: { type: Number, required: true },
       comment: { type: String, required: true },
+      photos: [
+        {
+          public_id: { type: String, required: true },
+          url: { type: String, required: true },
+        },
+      ],
+      isVerifiedPurchase: { type: Boolean, default: false },
+      createdAt: { type: Date, default: Date.now },
     },
   ])
-  reviews: Array<{ user: mongoose.Schema.Types.ObjectId; name: string; rating: number; comment: string }>;
+  reviews: Array<{
+    user: mongoose.Schema.Types.ObjectId;
+    name: string;
+    rating: number;
+    comment: string;
+    photos?: Array<{ public_id: string; url: string }>;
+    isVerifiedPurchase?: boolean;
+    createdAt?: Date;
+  }>;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
   user: mongoose.Schema.Types.ObjectId;
+
+  @Prop({ default: false })
+  hasVariants: boolean;
+
+  @Prop([
+    {
+      name: { type: String, required: true },
+      values: [{ type: String, required: true }],
+    },
+  ])
+  options: Array<{ name: string; values: string[] }>;
+
+  @Prop([
+    {
+      attributes: { type: Object, required: true },
+      stock: { type: Number, required: true, default: 0 },
+      price: { type: Number },
+      originalPrice: { type: Number },
+      sku: { type: String },
+    },
+  ])
+  variants: Array<{
+    attributes: Record<string, string>;
+    stock: number;
+    price?: number;
+    originalPrice?: number;
+    sku?: string;
+  }>;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

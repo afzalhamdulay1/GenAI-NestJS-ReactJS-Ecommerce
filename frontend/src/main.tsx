@@ -23,6 +23,7 @@ const UpdatePassword = React.lazy(() => import('@/components/User/UpdatePassword
 const ForgotPassword = React.lazy(() => import('@/components/User/ForgotPassword'));
 const ResetPassword = React.lazy(() => import('@/components/User/ResetPassword'));
 const Cart = React.lazy(() => import('@/components/Cart/Cart'));
+const CheckoutOption = React.lazy(() => import('@/components/Cart/CheckoutOption'));
 const Shipping = React.lazy(() => import('@/components/Cart/Shipping'));
 const ConfirmOrder = React.lazy(() => import('@/components/Cart/ConfirmOrder'));
 const Payment = React.lazy(() => import('@/components/Cart/Payment'));
@@ -98,36 +99,28 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: '/checkout/option',
+        element: <CheckoutOption />,
+      },
+      {
         path: '/shipping',
-        element: (
-          <ProtectedRoute>
-            <Shipping />
-          </ProtectedRoute>
-        ),
+        element: <Shipping />,
       },
       {
         path: '/order/confirm',
-        element: (
-          <ProtectedRoute>
-            <ConfirmOrder />
-          </ProtectedRoute>
-        ),
+        element: <ConfirmOrder />,
       },
       {
         path: '/process/payment',
-        element: (
-          <ProtectedRoute>
-            <Payment />
-          </ProtectedRoute>
-        ),
+        element: <Payment />,
       },
       {
         path: '/success',
-        element: (
-          <ProtectedRoute>
-            <OrderSuccess />
-          </ProtectedRoute>
-        ),
+        element: <OrderSuccess />,
+      },
+      {
+        path: '/order/guest/:id',
+        element: <OrderDetails />,
       },
       {
         path: '/orders',

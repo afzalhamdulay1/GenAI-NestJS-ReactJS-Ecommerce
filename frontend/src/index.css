@@ -33,3 +33,21 @@
     border-radius: 10px !important;
   }
 }
+
+/* Fix react-responsive-carousel Lightbox active thumbnail styling */
+.carousel .thumb {
+  border: 2px solid transparent !important;
+  opacity: 0.5 !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.carousel .thumb:hover {
+  opacity: 0.8 !important;
+}
+
+.carousel .thumb.selected {
+  border: 2px solid #ffffff !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.7) !important;
+}

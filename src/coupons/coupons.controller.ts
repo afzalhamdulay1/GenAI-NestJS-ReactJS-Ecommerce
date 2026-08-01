@@ -19,7 +19,6 @@ export class CouponsController {
   constructor(private readonly couponsService: CouponsService) {}
 
   @Post('coupons/apply')
-  @UseGuards(JwtAuthGuard)
   async applyCoupon(@Body() applyCouponDto: ApplyCouponDto) {
     return this.couponsService.applyCoupon(applyCouponDto);
   }

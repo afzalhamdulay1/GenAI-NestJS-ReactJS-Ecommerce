@@ -67,7 +67,7 @@ export class SettingsService {
     const verifiedOrderItems = items.map((item) => {
       const dbProduct = dbProducts.find((p) => p._id.toString() === item.productId);
       if (!dbProduct) {
-        throw new BadRequestException(`Product with ID ${item.productId} not found`);
+        throw new BadRequestException(`One or more items in your cart are no longer available. Please return to your cart and update your items.`);
       }
       const price = dbProduct.price;
       subtotal += price * item.quantity;

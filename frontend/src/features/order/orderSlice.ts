@@ -99,7 +99,7 @@ export const getAllOrders = createAsyncThunk<
 
 export const updateOrder = createAsyncThunk<
   { success: boolean },
-  { id: string; orderData: { status: string } },
+  { id: string; orderData: { status: string; courierName?: string; trackingNumber?: string; trackingUrl?: string; estimatedDelivery?: string } },
   { rejectValue: string }
 >('order/updateOrder', async ({ id, orderData }, { rejectWithValue }) => {
   try {
