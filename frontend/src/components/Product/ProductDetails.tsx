@@ -192,7 +192,7 @@ const ProductDetails: React.FC = () => {
                       ? currentVariant.originalPrice
                       : product?.originalPrice;
 
-                    const hasDiscount = Boolean(effectiveOrigPrice && effectiveOrigPrice > activePrice);
+                    const hasDiscount = Boolean(effectiveOrigPrice && effectiveOrigPrice > 0 && effectiveOrigPrice > activePrice);
                     const savingsAmount = hasDiscount && effectiveOrigPrice ? effectiveOrigPrice - activePrice : 0;
                     const savingsPct = hasDiscount && effectiveOrigPrice ? Math.min(100, Math.round((savingsAmount / effectiveOrigPrice) * 100)) : 0;
 

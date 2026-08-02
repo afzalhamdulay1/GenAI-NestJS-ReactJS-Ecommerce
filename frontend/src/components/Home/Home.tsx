@@ -11,6 +11,8 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import HeroBanner from '@/components/Home/Sections/HeroBanner';
 import ServicesSection from '@/components/Home/Sections/ServicesSection';
 import CategorySection from '@/components/Home/Sections/CategorySection';
+import FlashDealsSection from '@/components/Home/Sections/FlashDealsSection';
+import BestSellersSection from '@/components/Home/Sections/BestSellersSection';
 import FeaturedProducts from '@/components/Home/Sections/FeaturedProducts';
 import { api } from '@/services/api';
 
@@ -30,16 +32,25 @@ const Home: React.FC = () => {
     'SmartPhones',
   ]);
 
+  const [bestSellers, setBestSellers] = React.useState<any[]>([]);
+
   useEffect(() => {
-    const fetchCats = async () => {
+    const fetchCatsAndTopSelling = async () => {
       try {
-        const { data } = await api.get('/categories');
-        if (data.categories && data.categories.length > 0) {
-          setCategories(data.categories.map((c: any) => c.name));
+        const { data: catData } = await api.get('/categories');
+        if (catData.categories && catData.categories.length > 0) {
+          setCategories(catData.categories.map((c: any) => c.name));
+        }
+      } catch (err) {}
+
+      try {
+        const { data: topData } = await api.get('/products/top-selling');
+        if (topData.products) {
+          setBestSellers(topData.products);
         }
       } catch (err) {}
     };
-    fetchCats();
+    fetchCatsAndTopSelling();
   }, []);
 
   useEffect(() => {
@@ -64,6 +75,8 @@ const Home: React.FC = () => {
           <HeroBanner />
           <ServicesSection />
           <CategorySection categories={categories} />
+          <FlashDealsSection products={products} />
+          <BestSellersSection products={bestSellers.length > 0 ? bestSellers : products} />
           <FeaturedProducts products={products} />
         </Fragment>
       )}

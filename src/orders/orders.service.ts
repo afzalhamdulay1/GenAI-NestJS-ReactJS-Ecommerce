@@ -32,6 +32,7 @@ export class OrdersService {
     const orderItemsInput = createOrderDto.orderItems.map((item) => ({
       productId: item.productId,
       quantity: item.quantity,
+      selectedVariant: item.selectedVariant,
     }));
 
     const pricing = await this.settingsService.calculatePricing(

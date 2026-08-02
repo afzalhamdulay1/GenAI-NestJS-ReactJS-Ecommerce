@@ -1,7 +1,7 @@
 import React, { Fragment, useState, useEffect, useCallback } from "react";
 import "@/components/Cart/Cart.css";
 import CartItemCard from "@/components/Cart/CartItemCard";
-import { removeItem, changeItemQuantityInCart } from "@/features/cart/cartSlice";
+import { removeItem, changeItemQuantityInCart, syncCartPrices } from "@/features/cart/cartSlice";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { useNavigate } from "react-router-dom";
 import EmptyCartState from "@/components/Cart/Sections/EmptyCartState";
@@ -49,6 +49,14 @@ const Cart: React.FC = () => {
 
     const newErrors: Record<string, string> = {};
     const newLiveStocks: Record<string, number> = {};
+    const syncUpdates: Array<{
+      productId: string;
+      selectedVariant?: Record<string, string>;
+      price: number;
+      stock: number;
+      name: string;
+      image: string;
+    }> = [];
 
     for (const item of cartItems) {
       const key = getItemKey(item.productId, item.selectedVariant);
@@ -57,6 +65,7 @@ const Cart: React.FC = () => {
         const product = data.product;
 
         let availableStock = product.stock;
+        let realPrice = product.price;
 
         if (product.hasVariants && item.selectedVariant && product.variants) {
           const match = product.variants.find((v: any) => {
@@ -68,12 +77,22 @@ const Cart: React.FC = () => {
 
           if (match) {
             availableStock = match.stock;
+            realPrice = match.price;
           } else {
             availableStock = 0; // Variant combination deleted by admin
           }
         }
 
         newLiveStocks[key] = availableStock;
+
+        syncUpdates.push({
+          productId: item.productId,
+          selectedVariant: item.selectedVariant,
+          price: realPrice,
+          stock: availableStock,
+          name: product.name,
+          image: product.images && product.images.length > 0 ? product.images[0].url : '',
+        });
 
         if (availableStock <= 0) {
           newErrors[key] = "Out of stock — please remove";
@@ -86,9 +105,13 @@ const Cart: React.FC = () => {
       }
     }
 
+    if (syncUpdates.length > 0) {
+      dispatch(syncCartPrices(syncUpdates));
+    }
+
     setLiveStocks(newLiveStocks);
     setItemErrors(newErrors);
-  }, [cartItems]);
+  }, [cartItems, dispatch]);
 
   useEffect(() => {
     validateCartItems();
@@ -116,14 +139,99 @@ const Cart: React.FC = () => {
     dispatch(removeItem(payload));
   };
 
-  const checkoutHandler = () => {
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+  const checkoutHandler = async () => {
     if (cartItems.length === 0) {
       toast.error("Your cart is empty");
       return;
     }
 
-    if (Object.keys(itemErrors).length > 0) {
+    setCheckoutLoading(true);
+    let priceChanged = false;
+    let hasError = false;
+
+    const syncUpdates: Array<{
+      productId: string;
+      selectedVariant?: Record<string, string>;
+      price: number;
+      stock: number;
+      name: string;
+      image: string;
+    }> = [];
+
+    const newErrors: Record<string, string> = {};
+    const newLiveStocks: Record<string, number> = {};
+
+    for (const item of cartItems) {
+      const key = getItemKey(item.productId, item.selectedVariant);
+      try {
+        const { data } = await api.get(`/product/${item.productId}`);
+        const product = data.product;
+
+        let availableStock = product.stock;
+        let realPrice = product.price;
+
+        if (product.hasVariants && item.selectedVariant && product.variants) {
+          const match = product.variants.find((v: any) => {
+            const keys1 = Object.keys(v.attributes || {});
+            const keys2 = Object.keys(item.selectedVariant || {});
+            if (keys1.length !== keys2.length) return false;
+            return keys1.every((k) => v.attributes[k] === item.selectedVariant![k]);
+          });
+
+          if (match) {
+            availableStock = match.stock;
+            realPrice = match.price;
+          } else {
+            availableStock = 0;
+          }
+        }
+
+        newLiveStocks[key] = availableStock;
+
+        if (realPrice !== item.price) {
+          priceChanged = true;
+        }
+
+        if (availableStock <= 0) {
+          newErrors[key] = "Out of stock — please remove";
+          hasError = true;
+        } else if (item.quantity > availableStock) {
+          newErrors[key] = `Only ${availableStock} available in stock`;
+          hasError = true;
+        }
+
+        syncUpdates.push({
+          productId: item.productId,
+          selectedVariant: item.selectedVariant,
+          price: realPrice,
+          stock: availableStock,
+          name: product.name,
+          image: product.images && product.images.length > 0 ? product.images[0].url : '',
+        });
+      } catch (err) {
+        newLiveStocks[key] = 0;
+        newErrors[key] = "Item unavailable — please remove";
+        hasError = true;
+      }
+    }
+
+    if (syncUpdates.length > 0) {
+      dispatch(syncCartPrices(syncUpdates));
+    }
+
+    setLiveStocks(newLiveStocks);
+    setItemErrors(newErrors);
+    setCheckoutLoading(false);
+
+    if (hasError) {
       toast.error("Some items in your cart are out of stock or unavailable.");
+      return;
+    }
+
+    if (priceChanged) {
+      toast.info("Cart prices were updated to latest values. Please review your total.");
       return;
     }
 

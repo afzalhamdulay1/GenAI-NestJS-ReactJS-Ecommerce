@@ -4,7 +4,7 @@ import MetaData from "@/components/Layout/MetaData";
 import "@/components/Cart/ConfirmOrder.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "@/app/hooks";
-import { removeItem } from "@/features/cart/cartSlice";
+import { removeItem, syncCartPrices } from "@/features/cart/cartSlice";
 import OrderSummaryCard from "@/components/Cart/Sections/OrderSummaryCard";
 import { api } from "@/services/api";
 import { toast } from "react-toastify";
@@ -111,6 +111,65 @@ const ConfirmOrder: React.FC = () => {
   const dispatch = useAppDispatch();
   const [validating, setValidating] = useState(false);
 
+  // Live sync prices & stock when entering ConfirmOrder page
+  useEffect(() => {
+    const syncPrices = async () => {
+      if (cartItems.length === 0) return;
+
+      const syncUpdates: Array<{
+        productId: string;
+        selectedVariant?: Record<string, string>;
+        price: number;
+        stock: number;
+        name: string;
+        image: string;
+      }> = [];
+
+      for (const item of cartItems) {
+        try {
+          const { data } = await api.get(`/product/${item.productId}`);
+          const product = data.product;
+
+          let availableStock = product.stock;
+          let realPrice = product.price;
+
+          if (product.hasVariants && item.selectedVariant && product.variants) {
+            const match = product.variants.find((v: any) => {
+              const keys1 = Object.keys(v.attributes || {});
+              const keys2 = Object.keys(item.selectedVariant || {});
+              if (keys1.length !== keys2.length) return false;
+              return keys1.every((k) => v.attributes[k] === item.selectedVariant![k]);
+            });
+
+            if (match) {
+              availableStock = match.stock;
+              realPrice = match.price;
+            } else {
+              availableStock = 0;
+            }
+          }
+
+          syncUpdates.push({
+            productId: item.productId,
+            selectedVariant: item.selectedVariant,
+            price: realPrice,
+            stock: availableStock,
+            name: product.name,
+            image: product.images && product.images.length > 0 ? product.images[0].url : '',
+          });
+        } catch (err) {
+          // If error fetching item, keep existing
+        }
+      }
+
+      if (syncUpdates.length > 0) {
+        dispatch(syncCartPrices(syncUpdates));
+      }
+    };
+
+    syncPrices();
+  }, [cartItems.length, dispatch]);
+
   const proceedToPayment = async () => {
     if (cartItems.length === 0) {
       toast.error("Your cart is empty");
@@ -119,11 +178,59 @@ const ConfirmOrder: React.FC = () => {
 
     setValidating(true);
     let hasUnavailableItem = false;
+    let priceChanged = false;
+
+    const syncUpdates: Array<{
+      productId: string;
+      selectedVariant?: Record<string, string>;
+      price: number;
+      stock: number;
+      name: string;
+      image: string;
+    }> = [];
 
     // Validate each cart item against backend database before entering payment
     for (const item of cartItems) {
       try {
-        await api.get(`/product/${item.productId}`);
+        const { data } = await api.get(`/product/${item.productId}`);
+        const product = data.product;
+
+        let availableStock = product.stock;
+        let realPrice = product.price;
+
+        if (product.hasVariants && item.selectedVariant && product.variants) {
+          const match = product.variants.find((v: any) => {
+            const keys1 = Object.keys(v.attributes || {});
+            const keys2 = Object.keys(item.selectedVariant || {});
+            if (keys1.length !== keys2.length) return false;
+            return keys1.every((k) => v.attributes[k] === item.selectedVariant![k]);
+          });
+
+          if (match) {
+            availableStock = match.stock;
+            realPrice = match.price;
+          } else {
+            availableStock = 0;
+          }
+        }
+
+        if (realPrice !== item.price) {
+          priceChanged = true;
+        }
+
+        if (availableStock <= 0 || item.quantity > availableStock) {
+          hasUnavailableItem = true;
+          toast.error(`"${item.name}" stock updated. Only ${availableStock} left.`);
+        }
+
+        syncUpdates.push({
+          productId: item.productId,
+          selectedVariant: item.selectedVariant,
+          price: realPrice,
+          stock: availableStock,
+          name: product.name,
+          image: product.images && product.images.length > 0 ? product.images[0].url : '',
+        });
       } catch (err) {
         hasUnavailableItem = true;
         dispatch(removeItem({ productId: item.productId, selectedVariant: item.selectedVariant }));
@@ -131,7 +238,15 @@ const ConfirmOrder: React.FC = () => {
       }
     }
 
+    if (syncUpdates.length > 0) {
+      dispatch(syncCartPrices(syncUpdates));
+    }
+
     setValidating(false);
+
+    if (priceChanged) {
+      toast.info("Some product prices were updated to current market prices.");
+    }
 
     if (hasUnavailableItem) {
       return;

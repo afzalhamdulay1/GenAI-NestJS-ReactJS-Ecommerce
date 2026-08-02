@@ -103,7 +103,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </Box>
       )}
       {/* Offer Discount Badge Pill */}
-      {product.originalPrice && product.originalPrice > product.price && (
+      {Boolean(product.originalPrice && product.originalPrice > 0 && product.originalPrice > product.price) && (
         <Box
           sx={{
             position: 'absolute',
@@ -135,7 +135,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       </div>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '1.1rem' }}>{`₹${product.price}`}</span>
-        {product.originalPrice && product.originalPrice > product.price && (
+        {Boolean(product.originalPrice && product.originalPrice > 0 && product.originalPrice > product.price) && (
           <span style={{ textDecoration: 'line-through', color: '#94a3b8', fontSize: '0.9rem', fontWeight: 600 }}>
             {`₹${product.originalPrice}`}
           </span>

@@ -82,11 +82,16 @@ const cartSlice = createSlice({
       );
 
       if (existingItem) {
-        if (existingItem.quantity + action.payload.quantity > existingItem.stock) {
+        if (existingItem.quantity + action.payload.quantity > action.payload.stock) {
           toast.error("Insufficient stock. Item already in cart.");
           return;
         }
         existingItem.quantity += action.payload.quantity;
+        // Always refresh item details (price, stock, image, name) to latest values from server
+        existingItem.price = action.payload.price;
+        existingItem.stock = action.payload.stock;
+        existingItem.name = action.payload.name;
+        existingItem.image = action.payload.image;
       } else {
         state.cartItems.push(action.payload);
       }
@@ -124,9 +129,33 @@ const cartSlice = createSlice({
       state.cartItems = [];
       localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
     },
+    syncCartPrices(
+      state,
+      action: PayloadAction<
+        Array<{
+          productId: string;
+          selectedVariant?: Record<string, string>;
+          price: number;
+          stock: number;
+          name: string;
+          image: string;
+        }>
+      >
+    ) {
+      action.payload.forEach((updated) => {
+        const item = state.cartItems.find((ci) => isSameCartItem(ci, updated));
+        if (item) {
+          item.price = updated.price;
+          item.stock = updated.stock;
+          item.name = updated.name;
+          if (updated.image) item.image = updated.image;
+        }
+      });
+      localStorage.setItem("cartItems", JSON.stringify(state.cartItems));
+    },
   },
 });
 
-export const { removeItem, saveShippingInfo, addItem, changeItemQuantityInCart, emptyCart } = cartSlice.actions;
+export const { removeItem, saveShippingInfo, addItem, changeItemQuantityInCart, emptyCart, syncCartPrices } = cartSlice.actions;
 
 export default cartSlice.reducer;

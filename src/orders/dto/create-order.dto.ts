@@ -49,6 +49,10 @@ export class OrderItemDto {
   @IsString()
   @IsNotEmpty()
   productId: string;
+
+  @IsOptional()
+  @IsObject()
+  selectedVariant?: Record<string, string>;
 }
 
 export class PaymentInfoDto {

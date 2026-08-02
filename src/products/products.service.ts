@@ -110,6 +110,50 @@ export class ProductsService {
     };
   }
 
+  async getTopSellingProducts() {
+    // Aggregate total quantity sold per product across all orders
+    const salesAggregation = await this.orderModel.aggregate([
+      { $unwind: '$orderItems' },
+      {
+        $group: {
+          _id: '$orderItems.productId',
+          totalSold: { $sum: '$orderItems.quantity' },
+        },
+      },
+      { $sort: { totalSold: -1 } },
+      { $limit: 8 },
+    ]);
+
+    const topProductIds = salesAggregation.map((s) => s._id);
+
+    // Fetch product details for top selling product IDs
+    const products = await this.productModel
+      .find({ _id: { $in: topProductIds } })
+      .select('name price originalPrice discountType ratings images category stock numOfReviews hasVariants options variants createdAt');
+
+    // Maintain strict sort order based on aggregated units sold
+    const sortedProducts = topProductIds
+      .map((id) => products.find((p) => p._id.toString() === id.toString()))
+      .filter(Boolean);
+
+    // Fallback: If not enough orders yet, fill with highest rated products
+    if (sortedProducts.length < 8) {
+      const existingIds = new Set(sortedProducts.map((p: any) => p._id.toString()));
+      const fallbackProducts = await this.productModel
+        .find({ _id: { $nin: Array.from(existingIds) } })
+        .select('name price originalPrice discountType ratings images category stock numOfReviews hasVariants options variants createdAt')
+        .sort({ numOfReviews: -1, ratings: -1 })
+        .limit(8 - sortedProducts.length);
+
+      sortedProducts.push(...fallbackProducts as any);
+    }
+
+    return {
+      success: true,
+      products: sortedProducts,
+    };
+  }
+
   async getAdminProducts() {
     const products = await this.productModel.find().sort({ createdAt: -1 });
     return {
@@ -148,12 +192,48 @@ export class ProductsService {
     }
 
     if (images !== undefined && images.length > 0) {
-      await Promise.all(
-        product.images.map((img) => cloudinary.v2.uploader.destroy(img.public_id))
-      );
+      // 1. Separate new base64 uploads from existing Cloudinary image URLs
+      const newBase64Images: string[] = [];
+      const existingUrls: string[] = [];
 
-      const imagesLinks = await Promise.all(
-        images.map(async (img) => {
+      images.forEach((img) => {
+        if (typeof img === 'string' && img.startsWith('data:image')) {
+          newBase64Images.push(img);
+        } else if (typeof img === 'string') {
+          existingUrls.push(img);
+        }
+      });
+
+      // 2. Identify existing images that were deleted by admin and destroy them on Cloudinary
+      if (product.images && product.images.length > 0) {
+        const keptPublicIds = new Set(
+          product.images
+            .filter((img) => existingUrls.includes(img.url))
+            .map((img) => img.public_id)
+        );
+
+        const imagesToDestroy = product.images.filter(
+          (img) => img.public_id && !keptPublicIds.has(img.public_id)
+        );
+
+        if (imagesToDestroy.length > 0) {
+          await Promise.all(
+            imagesToDestroy.map(async (img) => {
+              try {
+                if (img.public_id) {
+                  await cloudinary.v2.uploader.destroy(img.public_id);
+                }
+              } catch (e) {
+                // Ignore Cloudinary deletion errors for non-existent assets
+              }
+            })
+          );
+        }
+      }
+
+      // 3. Upload any new base64 images to Cloudinary
+      const uploadedNewImages = await Promise.all(
+        newBase64Images.map(async (img) => {
           const result = await cloudinary.v2.uploader.upload(img, {
             folder: 'products',
           });
@@ -164,7 +244,20 @@ export class ProductsService {
         })
       );
 
-      updateProductDto.images = imagesLinks as any;
+      // 4. Re-construct the final ordered images array preserving the exact arrangement
+      let newUploadIndex = 0;
+      const finalImages = images.map((img) => {
+        if (typeof img === 'string' && img.startsWith('data:image')) {
+          const uploaded = uploadedNewImages[newUploadIndex++];
+          return uploaded;
+        } else {
+          // Find matching existing image object to keep public_id
+          const existingObj = product?.images?.find((existing) => existing.url === img);
+          return existingObj || { public_id: '', url: img };
+        }
+      });
+
+      updateProductDto.images = finalImages as any;
     }
 
     const updateData: any = { ...updateProductDto };

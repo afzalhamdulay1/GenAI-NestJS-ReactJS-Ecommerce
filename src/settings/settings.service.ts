@@ -9,6 +9,7 @@ import { CouponsService } from '../coupons/coupons.service';
 export interface OrderItemInput {
   productId: string;
   quantity: number;
+  selectedVariant?: Record<string, string>;
 }
 
 @Injectable()
@@ -69,15 +70,29 @@ export class SettingsService {
       if (!dbProduct) {
         throw new BadRequestException(`One or more items in your cart are no longer available. Please return to your cart and update your items.`);
       }
-      const price = dbProduct.price;
+      
+      let price = dbProduct.price;
+      if (dbProduct.hasVariants && item.selectedVariant && dbProduct.variants) {
+        const match = dbProduct.variants.find((v: any) => {
+          const keys1 = Object.keys(v.attributes || {});
+          const keys2 = Object.keys(item.selectedVariant || {});
+          if (keys1.length !== keys2.length) return false;
+          return keys1.every((k) => v.attributes[k] === item.selectedVariant![k]);
+        });
+        if (match && match.price !== undefined) {
+          price = match.price;
+        }
+      }
+
       subtotal += price * item.quantity;
 
       return {
         name: dbProduct.name,
-        price: dbProduct.price,
+        price,
         quantity: item.quantity,
         image: dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images[0].url : '',
         productId: dbProduct._id.toString(),
+        selectedVariant: item.selectedVariant,
       };
     });
 

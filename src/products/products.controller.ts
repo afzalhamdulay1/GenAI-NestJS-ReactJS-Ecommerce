@@ -20,6 +20,11 @@ export class ProductsController {
     return this.productsService.getAllProducts(query);
   }
 
+  @Get('products/top-selling')
+  async getTopSellingProducts() {
+    return this.productsService.getTopSellingProducts();
+  }
+
   @Get('product/:id')
   async getProductDetails(@Param('id') id: string) {
     return this.productsService.getProductDetails(id);
