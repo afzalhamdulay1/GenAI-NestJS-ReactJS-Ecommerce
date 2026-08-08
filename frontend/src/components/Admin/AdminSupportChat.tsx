@@ -102,7 +102,10 @@ const AdminSupportChat: React.FC = () => {
 
   useEffect(() => {
     if (chatMessagesContainerRef.current) {
-      chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
+      chatMessagesContainerRef.current.scrollTo({
+        top: chatMessagesContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   }, [activeSession?.messages, selectedSessionId]);
 

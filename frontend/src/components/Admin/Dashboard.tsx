@@ -97,7 +97,6 @@ const Dashboard: React.FC = () => {
         `🎉 Live Order Received! #${String(data.orderId).slice(-6)} by ${data.customerName} for $${Number(data.totalPrice).toFixed(2)}`,
         {
           autoClose: 8000,
-          position: "top-right",
         }
       );
 
@@ -109,7 +108,6 @@ const Dashboard: React.FC = () => {
     socket.on("new_support_request", (data: { customerName: string; sessionId: string }) => {
       toast.warn(`💬 New Live Support Request from ${data.customerName}! Go to Live Support Chat to respond.`, {
         autoClose: 10000,
-        position: "top-right",
       });
     });
 

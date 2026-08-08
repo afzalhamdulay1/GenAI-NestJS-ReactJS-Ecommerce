@@ -457,35 +457,47 @@ const AIChatWidget: React.FC = () => {
 
         {/* Input Bar */}
         <Box sx={{ p: 2, bgcolor: '#ffffff', borderTop: '1px solid #e2e8f0' }}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSendMessage();
-            }}
-            style={{ display: 'flex', gap: '8px' }}
-          >
-            <TextField
+          {chatMode === 'human_waiting' ? (
+            <Button
               fullWidth
-              size="small"
-              placeholder="Ask Afzal AI anything..."
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              disabled={loading}
-              sx={{ bgcolor: '#f8fafc', borderRadius: '10px' }}
-            />
-            <IconButton
-              type="submit"
-              disabled={!inputMessage.trim() || loading}
-              sx={{
-                bgcolor: '#a855f7',
-                color: '#ffffff',
-                '&:hover': { bgcolor: '#9333ea' },
-                '&.Mui-disabled': { bgcolor: '#cbd5e1', color: '#ffffff' },
-              }}
+              variant="outlined"
+              color="error"
+              onClick={handleCancelHumanSupport}
+              sx={{ fontWeight: 700, borderRadius: '10px' }}
             >
-              <SendIcon sx={{ fontSize: '1.2rem' }} />
-            </IconButton>
-          </form>
+              Cancel Live Support Request
+            </Button>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              style={{ display: 'flex', gap: '8px' }}
+            >
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Ask Afzal AI anything..."
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                disabled={loading}
+                sx={{ bgcolor: '#f8fafc', borderRadius: '10px' }}
+              />
+              <IconButton
+                type="submit"
+                disabled={!inputMessage.trim() || loading}
+                sx={{
+                  bgcolor: '#a855f7',
+                  color: '#ffffff',
+                  '&:hover': { bgcolor: '#9333ea' },
+                  '&.Mui-disabled': { bgcolor: '#cbd5e1', color: '#ffffff' },
+                }}
+              >
+                <SendIcon sx={{ fontSize: '1.2rem' }} />
+              </IconButton>
+            </form>
+          )}
         </Box>
       </Drawer>
     </>
