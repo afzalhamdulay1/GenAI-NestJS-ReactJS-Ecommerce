@@ -146,9 +146,11 @@ export class EventsGateway
     if (data.role === 'admin' && session.status === 'waiting') {
       session.status = 'active';
       this.server.emit('support_sessions_updated', Array.from(this.supportSessions.values()));
+      
+      // Notify the customer that the admin has joined!
+      this.server.to(roomName).emit('support_room_joined', session);
     }
 
-    client.emit('support_room_joined', session);
     return { success: true };
   }
 
