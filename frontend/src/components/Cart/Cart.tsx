@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { useNavigate } from "react-router-dom";
 import EmptyCartState from "@/components/Cart/Sections/EmptyCartState";
 import CartSummary from "@/components/Cart/Sections/CartSummary";
+import AISmartRecommendations from "@/components/Cart/Sections/AISmartRecommendations";
 import { api } from "@/services/api";
 import { toast } from "react-toastify";
 
@@ -299,6 +300,9 @@ const Cart: React.FC = () => {
               })}
 
             <CartSummary grossTotal={grossTotal} onCheckout={checkoutHandler} />
+
+            {/* ✨ AI Stylist Smart Recommendations */}
+            <AISmartRecommendations cartItemIds={Array.from(new Set(cartItems.map((item) => item.productId)))} />
           </div>
         </Fragment>
       )}

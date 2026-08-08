@@ -45,6 +45,7 @@ const NewCoupon = React.lazy(() => import('@/components/Admin/NewCoupon'));
 const StoreSettings = React.lazy(() => import('@/components/Admin/StoreSettings'));
 const CategoriesList = React.lazy(() => import('@/components/Admin/CategoriesList'));
 const NewCategory = React.lazy(() => import('@/components/Admin/NewCategory'));
+const AdminSupportChat = React.lazy(() => import('@/components/Admin/AdminSupportChat'));
 const NotFound = React.lazy(() => import('@/components/Layout/NotFound/NotFound'));
 import ErrorBoundary from '@/components/Layout/ErrorBoundary/ErrorBoundary';
 
@@ -282,6 +283,14 @@ const router = createBrowserRouter([
             element: (
               <ProtectedRoute admin={true}>
                 <StoreSettings />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'support',
+            element: (
+              <ProtectedRoute admin={true}>
+                <AdminSupportChat />
               </ProtectedRoute>
             ),
           },

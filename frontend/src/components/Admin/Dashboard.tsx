@@ -54,6 +54,11 @@ ChartJS.register(
   Filler
 );
 
+import AIExecutiveBriefCard from "@/components/Admin/Widgets/AIExecutiveBriefCard";
+import { io } from "socket.io-client";
+import confetti from "canvas-confetti";
+import { toast } from "react-toastify";
+
 const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
 
@@ -65,6 +70,52 @@ const Dashboard: React.FC = () => {
     dispatch(getAdminProducts());
     dispatch(getAllOrders());
     dispatch(getAllUsers());
+
+    // Connect to Backend WebSocket Gateway
+    const backendUrl = window.location.hostname === "localhost" ? "http://localhost:4000" : window.location.origin;
+    const socket = io(backendUrl, {
+      transports: ["websocket", "polling"],
+    });
+
+    socket.on("connect", () => {
+      console.log("⚡ Admin Dashboard connected to Real-Time WebSockets");
+    });
+
+    socket.on("new_order", (data: any) => {
+      console.log("🎉 Real-Time Order Event Received:", data);
+
+      // 1. Confetti Burst Animation 🎊
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ["#a855f7", "#ec4899", "#3b82f6", "#10b981", "#f59e0b"],
+      });
+
+      // 2. Interactive Toast Alert 🔔
+      toast.success(
+        `🎉 Live Order Received! #${String(data.orderId).slice(-6)} by ${data.customerName} for $${Number(data.totalPrice).toFixed(2)}`,
+        {
+          autoClose: 8000,
+          position: "top-right",
+        }
+      );
+
+      // 3. Dynamic Stats Refetch (Real-Time update without page reload) 📊
+      dispatch(getAllOrders());
+      dispatch(getAdminProducts());
+    });
+
+    socket.on("new_support_request", (data: { customerName: string; sessionId: string }) => {
+      toast.warn(`💬 New Live Support Request from ${data.customerName}! Go to Live Support Chat to respond.`, {
+        autoClose: 10000,
+        position: "top-right",
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [dispatch]);
 
   const {
@@ -98,6 +149,9 @@ const Dashboard: React.FC = () => {
             <TimelineIcon /> Overview of your store
           </div>
         </div>
+
+        {/* ✨ AI Executive Store Intelligence Brief */}
+        <AIExecutiveBriefCard />
 
         <div className="dashboardSummary">
           <SummaryCard 

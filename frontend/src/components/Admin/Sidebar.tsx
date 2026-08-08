@@ -17,6 +17,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import CategoryIcon from "@mui/icons-material/Category";
 import SettingsIcon from "@mui/icons-material/Settings";
+import HeadsetMicIcon from "@mui/icons-material/HeadsetMic";
 
 const Sidebar: React.FC = () => {
   return (
@@ -34,6 +35,14 @@ const Sidebar: React.FC = () => {
         >
           <DashboardIcon className="navIcon" /> 
           <span>Dashboard</span>
+        </NavLink>
+
+        <NavLink 
+          to="/admin/support" 
+          className={({ isActive }) => isActive ? "navLink active" : "navLink"}
+        >
+          <HeadsetMicIcon className="navIcon" />
+          <span>Live Support Chat</span>
         </NavLink>
 
         <SimpleTreeView

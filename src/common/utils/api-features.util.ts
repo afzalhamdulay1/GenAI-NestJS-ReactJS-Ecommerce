@@ -31,6 +31,18 @@ export class ApiFeatures<T> {
                 $options: 'i',
               },
             },
+            {
+              tags: {
+                $regex: this.queryStr.keyword,
+                $options: 'i',
+              },
+            },
+            {
+              metaTitle: {
+                $regex: this.queryStr.keyword,
+                $options: 'i',
+              },
+            },
           ],
         }
       : {};

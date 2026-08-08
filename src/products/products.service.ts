@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserDocument } from '../users/schemas/user.schema';
@@ -17,6 +18,7 @@ export class ProductsService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @Inject('Cloudinary') private cloudinaryProvider: any,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async createProduct(createProductDto: CreateProductDto, user: UserDocument) {
@@ -298,6 +300,8 @@ export class ProductsService {
       runValidators: true,
     });
 
+    await this.cacheManager.del('ai_store_executive_insights');
+
     return {
       success: true,
       product,
@@ -319,6 +323,8 @@ export class ProductsService {
     }
 
     await product.deleteOne();
+
+    await this.cacheManager.del('ai_store_executive_insights');
 
     return {
       success: true,
@@ -402,6 +408,9 @@ export class ProductsService {
     product.ratings = avg / product.reviews.length;
 
     await product.save({ validateBeforeSave: false });
+
+    // Invalidate stale cache for AI review summary and product page
+    await this.cacheManager.del(`ai_review_summary_${productId}`);
 
     return {
       success: true,

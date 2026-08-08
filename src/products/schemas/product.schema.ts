@@ -96,6 +96,15 @@ export class Product {
     originalPrice?: number;
     sku?: string;
   }>;
+
+  @Prop()
+  metaTitle?: string;
+
+  @Prop()
+  metaDescription?: string;
+
+  @Prop([String])
+  tags?: string[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
@@ -104,11 +113,13 @@ ProductSchema.index(
   {
     name: 'text',
     category: 'text',
+    tags: 'text',
     description: 'text',
   },
   {
     weights: {
       name: 10,
+      tags: 8,
       category: 5,
       description: 1,
     },

@@ -15,6 +15,8 @@ import Loader from '@/components/Layout/Loader/Loader';
 import ScrollToTop from '@/utils/ScrollToTop';
 import Maintenance from '@/components/Layout/Maintenance/Maintenance';
 
+import AIChatWidget from '@/components/Layout/AIChatWidget';
+
 function App(): React.ReactElement {
   const { isAuthenticated, user, isUserLoading } = useAppSelector((state) => state.user);
   const { isOffline } = useAppSelector((state) => state.system);
@@ -69,6 +71,7 @@ function App(): React.ReactElement {
             </Suspense>
           </Elements>
         </main>
+        <AIChatWidget />
         <Footer />
       </div>
     </div>

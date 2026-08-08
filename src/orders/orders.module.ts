@@ -7,6 +7,7 @@ import { OrdersController } from './orders.controller';
 import { ProductsModule } from '../products/products.module';
 import { PaymentsModule } from '../payments/payments.module';
 import { SettingsModule } from '../settings/settings.module';
+import { EventsModule } from '../events/events.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SettingsModule } from '../settings/settings.module';
     ProductsModule,
     PaymentsModule,
     SettingsModule,
+    EventsModule,
   ],
   providers: [OrdersService],
   controllers: [OrdersController],

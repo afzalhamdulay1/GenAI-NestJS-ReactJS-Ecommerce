@@ -3,12 +3,20 @@
 @tailwind utilities;
 
 /* Responsive Toastify Styling */
-.Toastify__toast-container {
+.Toastify__toast-container--bottom-center,
+.Toastify__toast-container--top-center {
   width: auto !important;
   max-width: 90vw !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   padding: 0 !important;
+}
+
+.Toastify__toast-container--top-right {
+  top: 1.5em !important;
+  right: 1.5em !important;
+  left: auto !important;
+  transform: none !important;
 }
 
 .Toastify__toast {

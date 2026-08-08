@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Order, OrderDocument } from './schemas/order.schema';
@@ -14,6 +15,7 @@ import { ProductDocument, Product } from '../products/schemas/product.schema';
 import { PaymentsService } from '../payments/payments.service';
 import { SettingsService } from '../settings/settings.service';
 import { ConfigService } from '@nestjs/config';
+import { EventsGateway } from '../events/events.gateway';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -26,6 +28,8 @@ export class OrdersService {
     private paymentsService: PaymentsService,
     private settingsService: SettingsService,
     private configService: ConfigService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private eventsGateway: EventsGateway,
   ) {}
 
   async createOrder(createOrderDto: CreateOrderDto, user?: UserDocument) {
@@ -82,6 +86,12 @@ export class OrdersService {
     }
 
     const order = await this.orderModel.create(orderData);
+
+    // Invalidate stale store insights cache on new order
+    await this.cacheManager.del('ai_store_executive_insights');
+
+    // Broadcast Real-Time WebSocket event to all connected admin clients
+    this.eventsGateway.emitNewOrder(order);
 
     const customerName = user?.name || createOrderDto.guestName || 'Valued Customer';
     const customerEmail = user?.email || guestEmail || '';

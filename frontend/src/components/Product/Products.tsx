@@ -9,10 +9,10 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { getProducts, clearErrors } from '@/features/products/productsSlice';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import ProductFilterSidebar from '@/components/Product/Sections/ProductFilterSidebar';
-import { Drawer, Button, useMediaQuery, useTheme, IconButton, TextField, InputAdornment } from '@mui/material';
+import { Drawer, Button, useMediaQuery, useTheme, IconButton, Paper, Box, Typography } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
-import SearchIcon from '@mui/icons-material/Search';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { api } from '@/services/api';
 import PredictiveSearch from '@/components/Search/PredictiveSearch';
 
@@ -28,6 +28,32 @@ const Products: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const isVisualSearch = searchParams.get('visualSearch') === 'true';
+  const [visualAnalysis, setVisualAnalysis] = useState<string>('');
+  const [visualProducts, setVisualProducts] = useState<any[] | null>(null);
+
+  useEffect(() => {
+    if (isVisualSearch) {
+      const stored = sessionStorage.getItem('ai_visual_search');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setVisualAnalysis(parsed.matchAnalysis || '');
+          setVisualProducts(parsed.matchedProducts || []);
+        } catch (e) {}
+      }
+    } else {
+      setVisualAnalysis('');
+      setVisualProducts(null);
+    }
+  }, [isVisualSearch, location.search]);
+
+  const handleClearVisualSearch = () => {
+    sessionStorage.removeItem('ai_visual_search');
+    setVisualAnalysis('');
+    setVisualProducts(null);
+    navigate('/products');
+  };
 
   const [searchInput, setSearchInput] = useState(mykeyword);
 
@@ -153,8 +179,56 @@ const Products: React.FC = () => {
               </div>
 
               <div className="totalProductsText">
-                Total Products: {filteredProductsCount}
+                {isVisualSearch
+                  ? `Visual Search Results: ${visualProducts ? visualProducts.length : 0}`
+                  : `Total Products: ${filteredProductsCount}`}
               </div>
+
+              {/* ✨ AI Visual Search Results Banner */}
+              {isVisualSearch && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2.5,
+                    mb: 3,
+                    borderRadius: '1.2rem',
+                    background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
+                    border: '1px solid #e9d5ff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: 2,
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <AutoAwesomeIcon sx={{ color: '#9333ea', fontSize: '1.8rem' }} />
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#581c87', fontSize: '1.05rem' }}>
+                        ✨ AI Visual Match Results
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#7e22ce', fontWeight: 600 }}>
+                        {visualAnalysis || 'Here are products in our store matching your photo!'}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={handleClearVisualSearch}
+                    sx={{
+                      textTransform: 'none',
+                      color: '#9333ea',
+                      borderColor: '#c084fc',
+                      fontWeight: 700,
+                      borderRadius: '10px',
+                      '&:hover': { bgcolor: '#f3e8ff', borderColor: '#7e22ce' },
+                    }}
+                  >
+                    Clear Visual Search ✖
+                  </Button>
+                </Paper>
+              )}
 
               <div className="productsLayout">
                 {isMobile && (
@@ -235,7 +309,18 @@ const Products: React.FC = () => {
                 )}
 
                 <div className="ProductsContainer">
-                  {products && products.length === 0 ? (
+                  {isVisualSearch ? (
+                    visualProducts && visualProducts.length > 0 ? (
+                      visualProducts.map((product) => (
+                        <ProductCard key={product._id} product={product} />
+                      ))
+                    ) : (
+                      <div className="noProductsInside">
+                        <h2>No Visual Match Found</h2>
+                        <p>Try uploading a clearer photo of a clothing, shoe, or tech item.</p>
+                      </div>
+                    )
+                  ) : products && products.length === 0 ? (
                     <div className="noProductsInside">
                       <h2>No Products Found</h2>
                       <p>

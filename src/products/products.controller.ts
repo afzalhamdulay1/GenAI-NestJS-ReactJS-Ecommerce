@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, UseInterceptors } from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -16,16 +17,19 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get('products')
+  @UseInterceptors(CacheInterceptor)
   async getAllProducts(@Query() query: ProductQueryDto) {
     return this.productsService.getAllProducts(query);
   }
 
   @Get('products/top-selling')
+  @UseInterceptors(CacheInterceptor)
   async getTopSellingProducts() {
     return this.productsService.getTopSellingProducts();
   }
 
   @Get('product/:id')
+  @UseInterceptors(CacheInterceptor)
   async getProductDetails(@Param('id') id: string) {
     return this.productsService.getProductDetails(id);
   }

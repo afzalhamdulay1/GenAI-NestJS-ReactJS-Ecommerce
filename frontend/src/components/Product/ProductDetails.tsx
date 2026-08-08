@@ -1,4 +1,5 @@
 import React, { Fragment, useEffect, useState, useMemo } from "react";
+import ReactMarkdown from "react-markdown";
 import "@/components/Product/ProductDetails.css";
 import {
   fetchProductDetails,
@@ -13,6 +14,7 @@ import { Rating } from "@mui/material";
 import ProductImageGallery from "@/components/Product/Sections/ProductImageGallery";
 import SubmitReviewDialog from "@/components/Product/Sections/SubmitReviewDialog";
 import ProductReviewsSection from "@/components/Product/Sections/ProductReviewsSection";
+import AIProductQASection from "@/components/Product/Sections/AIProductQASection";
 import { useParams, useNavigate } from "react-router-dom";
 import { createNewReview } from "@/features/review/reviewSlice";
 import { toggleWishlist } from "@/features/user/userSlice";
@@ -162,13 +164,54 @@ const ProductDetails: React.FC = () => {
     }
   }, [stockCount]);
 
+  const formatMarkdownToHtml = (text?: string) => {
+    if (!text) return "";
+    if (text.includes("<p>") || text.includes("<ul>") || text.includes("<div>")) {
+      return text;
+    }
+    let html = text
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/__(.*?)__/g, "<strong>$1</strong>");
+
+    const lines = html.split("\n").filter((l) => l.trim() !== "");
+    let inList = false;
+    let result = "";
+
+    lines.forEach((line) => {
+      const isBullet = /^\s*[\*\-]\s+(.*)/.test(line);
+      if (isBullet) {
+        if (!inList) {
+          result += "<ul>";
+          inList = true;
+        }
+        const bulletContent = line.replace(/^\s*[\*\-]\s+/, "");
+        result += `<li>${bulletContent}</li>`;
+      } else {
+        if (inList) {
+          result += "</ul>";
+          inList = false;
+        }
+        result += `<p>${line}</p>`;
+      }
+    });
+
+    if (inList) {
+      result += "</ul>";
+    }
+
+    return result;
+  };
+
   return (
     <Fragment>
       {loading ? (
         <Loader />
       ) : (
         <Fragment>
-          <MetaData title={`${product?.name || 'Product'} -- ECOMMERCE`} />
+          <MetaData
+            title={product?.metaTitle ? `${product.metaTitle} | ECOMMERCE` : `${product?.name || 'Product'} -- ECOMMERCE`}
+            description={product?.metaDescription}
+          />
           <div className="ProductDetails">
             <div>
               <ProductImageGallery images={product?.images} />
@@ -309,7 +352,11 @@ const ProductDetails: React.FC = () => {
               </div>
 
               <div className="detailsBlock-4">
-                Description : <p>{product?.description}</p>
+                Description :
+                <div
+                  className="descriptionContent"
+                  dangerouslySetInnerHTML={{ __html: formatMarkdownToHtml(product?.description) }}
+                />
               </div>
 
               <button onClick={submitReviewToggle} className="submitReview">
@@ -329,7 +376,11 @@ const ProductDetails: React.FC = () => {
             isSubmitting={isSubmittingReview}
           />
 
-          <ProductReviewsSection reviews={product?.reviews} />
+          {product?._id && (
+            <AIProductQASection productId={product._id} productName={product.name || "this product"} />
+          )}
+
+          <ProductReviewsSection reviews={product?.reviews} productId={product?._id} />
         </Fragment>
       )}
     </Fragment>

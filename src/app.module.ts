@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CacheModule } from '@nestjs/cache-manager';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
@@ -13,6 +16,8 @@ import { MailModule } from './mail/mail.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { SettingsModule } from './settings/settings.module';
 import { CategoriesModule } from './categories/categories.module';
+import { AiModule } from './ai/ai.module';
+import { EventsModule } from './events/events.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -22,6 +27,17 @@ import { join } from 'path';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 300000, // 5 Minutes default TTL
+      max: 1000,   // Max 1000 items in memory (LRU Eviction)
+    }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 60 seconds
+        limit: 30,  // Max 30 requests per minute by default
+      },
+    ]),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -43,8 +59,16 @@ import { join } from 'path';
     CouponsModule,
     SettingsModule,
     CategoriesModule,
+    AiModule,
+    EventsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

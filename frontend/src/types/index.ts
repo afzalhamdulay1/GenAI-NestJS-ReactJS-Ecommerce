@@ -62,6 +62,9 @@ export interface Product {
   hasVariants?: boolean;
   options?: ProductOption[];
   variants?: ProductVariant[];
+  metaTitle?: string;
+  metaDescription?: string;
+  tags?: string[];
 }
 
 export interface PaymentInfo {
