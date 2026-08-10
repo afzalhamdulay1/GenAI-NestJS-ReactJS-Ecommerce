@@ -92,9 +92,15 @@ const AIChatWidget: React.FC = () => {
 
     socket.on('connect_error', (err) => {
       console.error('Socket connection error:', err);
+      try {
+        socket.disconnect();
+      } catch (e) {}
+      socketRef.current = null;
       setLoading(false);
       setChatMode('ai');
-      toast.error('Could not connect to live support server. Please try again.');
+      toast.error('Could not connect to live support server. Please try again.', {
+        toastId: 'socket-connect-error',
+      });
     });
 
     socket.on('connect', () => {
