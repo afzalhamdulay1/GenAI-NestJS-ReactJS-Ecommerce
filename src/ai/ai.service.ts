@@ -12,6 +12,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Product, ProductDocument } from '../products/schemas/product.schema';
 import { Order, OrderDocument } from '../orders/schemas/order.schema';
 import { User, UserDocument } from '../users/schemas/user.schema';
+import { Settings, SettingsDocument } from '../settings/schemas/settings.schema';
 
 @Injectable()
 export class AiService {
@@ -22,6 +23,7 @@ export class AiService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Settings.name) private settingsModel: Model<SettingsDocument>,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
@@ -134,9 +136,24 @@ CRITICAL REQUIREMENT: Return strictly standard HTML tags (<p>, <ul>, <li>, <stro
             const optionsSummary = p.options
               .map((o: any) => `${o.name}: ${o.values.join(', ')}`)
               .join('; ');
-            variantStr = ` | Available Options: (${optionsSummary})`;
+
+            let detailedVariantsStr = '';
+            if (Array.isArray(p.variants) && p.variants.length > 0) {
+              const variantDetails = p.variants
+                .map((v: any) => {
+                  const attrs = Object.entries(v.attributes || {})
+                    .map(([key, val]) => `${key}: ${val}`)
+                    .join(', ');
+                  const priceInfo = v.price ? `, Price: ₹${v.price}` : '';
+                  return `[${attrs} -> Stock: ${v.stock}${priceInfo}]`;
+                })
+                .join('; ');
+              detailedVariantsStr = ` | Detailed Variant Stock Breakdown: ${variantDetails}`;
+            }
+
+            variantStr = ` | Available Options: (${optionsSummary})${detailedVariantsStr}`;
           }
-          return `- ID: ${p._id} | Name: "${p.name}" | Price: ₹${p.price}${discountStr} | Category: ${p.category} | Stock: ${p.stock}${variantStr} | Rating: ${p.ratings}⭐`;
+          return `- ID: ${p._id} | Name: "${p.name}" | Price: ₹${p.price}${discountStr} | Category: ${p.category} | Total Stock: ${p.stock}${variantStr} | Rating: ${p.ratings}⭐`;
         })
         .join('\n');
 
@@ -151,7 +168,10 @@ RULES FOR YOUR RESPONSES:
 2. For simple greetings (like "Hi"), just greet back and ask how you can help. Do NOT list categories or products.
 3. Only recommend products if the user explicitly asks for a recommendation, searches for an item, or asks what you have.
 4. When recommending a product, mention its exact Name, Price, and why it fits their request.
-5. If a user asks about color, size, or variant options for a product, check its "Available Options" in the catalog context. Accurately confirm availability if listed!
+5. If a user asks about availability or stock for a product or specific variant combination (size, color, etc.), check "Detailed Variant Stock Breakdown" and stock levels:
+   - If stock is high (> 5 items): Enthusiastically confirm that it is "In Stock and available to order!" (Do NOT disclose large exact numbers like 90, 50, etc.).
+   - If stock is LOW (5 or fewer items): Create healthy purchase urgency by stating: "Hurry! Only X left in stock for [Size/Color]!"
+   - If stock is 0: Inform them politely that it is currently Out of Stock and offer the closest in-stock alternative.
 6. If a user asks for items on sale, deals, or discounts, look for products marked "🔥 ON SALE!" in the catalog and present them enthusiastically with their sale prices and discount percentages!
 7. If a user asks about something out of stock or not in catalog, suggest closest alternative politely.
 8. Format your text cleanly with emoji bullet points where helpful.`;
@@ -604,7 +624,7 @@ Return strictly a raw JSON object with NO markdown formatting or code blocks:
    * 6. Admin Feature: AI Store Intelligence & Executive Analytics
    */
   async getStoreExecutiveInsights() {
-    const cacheKey = 'ai_store_executive_insights';
+    const cacheKey = 'ai_store_executive_insights_v2';
     try {
       const cachedInsights: any = await this.cacheManager.get(cacheKey);
       if (cachedInsights) {
@@ -635,7 +655,7 @@ Return strictly a raw JSON object with NO markdown formatting or code blocks:
 
       const storeMetricsContext = `
 STORE METRICS SUMMARY:
-- Total Revenue: $${totalRevenue.toFixed(2)}
+- Total Revenue: ₹${totalRevenue.toFixed(2)} (Indian Rupees / INR)
 - Total Orders: ${orders.length}
 - Order Status Breakdown: ${JSON.stringify(orderStatuses)}
 - Total Catalog Products: ${products.length}
@@ -646,9 +666,11 @@ STORE METRICS SUMMARY:
 `;
 
       const genAI = this.getGenAI();
-      const prompt = `You are a Chief E-Commerce Executive Advisor & AI Business Analyst for an online store.
+      const prompt = `You are a Chief E-Commerce Executive Advisor & AI Business Analyst for an online store based in India.
 Analyze the store metrics below carefully:
 ${storeMetricsContext}
+
+IMPORTANT: All financial figures, revenue, and prices are strictly in Indian Rupees (₹ / INR). ALWAYS state currency using ₹ or INR (e.g., ₹2.65M, ₹2,65,000, or ₹2.65 Lakhs/Crores). NEVER use dollars ($).
 
 TASK:
 Provide a crisp, actionable executive brief for the store administrator.
@@ -702,7 +724,7 @@ Return strictly a raw JSON object with NO markdown formatting or code blocks:
 
       const resultPayload = {
         success: true,
-        executiveSummary: parsed.executiveSummary || `Your store has generated $${totalRevenue.toFixed(2)} across ${orders.length} orders with ${products.length} catalog products.`,
+        executiveSummary: parsed.executiveSummary || `Your store has generated ₹${totalRevenue.toFixed(2)} across ${orders.length} orders with ${products.length} catalog products.`,
         inventoryAlerts: parsed.inventoryAlerts || (lowStockProducts.length > 0 ? [`Restock notice: ${lowStockProducts.length} products have 5 or fewer items remaining.`] : ['Inventory levels are healthy across all categories.']),
         strategicRecommendations: parsed.strategicRecommendations || ['Consider bundling top-rated items with accessories to boost average order value.'],
       };
@@ -820,7 +842,7 @@ Return strictly a raw JSON object with NO markdown formatting or code blocks:
 PRODUCT DETAILS:
 - Name: ${product.name}
 - Category: ${product.category}
-- Price: $${product.price} (Original: $${product.originalPrice || product.price})
+- Price: ₹${product.price} (Original: ₹${product.originalPrice || product.price})
 - Stock Status: ${product.stock > 0 ? `In Stock (${product.stock} units)` : 'Out of Stock'}
 - Available Options/Variants: ${optionsSummary || 'Standard'}
 - Description: ${product.description.replace(/<[^>]*>?/gm, '')}
@@ -871,6 +893,169 @@ REQUIREMENTS:
       throw new InternalServerErrorException(
         `AI Product Q&A failed: ${error?.message || 'Gemini error'}`,
       );
+    }
+  }
+
+  /**
+   * 10. Storefront Feature: AI Smart Cart Upsell Nudge ("AOV Booster")
+   */
+  async getCartUpsellNudge(cartItemIds: string[] = [], subtotal: number = 0) {
+    const numericSubtotal = Math.max(0, Number(subtotal) || 0);
+
+    // Fetch store settings for shipping threshold
+    const activeSettings = (await this.settingsModel.findOne().lean()) || {
+      freeShippingThreshold: 1000,
+      shippingFee: 200,
+      isShippingFeeEnabled: true,
+    };
+
+    const threshold = activeSettings.freeShippingThreshold || 1000;
+    const isFeeEnabled = activeSettings.isShippingFeeEnabled ?? true;
+    const gap = threshold - numericSubtotal;
+
+    const safeCartIds: string[] = Array.isArray(cartItemIds)
+      ? cartItemIds
+          .map((id: any) => (typeof id === 'string' ? id : String(id?._id || id?.productId || '')))
+          .filter((id: string) => typeof id === 'string' && id.length === 24)
+      : [];
+
+    // Fetch catalog products excluding current cart items
+    let inStockProducts = await this.productModel
+      .find({
+        _id: { $nin: safeCartIds },
+      })
+      .select('name price originalPrice category stock images ratings numOfReviews _id')
+      .limit(20)
+      .lean();
+
+    if (inStockProducts.length === 0) {
+      inStockProducts = await this.productModel
+        .find()
+        .select('name price originalPrice category stock images ratings numOfReviews _id')
+        .limit(10)
+        .lean();
+    }
+
+    if (inStockProducts.length === 0) {
+      return {
+        success: true,
+        qualifiesForFreeShipping: !isFeeEnabled || numericSubtotal >= threshold,
+        freeShippingThreshold: threshold,
+        gap: Math.max(0, gap),
+        nudgeText: numericSubtotal >= threshold ? '🎉 Great news! You qualify for FREE Shipping on this order!' : `You are ₹${Math.max(0, gap)} away from Free Shipping!`,
+        suggestedProduct: null,
+      };
+    }
+
+    const qualifies = !isFeeEnabled || gap <= 0;
+
+    // Fetch cart products to ground Gemini
+    const cartProducts = safeCartIds.length > 0
+      ? await this.productModel.find({ _id: { $in: safeCartIds } }).select('category name price _id').lean()
+      : [];
+
+    const cartSummary = cartProducts.map((p: any) => `- "${p.name}" (Category: ${p.category || 'General'}, Price: ₹${p.price})`).join('\n') || 'None';
+
+    const candidateList = inStockProducts
+      .slice(0, 15)
+      .map((p: any) => `- ID: ${p._id} | Name: "${p.name}" | Category: ${p.category || 'General'} | Price: ₹${p.price}`)
+      .join('\n');
+
+    // Smart fallback product closest to price gap
+    const sortedByPrice = [...inStockProducts].sort((a: any, b: any) => {
+      const diffA = Math.abs((a.price || 0) - gap);
+      const diffB = Math.abs((b.price || 0) - gap);
+      return diffA - diffB;
+    });
+    const defaultSuggestedProduct = sortedByPrice[0] || inStockProducts[0];
+
+    // Generate AI Product Selection & Nudge Text via Gemini
+    try {
+      const genAI = this.getGenAI();
+      const prompt = `You are a Chief AI Merchandising Strategist & E-Commerce Sales Coach for an online store in India.
+
+SHOPPER'S CURRENT CART:
+${cartSummary}
+Current Cart Subtotal: ₹${numericSubtotal}
+Free Shipping Threshold: ₹${threshold}
+Status: ${qualifies ? 'QUALIFIED for Free Shipping' : `NEEDS ₹${gap} MORE for Free Shipping`}
+
+STORE IN-STOCK CANDIDATE PRODUCTS:
+${candidateList}
+
+TASK:
+1. Analyze the items in the cart to determine the shopper's style/domain (e.g. clothing, electronics, footwear, etc.).
+2. Pick the SINGLE BEST add-on product from the candidate list that:
+   - Is domain/style complementary to what is in their cart (e.g. if clothing in cart, pick clothing/accessory; if tech, pick tech accessory).
+   - Has a reasonable price (ideally near ₹${gap}, not an absurdly expensive ₹50,000 item when gap is small).
+3. Create a short, highly engaging 1-sentence sales nudge encouraging the shopper in Indian Rupees (₹ / INR).
+
+Return strictly a raw JSON object with NO markdown formatting or code blocks:
+{
+  "selectedProductId": "exact_ID_from_candidate_list",
+  "nudgeText": "✨ 1-sentence sales nudge"
+}`;
+
+      const modelsToTry = [
+        'gemini-2.5-flash',
+        'gemini-1.5-flash',
+        'gemini-flash-latest',
+        'gemini-1.5-flash-lite',
+      ];
+      let jsonText = '';
+
+      for (const modelName of modelsToTry) {
+        try {
+          const model = genAI.getGenerativeModel({ model: modelName });
+          const result = await model.generateContent(prompt);
+          const response = await result.response;
+          jsonText = response.text() ? response.text().trim() : '';
+          if (jsonText) {
+            jsonText = jsonText.replace(/```json/gi, '').replace(/```/g, '').trim();
+            break;
+          }
+        } catch (err: any) {
+          console.warn(`Upsell nudge model ${modelName} failed: ${err.message}`);
+        }
+      }
+
+      let parsed: { selectedProductId?: string; nudgeText?: string } = {};
+      if (jsonText) {
+        try {
+          parsed = JSON.parse(jsonText);
+        } catch (e) {
+          console.warn('Failed to parse Gemini Upsell Nudge JSON:', e);
+        }
+      }
+
+      const aiSelectedProd = inStockProducts.find(
+        (p: any) => String(p._id) === String(parsed.selectedProductId),
+      );
+      const finalSuggestedProduct = aiSelectedProd || defaultSuggestedProduct;
+
+      const defaultNudgeText = qualifies
+        ? `🎉 Awesome! You unlocked FREE Shipping! Add ${finalSuggestedProduct.name} for ₹${finalSuggestedProduct.price} to complete your order!`
+        : `✨ You are only ₹${gap} away from FREE Shipping! Add ${finalSuggestedProduct.name} (₹${finalSuggestedProduct.price}) to qualify!`;
+
+      return {
+        success: true,
+        qualifiesForFreeShipping: qualifies,
+        freeShippingThreshold: threshold,
+        gap: Math.max(0, gap),
+        nudgeText: parsed.nudgeText || defaultNudgeText,
+        suggestedProduct: finalSuggestedProduct,
+      };
+    } catch (error: any) {
+      return {
+        success: true,
+        qualifiesForFreeShipping: qualifies,
+        freeShippingThreshold: threshold,
+        gap: Math.max(0, gap),
+        nudgeText: qualifies
+          ? `🎉 You qualify for FREE Shipping on this order!`
+          : `✨ Add ₹${gap} more to your cart to get FREE Shipping!`,
+        suggestedProduct: defaultSuggestedProduct,
+      };
     }
   }
 }

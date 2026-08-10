@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import EmptyCartState from "@/components/Cart/Sections/EmptyCartState";
 import CartSummary from "@/components/Cart/Sections/CartSummary";
 import AISmartRecommendations from "@/components/Cart/Sections/AISmartRecommendations";
+import AICartUpsellNudge from "@/components/Cart/Sections/AICartUpsellNudge";
 import { api } from "@/services/api";
 import { toast } from "react-toastify";
 
@@ -298,6 +299,12 @@ const Cart: React.FC = () => {
                   </div>
                 );
               })}
+
+            {/* ✨ AI Smart Cart Upsell Nudge & Free Shipping Tracker */}
+            <AICartUpsellNudge
+              cartItemIds={Array.from(new Set(cartItems.map((item) => item.productId)))}
+              subtotal={grossTotal}
+            />
 
             <CartSummary grossTotal={grossTotal} onCheckout={checkoutHandler} />
 

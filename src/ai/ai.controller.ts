@@ -95,4 +95,16 @@ export class AiController {
   ) {
     return this.aiService.askProductQuestion(productId, question);
   }
+
+  /**
+   * Public Customer Endpoint: AI Smart Cart Upsell Nudge ("AOV Booster")
+   */
+  @Post('cart-upsell-nudge')
+  @Throttle({ default: { limit: 15, ttl: 60000 } })
+  async getCartUpsellNudge(
+    @Body('cartItemIds') cartItemIds: string[],
+    @Body('subtotal') subtotal: number,
+  ) {
+    return this.aiService.getCartUpsellNudge(cartItemIds || [], subtotal || 0);
+  }
 }

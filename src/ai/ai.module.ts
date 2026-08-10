@@ -5,6 +5,7 @@ import { AiService } from './ai.service';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
 import { Order, OrderSchema } from '../orders/schemas/order.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
+import { Settings, SettingsSchema } from '../settings/schemas/settings.schema';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { User, UserSchema } from '../users/schemas/user.schema';
       { name: Product.name, schema: ProductSchema },
       { name: Order.name, schema: OrderSchema },
       { name: User.name, schema: UserSchema },
+      { name: Settings.name, schema: SettingsSchema },
     ]),
   ],
   controllers: [AiController],

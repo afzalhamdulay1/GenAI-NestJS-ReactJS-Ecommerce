@@ -429,11 +429,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ isEdit = false }) => {
 
     setVariants((prevVariants) => {
       const prevMap = new Map<string, { stock: number; price?: number; offerPrice?: number }>();
-      prevVariants.forEach((v) => {
-        const key = Object.entries(v.attributes)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([k, val]) => `${k}:${val}`)
+      const normalizeAttrKey = (attrs: Record<string, string>) =>
+        Object.entries(attrs || {})
+          .map(([k, val]) => `${k.trim().toLowerCase()}:${String(val).trim().toLowerCase()}`)
+          .sort()
           .join("|");
+
+      prevVariants.forEach((v) => {
+        const key = normalizeAttrKey(v.attributes);
         prevMap.set(key, { stock: v.stock, price: v.price, offerPrice: v.offerPrice });
       });
 
@@ -443,16 +446,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ isEdit = false }) => {
           attributes[optionArrays[idx].name] = val;
         });
 
-        const key = Object.entries(attributes)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([k, val]) => `${k}:${val}`)
-          .join("|");
-
+        const key = normalizeAttrKey(attributes);
         const existing = prevMap.get(key);
 
         return {
           attributes,
-          stock: existing ? existing.stock : 10,
+          stock: existing !== undefined && existing.stock !== undefined ? Number(existing.stock) : 10,
           price: existing ? existing.price : undefined,
           offerPrice: existing ? existing.offerPrice : undefined,
         };

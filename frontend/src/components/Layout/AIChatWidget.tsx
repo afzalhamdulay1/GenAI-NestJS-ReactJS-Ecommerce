@@ -41,7 +41,17 @@ const AIChatWidget: React.FC = () => {
   // Mode: 'ai' | 'human_waiting' | 'human_active'
   const [chatMode, setChatMode] = useState<'ai' | 'human_waiting' | 'human_active'>('ai');
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const socketRef = useRef<Socket | null>(null);
+
+  useEffect(() => {
+    if (!loading && open) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50);
+    }
+  }, [loading, open]);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -50,8 +60,6 @@ const AIChatWidget: React.FC = () => {
       text: "👋 Hi! I'm Afzal AI, your AI Shopping Assistant. Looking for something specific, a gift idea, or style recommendations? Ask me anything!",
     },
   ]);
-
-  const chatBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open) {
@@ -476,6 +484,7 @@ const AIChatWidget: React.FC = () => {
               style={{ display: 'flex', gap: '8px' }}
             >
               <TextField
+                inputRef={inputRef}
                 fullWidth
                 size="small"
                 placeholder="Ask Afzal AI anything..."

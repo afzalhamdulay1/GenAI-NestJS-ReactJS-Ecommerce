@@ -295,12 +295,16 @@ export class ProductsService {
       }
     }
 
-    product = await this.productModel.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    Object.assign(product, updateData);
+    if (updateData.hasVariants) {
+      product.markModified('variants');
+      product.markModified('options');
+    }
+
+    await product.save();
 
     await this.cacheManager.del('ai_store_executive_insights');
+    await this.cacheManager.del('ai_store_executive_insights_v2');
 
     return {
       success: true,
