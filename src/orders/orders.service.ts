@@ -349,20 +349,50 @@ export class OrdersService {
     if (!product) return;
 
     if (product.hasVariants && Array.isArray(product.variants) && selectedVariant && Object.keys(selectedVariant).length > 0) {
-      const variantIndex = product.variants.findIndex((v) => {
+      const variant = product.variants.find((v: any) => {
         const attrs = v.attributes || {};
         return Object.keys(selectedVariant).every((key) => attrs[key] === selectedVariant[key]);
       });
 
-      if (variantIndex !== -1) {
-        const currentVariantStock = product.variants[variantIndex].stock || 0;
-        const newVariantStock = action === 'deduct' 
-          ? Math.max(0, currentVariantStock - quantity)
-          : currentVariantStock + quantity;
+      if (variant) {
+        const delta = action === 'deduct' ? -quantity : quantity;
+        const variantId = (variant as any)._id;
+        const sku = variant.sku;
 
-        product.variants[variantIndex].stock = newVariantStock;
-        product.stock = product.variants.reduce((sum, v) => sum + Number(v.stock || 0), 0);
-        await product.save({ validateBeforeSave: false });
+        // Build atomic positional query filter targeting exact variant inside array
+        const queryFilter: any = { _id: productId };
+        if (variantId) {
+          queryFilter['variants._id'] = variantId;
+        } else if (sku) {
+          queryFilter['variants.sku'] = sku;
+        }
+
+        if (action === 'deduct') {
+          queryFilter['variants.stock'] = { $gte: quantity };
+        }
+
+        // Perform atomic positional $inc update directly inside MongoDB
+        const updateResult = await this.productModel.updateOne(
+          queryFilter,
+          {
+            $inc: {
+              'variants.$.stock': delta,
+              stock: delta,
+            },
+          }
+        );
+
+        // If stock deduction was blocked because stock was lower than quantity, log warning
+        if (action === 'deduct' && updateResult.modifiedCount === 0) {
+          console.warn(`[Atomic Stock Warning] Could not deduct ${quantity} units for product ${productId} variant SKU: ${sku || variantId}`);
+        }
+
+        // Recalculate total product stock to keep top-level stock in exact sync with variants sum
+        const updatedProduct = await this.productModel.findById(productId);
+        if (updatedProduct && Array.isArray(updatedProduct.variants)) {
+          const totalStock = updatedProduct.variants.reduce((sum, v) => sum + Math.max(0, Number(v.stock || 0)), 0);
+          await this.productModel.updateOne({ _id: productId }, { stock: totalStock });
+        }
         return;
       }
     }
@@ -379,6 +409,15 @@ export class OrdersService {
         { $inc: { stock: quantity } }
       );
     }
+
+    try {
+      await (this.cacheManager as any).reset();
+    } catch (e) {}
+    await this.cacheManager.del(`/api/v1/product/${productId}`);
+    await this.cacheManager.del('/api/v1/products');
+    await this.cacheManager.del('/api/v1/products/top-selling');
+    await this.cacheManager.del('ai_store_executive_insights');
+    await this.cacheManager.del('ai_store_executive_insights_v2');
   }
 
   async cancelMyOrder(id: string, user: UserDocument) {

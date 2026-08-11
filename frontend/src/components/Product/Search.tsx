@@ -46,7 +46,7 @@ const Search: React.FC = () => {
         </div>
 
         <div className="w-full max-w-xl flex justify-center mt-6">
-          <PredictiveSearch />
+          <PredictiveSearch variant="pill" />
         </div>
       </div>
     </Fragment>

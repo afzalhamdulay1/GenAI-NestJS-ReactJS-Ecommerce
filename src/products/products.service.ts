@@ -296,20 +296,45 @@ export class ProductsService {
     }
 
     Object.assign(product, updateData);
-    if (updateData.hasVariants) {
+
+    if (updateData.variants !== undefined) {
+      product.variants = updateData.variants;
       product.markModified('variants');
+    }
+    if (updateData.options !== undefined) {
+      product.options = updateData.options;
       product.markModified('options');
     }
 
     await product.save();
 
-    await this.cacheManager.del('ai_store_executive_insights');
-    await this.cacheManager.del('ai_store_executive_insights_v2');
+    await this.clearProductCache(id);
 
     return {
       success: true,
       product,
     };
+  }
+
+  public async clearProductCache(productId?: string) {
+    try {
+      await (this.cacheManager as any).reset();
+    } catch (e) {
+      try {
+        if (typeof (this.cacheManager as any).clear === 'function') {
+          await (this.cacheManager as any).clear();
+        }
+      } catch (err) {}
+    }
+
+    if (productId) {
+      await this.cacheManager.del(`/api/v1/product/${productId}`);
+      await this.cacheManager.del(`ai_review_summary_${productId}`);
+    }
+    await this.cacheManager.del('/api/v1/products');
+    await this.cacheManager.del('/api/v1/products/top-selling');
+    await this.cacheManager.del('ai_store_executive_insights');
+    await this.cacheManager.del('ai_store_executive_insights_v2');
   }
 
   async deleteProduct(id: string) {
@@ -328,7 +353,7 @@ export class ProductsService {
 
     await product.deleteOne();
 
-    await this.cacheManager.del('ai_store_executive_insights');
+    await this.clearProductCache(id);
 
     return {
       success: true,

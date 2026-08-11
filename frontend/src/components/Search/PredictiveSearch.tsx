@@ -9,6 +9,7 @@ import { CircularProgress, Tooltip, IconButton, Typography, Dialog, DialogTitle,
 import { Product } from "@/types";
 import { api } from "@/services/api";
 import { toast } from "react-toastify";
+import { compressImage } from "@/utils/imageCompressor";
 
 // In-memory cache for debounced predictive search queries
 const searchCache = new Map<string, Product[]>();
@@ -46,7 +47,7 @@ const PredictiveSearch: React.FC<PredictiveSearchProps> = ({
     fileInputRef.current?.click();
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -55,35 +56,33 @@ const PredictiveSearch: React.FC<PredictiveSearchProps> = ({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64String = reader.result as string;
-      setVisualLoading(true);
-      setIsOpen(false);
+    setVisualLoading(true);
+    setIsOpen(false);
 
-      try {
-        const { data } = await api.post("/ai/visual-search", { image: base64String });
-        if (data.success && data.matchedProducts) {
-          sessionStorage.setItem(
-            "ai_visual_search",
-            JSON.stringify({
-              matchAnalysis: data.matchAnalysis,
-              matchedProducts: data.matchedProducts,
-            })
-          );
-          if (onSearchSubmit) onSearchSubmit();
-          navigate("/products?visualSearch=true");
-          toast.success("✨ Visual match found!");
-        } else {
-          toast.error("Could not find matching products for this photo");
-        }
-      } catch (err: any) {
-        toast.error(err?.response?.data?.message || "AI Visual Search failed");
-      } finally {
-        setVisualLoading(false);
+    try {
+      // compressImage compresses & resizes canvas, returning base64 DataURL directly
+      const base64String = await compressImage(file, { maxDimension: 800, quality: 0.75 });
+      
+      const { data } = await api.post("/ai/visual-search", { image: base64String });
+      if (data.success && data.matchedProducts) {
+        sessionStorage.setItem(
+          "ai_visual_search",
+          JSON.stringify({
+            matchAnalysis: data.matchAnalysis,
+            matchedProducts: data.matchedProducts,
+          })
+        );
+        if (onSearchSubmit) onSearchSubmit();
+        navigate("/products?visualSearch=true");
+        toast.success("✨ Visual match found!");
+      } else {
+        toast.error("Could not find matching products for this photo");
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "AI Visual Search failed");
+    } finally {
+      setVisualLoading(false);
+    }
   };
 
   // Fetch predictive search results with caching
