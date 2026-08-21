@@ -1,6 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Product, ProductSchema } from './schemas/product.schema';
+import { ProductChunk, ProductChunkSchema } from './schemas/product-chunk.schema';
 import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
 import { ConfigModule } from '@nestjs/config';
@@ -13,6 +14,7 @@ import { Order, OrderSchema } from '../orders/schemas/order.schema';
   imports: [
     MongooseModule.forFeature([
       { name: Product.name, schema: ProductSchema },
+      { name: ProductChunk.name, schema: ProductChunkSchema },
       { name: Order.name, schema: OrderSchema },
     ]),
     ConfigModule,

@@ -11,6 +11,8 @@ import {
   Avatar,
   Button,
   Chip,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import CloseIcon from '@mui/icons-material/Close';
@@ -29,6 +31,14 @@ interface ChatMessage {
   sender: 'user' | 'bot' | 'agent';
   text: string;
   recommendedProducts?: any[];
+  metrics?: { 
+    embedTime: number; 
+    dbTime: number; 
+    llmTime: number; 
+    totalTime: number;
+    usedModel?: string;
+    modelAttempts?: { model: string; status: 'success' | 'failed'; error?: string; timeMs: number }[];
+  };
 }
 
 const AIChatWidget: React.FC = () => {
@@ -40,6 +50,7 @@ const AIChatWidget: React.FC = () => {
 
   // Mode: 'ai' | 'human_waiting' | 'human_active'
   const [chatMode, setChatMode] = useState<'ai' | 'human_waiting' | 'human_active'>('ai');
+  const [embeddingType, setEmbeddingType] = useState<'gemini' | 'local'>('local');
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -228,6 +239,7 @@ const AIChatWidget: React.FC = () => {
       const { data } = await api.post('/ai/chat', {
         message: userText,
         history: historyPayload,
+        embeddingType: embeddingType,
       });
 
       const botMsgObj: ChatMessage = {
@@ -235,6 +247,7 @@ const AIChatWidget: React.FC = () => {
         sender: 'bot',
         text: data.reply || "I couldn't process that right now.",
         recommendedProducts: data.recommendedProducts || [],
+        metrics: data.metrics,
       };
 
       setMessages((prev) => [...prev, botMsgObj]);
@@ -371,10 +384,30 @@ const AIChatWidget: React.FC = () => {
               </Typography>
             </Box>
           </Box>
-          <IconButton size="small" onClick={() => setOpen(false)} sx={{ color: '#94a3b8' }}>
+          <IconButton onClick={() => setOpen(false)} size="small" sx={{ color: '#ffffff' }}>
             <CloseIcon />
           </IconButton>
         </Box>
+
+        {chatMode === 'ai' && (
+          <Box sx={{ p: 1, display: 'flex', justifyContent: 'center', bgcolor: '#e2e8f0' }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={embeddingType === 'local'}
+                  onChange={(e) => setEmbeddingType(e.target.checked ? 'local' : 'gemini')}
+                  color="secondary"
+                  size="small"
+                />
+              }
+              label={
+                <Typography variant="caption" sx={{ fontWeight: 600, color: '#334155' }}>
+                  ⚡ Fast Mode (Local Embeddings)
+                </Typography>
+              }
+            />
+          </Box>
+        )}
 
         {/* Live Human Support Escalation Action Bar */}
         {chatMode === 'ai' ? (
@@ -453,6 +486,30 @@ const AIChatWidget: React.FC = () => {
                       <ProductCard product={p} showAddToCart={true} showWishlistHeart={false} />
                     </Box>
                   ))}
+                </Box>
+              )}
+
+              {/* Render Metrics Chip if available */}
+              {msg.sender === 'bot' && msg.metrics && (
+                <Box sx={{ mt: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap', maxWidth: '90%', alignSelf: 'flex-start' }}>
+                  <Chip size="small" label={`Embed: ${msg.metrics.embedTime}ms`} sx={{ fontSize: '0.65rem', height: 20, bgcolor: '#e2e8f0', color: '#475569' }} />
+                  <Chip size="small" label={`DB: ${msg.metrics.dbTime}ms`} sx={{ fontSize: '0.65rem', height: 20, bgcolor: '#e2e8f0', color: '#475569' }} />
+                  <Chip size="small" label={`LLM: ${msg.metrics.llmTime}ms`} sx={{ fontSize: '0.65rem', height: 20, bgcolor: '#e2e8f0', color: '#475569' }} />
+                  <Chip size="small" label={`Total: ${msg.metrics.totalTime}ms`} sx={{ fontSize: '0.65rem', height: 20, bgcolor: '#cbd5e1', fontWeight: 'bold', color: '#334155' }} />
+                  
+                  {/* Model Diagnostics */}
+                  {msg.metrics.usedModel && (
+                    <Chip size="small" label={`🤖 ${msg.metrics.usedModel}`} sx={{ fontSize: '0.65rem', height: 20, bgcolor: '#e0e7ff', color: '#3730a3', fontWeight: 700 }} />
+                  )}
+
+                  {/* Fallback attempts logs if any model failed */}
+                  {msg.metrics.modelAttempts && msg.metrics.modelAttempts.some(a => a.status === 'failed') && (
+                    <Box sx={{ width: '100%', mt: 0.5 }}>
+                      <Typography variant="caption" sx={{ fontSize: '0.6rem', color: '#dc2626', fontWeight: 600, display: 'block' }}>
+                        ⚠️ Model Trace: {msg.metrics.modelAttempts.map(a => `${a.model} (${a.status === 'failed' ? '❌' : '✅'})`).join(' ➔ ')}
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
               )}
             </Box>

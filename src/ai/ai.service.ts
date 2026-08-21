@@ -3,24 +3,32 @@ import {
   BadRequestException,
   InternalServerErrorException,
   Inject,
+  OnModuleInit
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { Model } from 'mongoose';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { pipeline } from '@xenova/transformers';
 import { Product, ProductDocument } from '../products/schemas/product.schema';
+import { ProductChunk, ProductChunkDocument } from '../products/schemas/product-chunk.schema';
 import { Order, OrderDocument } from '../orders/schemas/order.schema';
 import { User, UserDocument } from '../users/schemas/user.schema';
 import { Settings, SettingsDocument } from '../settings/schemas/settings.schema';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
-export class AiService {
+export class AiService implements OnModuleInit {
   private genAI: GoogleGenerativeAI | null = null;
+  private localEmbeddingPipeline: any = null;
+  private knowledgeChunks: any[] = [];
 
   constructor(
     private configService: ConfigService,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(ProductChunk.name) private productChunkModel: Model<ProductChunkDocument>,
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Settings.name) private settingsModel: Model<SettingsDocument>,
@@ -30,6 +38,53 @@ export class AiService {
     if (apiKey) {
       this.genAI = new GoogleGenerativeAI(apiKey);
     }
+  }
+
+  async onModuleInit() {
+    console.log('Loading Local Embedding Model (Transformers.js)...');
+    try {
+      this.localEmbeddingPipeline = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+      console.log('Local Embedding Model loaded successfully.');
+    } catch (err) {
+      console.warn('Failed to load local embedding model:', err);
+    }
+
+    // Load Multi-File Knowledge Vectors from data/vectors/ into RAM
+    try {
+      const vectorsDir = path.join(process.cwd(), 'data', 'vectors');
+      if (fs.existsSync(vectorsDir)) {
+        const files = fs.readdirSync(vectorsDir).filter(f => f.endsWith('.json'));
+        this.knowledgeChunks = [];
+        for (const file of files) {
+          const filePath = path.join(vectorsDir, file);
+          const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+          this.knowledgeChunks.push(...content);
+        }
+        console.log(`⚡ Loaded ${this.knowledgeChunks.length} Knowledge Base Chunks into RAM from ${files.length} vector files!`);
+      }
+    } catch (err) {
+      console.warn('Failed to load in-memory knowledge vector files:', err);
+    }
+  }
+
+  private searchInMemoryKnowledge(queryVector: number[], isLocal: boolean, topK = 2) {
+    if (!this.knowledgeChunks || this.knowledgeChunks.length === 0) return [];
+    
+    const results = this.knowledgeChunks.map(chunk => {
+      const vec = isLocal ? chunk.localEmbedding : chunk.embedding;
+      if (!vec || vec.length !== queryVector.length) return { chunk, score: 0 };
+      
+      let dot = 0;
+      for (let i = 0; i < vec.length; i++) {
+        dot += vec[i] * queryVector[i];
+      }
+      return { chunk, score: dot };
+    });
+
+    return results
+      .sort((a, b) => b.score - a.score)
+      .slice(0, topK)
+      .filter(r => r.score > 0.30);
   }
 
   private getGenAI(): GoogleGenerativeAI {
@@ -62,9 +117,9 @@ Structure the response cleanly with 2 brief engaging paragraphs wrapped in <p> t
 CRITICAL REQUIREMENT: Return strictly standard HTML tags (<p>, <ul>, <li>, <strong>). Do NOT use any Markdown syntax like "*", "**", "#", or "-". Do NOT wrap the HTML in backticks or code blocks like \`\`\`html.`;
 
       const modelsToTry = [
-        'gemini-3.5-flash',
-        'gemini-flash-latest',
-        'gemini-3.5-flash-lite',
+        'gemini-3.6-flash',
+        'gemini-3.6-flash-latest',
+        'gemini-3.6-flash-lite',
         'gemini-3.1-flash-lite',
       ];
       let responseText = '';
@@ -104,22 +159,180 @@ CRITICAL REQUIREMENT: Return strictly standard HTML tags (<p>, <ul>, <li>, <stro
   async chatWithShoppingAssistant(
     userMessage: string,
     chatHistory: any[] = [],
+    embeddingType: 'gemini' | 'local' = 'local',
   ) {
     if (!userMessage || !userMessage.trim()) {
       throw new BadRequestException('Message cannot be empty');
     }
 
     try {
+      const startTime = performance.now();
+      let embedStart = 0, embedTime = 0;
+      let dbStart = 0, dbTime = 0;
+      let llmStart = 0, llmTime = 0;
+
       const genAI = this.getGenAI();
 
-      // Fetch live product context from MongoDB to ground the bot
-      const products = await this.productModel
-        .find()
-        .select(
-          'name price originalPrice category stock ratings numOfReviews description images _id hasVariants options variants',
-        )
-        .limit(30)
-        .lean();
+      // Fast-Path Intent Router for Small Talk / Greetings
+      const cleanMsg = userMessage.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
+      const isShort = cleanMsg.split(' ').length <= 6; // Only intercept if it's a short message
+      
+      const isGreeting = /^(hi|hello|hey|how are you|how you doing|sup|good morning|good evening)( how are you| how you doing)?$/.test(cleanMsg);
+      const isThanks = /^(thanks|thank you|ty|thanks a lot|appreciate it)$/.test(cleanMsg);
+      const isAck = /^(ok|okay|cool|awesome|great|nice)$/.test(cleanMsg);
+
+      if (isShort && isGreeting) {
+        return {
+          success: true,
+          reply: "Hello! 👋 I'm your Afzal AI Shopping Assistant. How can I help you find the perfect product today?",
+          recommendedProducts: [],
+          metrics: { embedTime: 0, dbTime: 0, llmTime: 0, totalTime: Math.round(performance.now() - startTime) }
+        };
+      } else if (isShort && isThanks) {
+        return {
+          success: true,
+          reply: "You're very welcome! Let me know if you need help with anything else. 😊",
+          recommendedProducts: [],
+          metrics: { embedTime: 0, dbTime: 0, llmTime: 0, totalTime: Math.round(performance.now() - startTime) }
+        };
+      } else if (isShort && isAck) {
+        return {
+          success: true,
+          reply: "Awesome! Let me know if you have any questions.",
+          recommendedProducts: [],
+          metrics: { embedTime: 0, dbTime: 0, llmTime: 0, totalTime: Math.round(performance.now() - startTime) }
+        };
+      }
+
+      // Extract recent USER queries so pronouns like "it" map to previous subjects (e.g. jacket) without bot message noise
+      const previousUserQueries = chatHistory
+        .filter((m: any) => m.role === 'user')
+        .slice(-2)
+        .map((m: any) => m.content || m.text || '')
+        .join(' ');
+      const searchContext = `${previousUserQueries} ${userMessage}`.trim();
+
+      // Convert searchContext to embedding vector
+      let userVector: number[] = [];
+      let vectorIndexName = 'vector_index';
+      let vectorPathName = 'embedding';
+
+      try {
+        embedStart = performance.now();
+        if (embeddingType === 'local') {
+          if (!this.localEmbeddingPipeline) throw new Error('Local embedding model not loaded yet.');
+          const output = await this.localEmbeddingPipeline(searchContext, { pooling: 'mean', normalize: true });
+          userVector = Array.from(output.data);
+          vectorIndexName = 'vector_index';
+          vectorPathName = 'localEmbedding';
+        } else {
+          const embedModel = genAI.getGenerativeModel({ model: 'gemini-embedding-001' });
+          const embedResult = await embedModel.embedContent({
+              content: { role: 'user', parts: [{ text: searchContext }] },
+              taskType: 'RETRIEVAL_QUERY'
+          } as any);
+          userVector = embedResult.embedding.values;
+          vectorIndexName = 'vector_index';
+          vectorPathName = 'embedding';
+        }
+        embedTime = performance.now() - embedStart;
+      } catch (err: any) {
+        console.warn(`Vector Embedding failed: ${err.message}`);
+      }
+
+      // 1. Run In-Memory Knowledge RAG Search in RAM (~1ms)
+      const kStart = performance.now();
+      const topKnowledgeMatches = this.searchInMemoryKnowledge(userVector, embeddingType === 'local');
+      const kTime = performance.now() - kStart;
+      console.log(`[Knowledge RAM RAG] Cosine search in RAM took ${Math.round(kTime)}ms, found ${topKnowledgeMatches.length} matching policy chunks.`);
+
+      // Short-circuit check: If user query matches knowledge base with high confidence and contains no product intent, skip DB!
+      const isProductBuyingQuery = /(buy|price|cost|jacket|shirt|shoe|phone|laptop|jeans|stock|purchase|cart|discount|offer)/i.test(cleanMsg);
+      const topKScore = topKnowledgeMatches.length > 0 ? topKnowledgeMatches[0].score : 0;
+      const scoreThreshold = embeddingType === 'local' ? 0.35 : 0.50;
+      const isPurePolicyQuery = topKScore > scoreThreshold && !isProductBuyingQuery;
+
+      let products: any[] = [];
+      if (isPurePolicyQuery) {
+        console.log(`⚡ [Short-Circuit] High confidence policy match (${topKScore.toFixed(2)}). SKIPPING MONGODB CALL!`);
+        dbTime = 0;
+      } else if (userVector && userVector.length > 0) {
+        try {
+          dbStart = performance.now();
+          
+          // Single database round-trip: Vector search chunks + $lookup to join parent products inside MongoDB
+          const vStart = performance.now();
+          products = await this.productChunkModel.aggregate([
+            {
+              $vectorSearch: {
+                index: vectorIndexName,
+                path: vectorPathName,
+                queryVector: userVector,
+                numCandidates: 100,
+                limit: 5,
+              },
+            },
+            {
+              $lookup: {
+                from: 'products',
+                localField: 'productId',
+                foreignField: '_id',
+                as: 'parentProduct',
+              },
+            },
+            {
+              $unwind: '$parentProduct',
+            },
+            {
+              $replaceRoot: { newRoot: '$parentProduct' },
+            },
+          ]);
+          console.log(`[Vector Search] $vectorSearch on product_chunks took: ${Math.round(performance.now() - vStart)}ms, returned ${products.length} items.`);
+
+          // Fallback if chunks collection is empty or index not ready
+          if (products.length === 0) {
+            console.warn('[Vector Search] Chunks returned 0 items. Running fallback vectorSearch on products...');
+            products = await this.productModel.aggregate([
+              {
+                $vectorSearch: {
+                  index: vectorIndexName,
+                  path: vectorPathName,
+                  queryVector: userVector,
+                  numCandidates: 100,
+                  limit: 5,
+                },
+              },
+            ]);
+          }
+
+          // Deduplicate products by _id so multiple matching chunks of the same product don't create duplicate cards
+          const uniqueMap = new Map();
+          products.forEach((p: any) => {
+            if (p && p._id) {
+              uniqueMap.set(p._id.toString(), p);
+            }
+          });
+          products = Array.from(uniqueMap.values());
+
+          dbTime = performance.now() - dbStart;
+        } catch (dbErr: any) {
+          console.warn(`[Vector Search Error] $vectorSearch failed: ${dbErr.message}`);
+          const fbStart = performance.now();
+          products = await this.productModel
+            .find({ $text: { $search: userMessage } })
+            .select('name price originalPrice category stock ratings numOfReviews description images _id hasVariants options variants')
+            .limit(5)
+            .lean();
+          console.log(`[Vector Search Error] Text search fallback took: ${Math.round(performance.now() - fbStart)}ms`);
+        }
+      } else {
+        // Fallback if embedding generation failed
+        products = await this.productModel
+          .find()
+          .select('name price originalPrice category stock ratings numOfReviews description images _id hasVariants options variants')
+          .limit(5)
+          .lean();
+      }
 
       const inventoryContext = products
         .map((p: any) => {
@@ -157,17 +370,25 @@ CRITICAL REQUIREMENT: Return strictly standard HTML tags (<p>, <ul>, <li>, <stro
         })
         .join('\n');
 
-      const systemInstruction = `You are "Afzal AI", the helpful, friendly AI Shopping Assistant for our E-Commerce Store.
-Your job is to assist customers in finding products, answering questions, giving style/buying advice, and making recommendations.
+      const knowledgeContext = topKnowledgeMatches.length > 0
+        ? topKnowledgeMatches.map(m => `- ${m.chunk.chunkText}`).join('\n')
+        : 'No specific policy document matched.';
 
-Here is our CURRENT live product catalog from our database:
-${inventoryContext}
+      const systemInstruction = `You are "Afzal AI", the helpful, friendly AI Shopping & Customer Support Assistant for our E-Commerce Store.
+Your job is to assist customers in finding products, answering questions about store policies (Return, Refund, Shipping, Warranty, Troubleshooting, Payments), and giving buying advice.
+
+STORE POLICIES & KNOWLEDGE BASE (FROM IN-MEMORY VECTOR RAG):
+${knowledgeContext}
+
+LIVE PRODUCT CATALOG (FROM MONGODB ATLAS VECTOR SEARCH):
+${inventoryContext || 'No specific products matched.'}
 
 RULES FOR YOUR RESPONSES:
 1. Always be polite, enthusiastic, and EXTREMELY concise.
-2. For simple greetings (like "Hi"), just greet back and ask how you can help. Do NOT list categories or products.
-3. Only recommend products if the user explicitly asks for a recommendation, searches for an item, or asks what you have.
-4. When recommending a product, mention its exact Name, Price, and why it fits their request.
+2. For store policy or support questions (returns, shipping, warranties, troubleshooting), answer accurately using the STORE POLICIES context.
+3. For simple greetings (like "Hi"), just greet back and ask how you can help. Do NOT list categories or products.
+4. Only recommend products if the user explicitly asks for a recommendation, searches for an item, or asks what you have.
+5. When recommending a product, mention its exact Name, Price, and why it fits their request.
 5. If a user asks about availability or stock for a product or specific variant combination (size, color, etc.), check "Detailed Variant Stock Breakdown" and stock levels:
    - If stock is high (> 5 items): Enthusiastically confirm that it is "In Stock and available to order!" (Do NOT disclose large exact numbers like 90, 50, etc.).
    - If stock is LOW (5 or fewer items): Create healthy purchase urgency by stating: "Hurry! Only X left in stock for [Size/Color]!"
@@ -197,14 +418,18 @@ RULES FOR YOUR RESPONSES:
       }
 
       const modelsToTry = [
-        'gemini-3.5-flash',
-        'gemini-flash-latest',
+        'gemini-flash-lite-latest',
         'gemini-3.5-flash-lite',
         'gemini-3.1-flash-lite',
+        'gemini-3.5-flash',
+        'gemini-3.6-flash',
       ];
       let replyText = '';
+      const modelAttempts: { model: string; status: 'success' | 'failed'; error?: string; timeMs: number }[] = [];
+      let usedModel = '';
 
       for (const modelName of modelsToTry) {
+        const tryStart = performance.now();
         try {
           const model = genAI.getGenerativeModel({
             model: modelName,
@@ -215,12 +440,21 @@ RULES FOR YOUR RESPONSES:
             history: formattedHistory,
           });
 
+          llmStart = performance.now();
           const result = await chat.sendMessage(userMessage);
           const response = await result.response;
+          llmTime = performance.now() - llmStart;
           replyText = response.text() ? response.text().trim() : '';
-          if (replyText) break;
+          
+          if (replyText) {
+            usedModel = modelName;
+            modelAttempts.push({ model: modelName, status: 'success', timeMs: Math.round(llmTime) });
+            break;
+          }
         } catch (err: any) {
+          const attemptTime = Math.round(performance.now() - tryStart);
           console.warn(`Chat model ${modelName} failed: ${err.message}`);
+          modelAttempts.push({ model: modelName, status: 'failed', error: err.message || 'Error', timeMs: attemptTime });
         }
       }
 
@@ -231,17 +465,42 @@ RULES FOR YOUR RESPONSES:
 
       // Find matching products mentioned in bot response to render rich cards in UI
       const mentionedProducts = products
-        .filter(
-          (p: any) =>
-            replyText.toLowerCase().includes(p.name.toLowerCase()) ||
-            userMessage.toLowerCase().includes(p.category.toLowerCase()),
-        )
+        .filter((p: any) => {
+          const cleanText = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]/g, '');
+          
+          const replyClean = cleanText(replyText);
+          const userClean = cleanText(userMessage);
+          const nameClean = cleanText(p.name);
+          const catClean = cleanText(p.category || '');
+          
+          if (replyClean.includes(nameClean)) return true;
+          if (catClean && userClean.includes(catClean)) return true;
+          
+          // Relaxed match: if AI mentions the first 3 significant words of a long product name
+          const nameWords = nameClean.split(' ').filter((w: string) => w.length > 2);
+          if (nameWords.length >= 3) {
+            const shortName = nameWords.slice(0, 3).join(' ');
+            if (replyClean.includes(shortName)) return true;
+          }
+          
+          return false;
+        })
         .slice(0, 3);
+
+      const totalTime = performance.now() - startTime;
 
       return {
         success: true,
         reply: replyText,
         recommendedProducts: mentionedProducts,
+        metrics: {
+          embedTime: Math.round(embedTime),
+          dbTime: Math.round(dbTime),
+          llmTime: Math.round(llmTime),
+          totalTime: Math.round(totalTime),
+          usedModel: usedModel || 'None',
+          modelAttempts,
+        }
       };
     } catch (error: any) {
       throw new InternalServerErrorException(
@@ -298,9 +557,9 @@ CRITICAL: Return ONLY a valid raw JSON object matching this schema without any m
 }`;
 
       const modelsToTry = [
-        'gemini-3.5-flash',
-        'gemini-flash-latest',
-        'gemini-3.5-flash-lite',
+        'gemini-3.6-flash',
+        'gemini-3.6-flash-latest',
+        'gemini-3.6-flash-lite',
         'gemini-3.1-flash-lite',
       ];
       let jsonText = '';
@@ -416,9 +675,9 @@ Return strictly a raw JSON object with NO markdown formatting or code blocks:
 }`;
 
       const modelsToTry = [
-        'gemini-3.5-flash',
-        'gemini-flash-latest',
-        'gemini-3.5-flash-lite',
+        'gemini-3.6-flash',
+        'gemini-3.6-flash-latest',
+        'gemini-3.6-flash-lite',
         'gemini-3.1-flash-lite',
       ];
       let jsonText = '';
@@ -557,9 +816,9 @@ Return strictly a raw JSON object with NO markdown formatting or code blocks:
       };
 
       const modelsToTry = [
-        'gemini-3.5-flash',
-        'gemini-flash-latest',
-        'gemini-3.5-flash-lite',
+        'gemini-3.6-flash',
+        'gemini-3.6-flash-latest',
+        'gemini-3.6-flash-lite',
         'gemini-3.1-flash-lite',
       ];
       let jsonText = '';
@@ -687,9 +946,9 @@ Return strictly a raw JSON object with NO markdown formatting or code blocks:
 }`;
 
       const modelsToTry = [
-        'gemini-3.5-flash',
-        'gemini-flash-latest',
-        'gemini-3.5-flash-lite',
+        'gemini-3.6-flash',
+        'gemini-3.6-flash-latest',
+        'gemini-3.6-flash-lite',
       ];
 
       let jsonText = '';
@@ -769,9 +1028,9 @@ Return strictly a raw JSON object with NO markdown formatting or code blocks:
 }`;
 
       const modelsToTry = [
-        'gemini-3.5-flash',
-        'gemini-flash-latest',
-        'gemini-3.5-flash-lite',
+        'gemini-3.6-flash',
+        'gemini-3.6-flash-latest',
+        'gemini-3.6-flash-lite',
       ];
 
       let jsonText = '';
@@ -866,9 +1125,9 @@ REQUIREMENTS:
 4. Be polite, friendly, and helpful to encourage a positive shopping experience.`;
 
       const modelsToTry = [
-        'gemini-3.5-flash',
-        'gemini-flash-latest',
-        'gemini-3.5-flash-lite',
+        'gemini-3.6-flash',
+        'gemini-3.6-flash-latest',
+        'gemini-3.6-flash-lite',
       ];
 
       let answerText = '';
@@ -998,9 +1257,9 @@ Return strictly a raw JSON object with NO markdown formatting or code blocks:
 
       const modelsToTry = [
         'gemini-2.5-flash',
-        'gemini-1.5-flash',
-        'gemini-flash-latest',
-        'gemini-1.5-flash-lite',
+        'gemini-3.6-flash',
+        'gemini-3.6-flash-latest',
+        'gemini-3.6-flash-lite',
       ];
       let jsonText = '';
 

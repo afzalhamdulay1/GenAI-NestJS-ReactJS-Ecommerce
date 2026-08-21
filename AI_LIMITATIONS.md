@@ -29,8 +29,8 @@ Due to model deprecations or free-tier endpoint variations (e.g., `gemini-1.5-fl
 
 ## 3. 🛍️ Catalog Context & Data Limits
 
-* **Top 20 Products Limit:** To optimize token usage and avoid latency, `ai.service.ts` currently injects up to **20 live products** from MongoDB into the system context (`.limit(20)`).
-* **Scalability Note:** For catalogs exceeding 50–100+ items, a **RAG (Retrieval-Augmented Generation)** or vector-search solution (e.g. Pinecone, MongoDB Atlas Vector Search) will be required to fetch relevant items dynamically based on user query embeddings.
+* **Catalog Truncation (`.limit(30)`):** To optimize token usage and avoid latency, `ai.service.ts` currently injects up to **30 live products** from MongoDB into the system context (`.limit(30)`).
+* **Scalability Note:** For catalogs exceeding 50–100+ items, a **RAG (Retrieval-Augmented Generation)** or vector-search solution (e.g. Pinecone, MongoDB Atlas Vector Search) will be required to fetch relevant items dynamically based on user query embeddings instead of static arrays.
 
 ---
 
@@ -41,8 +41,21 @@ Due to model deprecations or free-tier endpoint variations (e.g., `gemini-1.5-fl
 
 ---
 
-## 5. 🔮 Future Enhancement Opportunities
+## 5. 🛠️ Codebase Limitations & Architectural Improvements
 
-1. **Multimodal / Vision Support:** Allow users to upload photos of outfits or items to search for visually similar products in stock.
-2. **Streaming Responses:** Implement Server-Sent Events (SSE) or WebSockets for real-time typewriter-style response rendering.
-3. **Vector Database Integration (RAG):** Enable full database product catalog searching for large-scale inventory.
+1. **Unprotected Public Endpoints & Throttling (DDoS / Quota Risk):**
+   * Public endpoints (`POST /api/v1/ai/chat`, `POST /api/v1/ai/visual-search`, `POST /api/v1/ai/product-qa`) currently lack rate limiting (`@nestjs/throttler`). Spammers or web scrapers could exhaust daily API quotas.
+   * *Action:* Add `@nestjs/throttler` guards to limit requests to ~10 req/min per IP.
+
+2. **Fragile Regex JSON Parsing:**
+   * Methods like `summarizeProductReviews` and `generateSeo` parse JSON with `.replace(/```json/gi, '')` and `JSON.parse()`. If Gemini outputs conversational text, `JSON.parse()` fails.
+   * *Action:* Use `@google/generative-ai`'s native `responseMimeType: 'application/json'` setting for guaranteed JSON format compliance.
+
+3. **Fallback Array Latency Overhead:**
+   * The model fallback loop contains model string names that may trigger initial catch blocks before hitting the active alias, adding ~300ms network trial-and-error overhead.
+   * *Action:* Clean up model strings to strictly use current active Gemini endpoints (`gemini-2.5-flash`, `gemini-2.0-flash`, `gemini-1.5-flash`).
+
+4. **Synchronous REST Latency in Chat Widget:**
+   * The AI Chatbot currently waits 2–4 seconds for the complete HTTP response payload before rendering.
+   * *Action:* Migrate to `generateContentStream()` with WebSockets/Server-Sent Events (SSE) to render typewriter-style real-time streaming in `AIChatWidget.tsx`.
+

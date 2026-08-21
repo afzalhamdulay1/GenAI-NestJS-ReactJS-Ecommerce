@@ -11,6 +11,8 @@ import { ApiFeatures } from '../common/utils/api-features.util';
 import { ProductQueryDto } from './dto/product-query.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import * as cloudinary from 'cloudinary';
+import { ConfigService } from '@nestjs/config';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 @Injectable()
 export class ProductsService {
@@ -19,7 +21,25 @@ export class ProductsService {
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @Inject('Cloudinary') private cloudinaryProvider: any,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private configService: ConfigService,
   ) {}
+
+  private async generateEmbedding(text: string): Promise<number[]> {
+    try {
+      const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+      if (!apiKey) return [];
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: 'gemini-embedding-001' });
+      const result = await model.embedContent({
+          content: { role: 'user', parts: [{ text }] },
+          taskType: 'RETRIEVAL_DOCUMENT'
+      } as any);
+      return result.embedding.values;
+    } catch (error: any) {
+      console.warn('Failed to generate embedding:', error.message);
+      return [];
+    }
+  }
 
   async createProduct(createProductDto: CreateProductDto, user: UserDocument) {
     let images: string[] = [];
@@ -47,6 +67,13 @@ export class ProductsService {
       images: imagesLinks,
       user: user._id,
     };
+
+    let variantsText = '';
+    if (productData.hasVariants && productData.options && productData.options.length > 0) {
+        variantsText = 'Options: ' + productData.options.map((opt: any) => `${opt.name} (${opt.values.join(', ')})`).join('; ');
+    }
+    const textToEmbed = `${productData.name || ''} ${productData.category || ''} ${variantsText} ${productData.description || ''} ${productData.tags ? productData.tags.join(' ') : ''}`;
+    productData.embedding = await this.generateEmbedding(textToEmbed);
 
     // Backend Safety Sanitization for Prices
     if (productData.price !== undefined) {
@@ -304,6 +331,16 @@ export class ProductsService {
     if (updateData.options !== undefined) {
       product.options = updateData.options;
       product.markModified('options');
+    }
+
+    // Regenerate Embedding if text-heavy fields are modified
+    if (updateData.name !== undefined || updateData.description !== undefined || updateData.category !== undefined || updateData.tags !== undefined) {
+      let variantsText = '';
+      if (product.hasVariants && product.options && product.options.length > 0) {
+          variantsText = 'Options: ' + product.options.map((opt: any) => `${opt.name} (${opt.values.join(', ')})`).join('; ');
+      }
+      const textToEmbed = `${product.name || ''} ${product.category || ''} ${variantsText} ${product.description || ''} ${product.tags ? product.tags.join(' ') : ''}`;
+      product.embedding = await this.generateEmbedding(textToEmbed);
     }
 
     await product.save();

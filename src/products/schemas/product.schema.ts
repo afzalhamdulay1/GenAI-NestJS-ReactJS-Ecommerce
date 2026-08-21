@@ -97,6 +97,12 @@ export class Product {
     sku?: string;
   }>;
 
+  @Prop({ type: [Number], default: [] })
+  embedding: number[];
+
+  @Prop({ type: [Number], default: [] })
+  localEmbedding: number[];
+
   @Prop()
   metaTitle?: string;
 

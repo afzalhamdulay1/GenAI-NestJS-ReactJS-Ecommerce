@@ -30,8 +30,9 @@ export class AiController {
   async chatWithAssistant(
     @Body('message') message: string,
     @Body('history') history?: any[],
+    @Body('embeddingType') embeddingType?: 'gemini' | 'local',
   ) {
-    return this.aiService.chatWithShoppingAssistant(message, history);
+    return this.aiService.chatWithShoppingAssistant(message, history, embeddingType);
   }
 
   /**
